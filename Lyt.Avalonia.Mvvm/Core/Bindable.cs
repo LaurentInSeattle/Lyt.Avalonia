@@ -7,7 +7,7 @@ public class DoNotLogAttribute : Attribute { }
 
 /// <summary> Bindable class, aka a View Model.  </summary>
 /// <remarks> All bound properties are held in a dictionary.</remarks>
-public class Bindable : NotifyPropertyChanged, ISupportBehaviors
+public class Bindable : NotifyPropertyChanged, ISupportBehaviors, IBindable
 {
     private static readonly ILocalizer? StaticLocalizer;
 
@@ -81,12 +81,9 @@ public class Bindable : NotifyPropertyChanged, ISupportBehaviors
 #pragma warning disable IDE0079
 #pragma warning disable CA1822 // Mark members as static
 
-    public bool CanLocalize => StaticLocalizer is not null;
 
     public ILocalizer Localizer =>
         this.CanLocalize ? StaticLocalizer! : throw new Exception("Should have checked CanLocalize property.");
-
-    public ILogger Logger => StaticLogger;
 
     public IMessenger Messenger => StaticMessenger;
 
@@ -362,6 +359,61 @@ public class Bindable : NotifyPropertyChanged, ISupportBehaviors
             }
         }
     }
+
+    #region IBindable implementation 
+
+    public void Set(string message, string messagePropertyName)
+        => _ = this.Set<string>(message, messagePropertyName);
+
+    public string? Get(string sourcePropertyName) 
+        => this.Get<string>(sourcePropertyName);
+
+    public ILogger Logger => StaticLogger;
+
+    public bool CanLocalize => StaticLocalizer is not null;
+
+    public string Localize(string message)
+    {
+        if (this.CanLocalize)
+        {
+            return this.Localize(message);
+        }
+
+        return message;
+    }
+
+    public bool TryFocus(string focusFieldName)
+    {
+        var field = this.GetControlByName(focusFieldName);
+        if (field is Control control && control.Focusable)
+        {
+            // viewModel.Logger.Debug(viewModel.GetType().Name + ": Focus on : " + focusFieldName);
+            // Why we need to wait is still a bit of a mistery !
+             Schedule.OnUiThread(222, () => { control.Focus(); }, DispatcherPriority.ApplicationIdle);
+            return true;
+        }
+
+        return false;
+    }
+
+    public Control? GetControlByName(string name)
+    {
+        if ((string.IsNullOrWhiteSpace(name)) || (this.Control is null))
+        {
+            return null;
+        }
+
+        object? maybeControl = this.Control.FindControl<Control>(name);
+        if (maybeControl is Control control)
+        {
+            return control;
+        }
+
+        return null;
+    }
+
+    #endregion IBindable implementation 
+
 
     #region Debug Utilities 
 

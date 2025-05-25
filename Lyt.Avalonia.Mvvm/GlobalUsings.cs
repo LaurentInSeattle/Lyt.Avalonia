@@ -40,6 +40,7 @@ global using Avalonia.Styling;
 global using Avalonia.Threading;
 
 global using Lyt.Framework.Interfaces;
+global using Lyt.Framework.Interfaces.Binding;
 global using Lyt.Framework.Interfaces.Dispatching;
 global using Lyt.Framework.Interfaces.Localizing;
 global using Lyt.Framework.Interfaces.Logging;
