@@ -28,6 +28,7 @@ public class Bindable : NotifyPropertyChanged, ISupportBehaviors, IBindable
         catch (Exception ex)
         {
             Debug.WriteLine("Missing essential services \n" + ex.ToString());
+            if ( Debugger.IsAttached ) { Debugger.Break(); }
             throw;
         }
 

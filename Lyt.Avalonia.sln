@@ -37,6 +37,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lyt.Validation", "..\Lyt.Fr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lyt.UserAdministration", "..\Lyt.Framework\Lyt.UserAdministration\Lyt.UserAdministration.csproj", "{FD61E555-024F-CD26-CB18-ACB5A80FA696}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lyt.Avalonia.TestMvvm", "Lyt.Avalonia.TestMvvm\Lyt.Avalonia.TestMvvm.csproj", "{F16D361B-6CB7-4A69-A324-F79DDBDCA6B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lyt.Mvvm", "..\Lyt.Framework\Lyt.Mvvm\Lyt.Mvvm.csproj", "{66333785-F79B-0142-0808-D9E0F442C5F6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -107,6 +111,14 @@ Global
 		{FD61E555-024F-CD26-CB18-ACB5A80FA696}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD61E555-024F-CD26-CB18-ACB5A80FA696}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD61E555-024F-CD26-CB18-ACB5A80FA696}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F16D361B-6CB7-4A69-A324-F79DDBDCA6B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F16D361B-6CB7-4A69-A324-F79DDBDCA6B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F16D361B-6CB7-4A69-A324-F79DDBDCA6B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F16D361B-6CB7-4A69-A324-F79DDBDCA6B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66333785-F79B-0142-0808-D9E0F442C5F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66333785-F79B-0142-0808-D9E0F442C5F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66333785-F79B-0142-0808-D9E0F442C5F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66333785-F79B-0142-0808-D9E0F442C5F6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -120,6 +132,7 @@ Global
 		{B66E955F-1CAE-6036-7E54-F822B4E764EF} = {3A0F4AC3-530E-0ADE-C731-DC36B35E9C97}
 		{30EDB68C-2931-3EC9-352B-FD09E8658E0D} = {3A0F4AC3-530E-0ADE-C731-DC36B35E9C97}
 		{FD61E555-024F-CD26-CB18-ACB5A80FA696} = {3A0F4AC3-530E-0ADE-C731-DC36B35E9C97}
+		{66333785-F79B-0142-0808-D9E0F442C5F6} = {3A0F4AC3-530E-0ADE-C731-DC36B35E9C97}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {137CD12A-AB0D-43F0-A6F1-CF296F58014C}

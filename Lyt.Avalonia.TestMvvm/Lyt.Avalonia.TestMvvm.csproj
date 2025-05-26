@@ -7,13 +7,12 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\avalonia-logo.ico" />
+
+    <ItemGroup>
+        <AvaloniaResource Include="Assets\**" />
+    </ItemGroup>
+    <ItemGroup>
     <AvaloniaResource Include="Assets\Images\dark.jpg" />
-    <AvaloniaResource Include="Assets\Vectors\FluentSvgResourceDictionary.axaml" />
-    <AvaloniaResource Include="Assets\Vectors\FluentUiIcons_Filled.xaml" />
-    <AvaloniaResource Include="Assets\Vectors\FluentUiIcons_Regular.axaml" />
-    <AvaloniaResource Include="Assets\Vectors\SvgResourceDictionary.axaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,21 +21,20 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.0" />
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.0">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.5" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Lyt.Framework\Lyt.Model\Lyt.Model.csproj" />
-    <ProjectReference Include="..\..\Lyt.Framework\Lyt.Persistence\Lyt.Persistence.csproj" />
-    <ProjectReference Include="..\..\Lyt.Framework\Lyt.StateMachine\Lyt.StateMachine.csproj" />
-    <ProjectReference Include="..\..\Lyt.Framework\Lyt.UserAdministration\Lyt.UserAdministration.csproj" />
+    <ProjectReference Include="..\..\Lyt.Framework\Lyt.Framework.Interfaces\Lyt.Framework.Interfaces.csproj" />
+    <ProjectReference Include="..\..\Lyt.Framework\Lyt.Mvvm\Lyt.Mvvm.csproj" />
     <ProjectReference Include="..\..\Lyt.Framework\Lyt.Utilities\Lyt.Utilities.csproj" />
-    <ProjectReference Include="..\..\Lyt.Framework\Lyt.Validation\Lyt.Validation.csproj" />
     <ProjectReference Include="..\Lyt.Avalonia.Controls\Lyt.Avalonia.Controls.csproj" />
     <ProjectReference Include="..\Lyt.Avalonia.Interfaces\Lyt.Avalonia.Interfaces.csproj" />
     <ProjectReference Include="..\Lyt.Avalonia.Localizer\Lyt.Avalonia.Localizer.csproj" />
     <ProjectReference Include="..\Lyt.Avalonia.Mvvm\Lyt.Avalonia.Mvvm.csproj" />
-    <ProjectReference Include="..\Lyt.Avalonia.Orchestrator\Lyt.Avalonia.Orchestrator.csproj" />
-    <ProjectReference Include="..\Lyt.Avalonia.Themes\Lyt.Avalonia.Themes.csproj" />
   </ItemGroup>
 </Project>

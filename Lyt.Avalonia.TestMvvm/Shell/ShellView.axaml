@@ -1,0 +1,93 @@
+<UserControl 
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
+
+    x:Class="Lyt.Avalonia.TestMvvm.Shell.ShellView"
+    xmlns:vm="using:Lyt.Avalonia.TestMvvm.Shell"
+    x:DataType="vm:ShellViewModel"
+    >
+    <Design.DataContext>
+        <vm:ShellViewModel />
+    </Design.DataContext>
+    <UserControl.Styles>
+        <Style Selector="Button.btn /template/ ContentPresenter">
+            <Setter Property="CornerRadius" Value="10" />
+        </Style>
+        <Style Selector="Button.btn">
+            <Setter Property="Width" Value="160" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="Margin" Value="12" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="DarkOrange" />
+            <Setter Property="Background" Value="#20FFFFFF" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="#40AAAAFF" />
+        </Style>
+        <Style Selector="Button:pointerover.btn /template/ ContentPresenter">
+            <Setter Property="Foreground" Value="DarkOrange" />
+            <Setter Property="Background" Value="#20FFFFFF" />
+            <Setter Property="BorderBrush" Value="#80AAAAFF" />
+            <Setter Property="FontSize" Value="21" />
+        </Style>
+    </UserControl.Styles>	
+    <Grid
+        x:Name="InnerGrid"
+        Background="Transparent"
+        RowDefinitions="*,60, 60, 60 , *, 80"
+        ShowGridLines="False"
+        >
+        <Image
+            Stretch="UniformToFill"
+            Source="\Assets\Images\dark.jpg"
+            Grid.ColumnSpan="999" Grid.RowSpan="999"
+            />
+        <ContentControl
+            Grid.Row="0"
+            x:Name="WorkflowContent"
+            />
+        <TextBlock 
+            Grid.Row="1"
+            Text="{Binding TickCount}" 
+            FontSize="40"
+            Foreground="DarkOrange"
+            HorizontalAlignment="Center" VerticalAlignment="Center"
+            />
+        <TextBlock
+            Grid.Row="3"
+            Text="{Binding IsTicking}"
+            FontSize="40"
+            Foreground="DarkOrange"
+            HorizontalAlignment="Center" VerticalAlignment="Center"
+            />
+        <Button
+            Grid.Row="5"
+            Foreground="DarkOrange"
+            Content="{Binding ButtonText}"
+            VerticalAlignment="Center" HorizontalAlignment="Right"
+            ClickMode="Release"
+            Command="{Binding OnStartStop}"
+            
+            Width="160" Height ="40"
+            FontSize ="20"
+            Margin =" 10"
+            />
+        <Button
+            Grid.Row="5"
+            Foreground="DarkOrange"
+            Content="SVG Extractor"
+            VerticalAlignment="Center" HorizontalAlignment="Left"
+            ClickMode="Release"
+            Command="{Binding OnStartStop}"
+            
+            Width="160" Height ="40"
+            FontSize ="20"
+            Margin =" 10"
+            />
+
+    </Grid>
+</UserControl>
