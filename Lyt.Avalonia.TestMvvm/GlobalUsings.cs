@@ -24,6 +24,7 @@ global using Avalonia.Media;
 global using Avalonia.Media.Immutable;
 global using Avalonia.Threading;
 
+global using Lyt.Framework.Interfaces.Binding;
 global using Lyt.Framework.Interfaces.Dispatching;
 global using Lyt.Framework.Interfaces.Messaging;
 global using Lyt.Framework.Interfaces.Modeling;
