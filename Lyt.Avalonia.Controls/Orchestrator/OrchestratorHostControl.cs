@@ -8,23 +8,28 @@ public sealed class OrchestratorHostControl : ContentControl, IOrchestratorHostC
     {
         this.retainedViews.Clear();
         this.retainedViews.AddRange(views);
-    } 
+    }
 
     public void Activate(IView view)
     {
-        if (view is Control control)
+        Dispatcher.UIThread.Post(() =>
         {
-            this.Content = control;
-            control.IsVisible = true;
-        }
+            if (view is Control control)
+            {
+                this.Content = control;
+                control.IsVisible = true;
+            }
+        });
     }
 
     public void Deactivate(IView view)
     {
-        if (view is Control control)
+        Dispatcher.UIThread.Post(() =>
         {
-            control.IsVisible = false;
-        }
+            if (view is Control control)
+            {
+                control.IsVisible = false;
+            }
+        });
     }
-
 }
