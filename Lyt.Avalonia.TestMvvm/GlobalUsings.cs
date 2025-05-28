@@ -24,6 +24,9 @@ global using Avalonia.Media;
 global using Avalonia.Media.Immutable;
 global using Avalonia.Threading;
 
+global using CommunityToolkit.Mvvm.ComponentModel;
+global using CommunityToolkit.Mvvm.Input;
+
 global using Lyt.Framework.Interfaces.Binding;
 global using Lyt.Framework.Interfaces.Dispatching;
 global using Lyt.Framework.Interfaces.Messaging;
@@ -37,14 +40,15 @@ global using Lyt.Avalonia.Mvvm.Core;
 global using Lyt.Avalonia.Mvvm.Logging;
 global using Lyt.Avalonia.Controls;
 global using Lyt.Avalonia.Controls.BadgeControl;
-global using Lyt.Persistence;
 
 global using Lyt.Avalonia.Mvvm.Utilities;
-global using Lyt.Utilities.Profiling;
 
+global using Lyt.Mvvm;
 global using Lyt.Model;
 global using Lyt.Messaging;
+global using Lyt.Persistence;
 global using Lyt.Utilities;
+global using Lyt.Utilities.Profiling;
 
 global using Lyt.Avalonia.TestMvvm; 
 global using Lyt.Avalonia.TestMvvm.Shell;

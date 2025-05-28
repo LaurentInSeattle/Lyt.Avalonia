@@ -41,6 +41,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lyt.Avalonia.TestMvvm", "Ly
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lyt.Mvvm", "..\Lyt.Framework\Lyt.Mvvm\Lyt.Mvvm.csproj", "{66333785-F79B-0142-0808-D9E0F442C5F6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lyt.Orchestrator", "..\Lyt.Framework\Lyt.Orchestrator\Lyt.Orchestrator.csproj", "{AB43F19F-5F7E-2719-CEA5-BDD39075CDEF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -119,6 +121,10 @@ Global
 		{66333785-F79B-0142-0808-D9E0F442C5F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66333785-F79B-0142-0808-D9E0F442C5F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66333785-F79B-0142-0808-D9E0F442C5F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB43F19F-5F7E-2719-CEA5-BDD39075CDEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB43F19F-5F7E-2719-CEA5-BDD39075CDEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB43F19F-5F7E-2719-CEA5-BDD39075CDEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB43F19F-5F7E-2719-CEA5-BDD39075CDEF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -133,6 +139,7 @@ Global
 		{30EDB68C-2931-3EC9-352B-FD09E8658E0D} = {3A0F4AC3-530E-0ADE-C731-DC36B35E9C97}
 		{FD61E555-024F-CD26-CB18-ACB5A80FA696} = {3A0F4AC3-530E-0ADE-C731-DC36B35E9C97}
 		{66333785-F79B-0142-0808-D9E0F442C5F6} = {3A0F4AC3-530E-0ADE-C731-DC36B35E9C97}
+		{AB43F19F-5F7E-2719-CEA5-BDD39075CDEF} = {3A0F4AC3-530E-0ADE-C731-DC36B35E9C97}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {137CD12A-AB0D-43F0-A6F1-CF296F58014C}

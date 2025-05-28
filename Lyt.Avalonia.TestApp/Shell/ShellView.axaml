@@ -7,6 +7,7 @@
     xmlns:vm="clr-namespace:Lyt.Avalonia.TestApp.Shell"
     xmlns:controls="clr-namespace:Lyt.Avalonia.Controls;assembly=Lyt.Avalonia.Controls"
     xmlns:glyphs="clr-namespace:Lyt.Avalonia.Controls.Glyphs;assembly=Lyt.Avalonia.Controls"
+    xmlns:workflow="clr-namespace:Lyt.Avalonia.Controls.Orchestrator;assembly=Lyt.Avalonia.Controls"
     xmlns:badgeControl="clr-namespace:Lyt.Avalonia.Controls.BadgeControl;assembly=Lyt.Avalonia.Controls"
     xmlns:badge="clr-namespace:Lyt.Avalonia.Controls.Badge;assembly=Lyt.Avalonia.Controls"
     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="850"
@@ -61,7 +62,7 @@
             Source="\Assets\Images\dark.jpg"
             Grid.ColumnSpan="999" Grid.RowSpan="999"
             />
-        <ContentControl
+        <workflow:OrchestratorHostControl
             Grid.Row="0"
             x:Name="WorkflowContent"
             />
@@ -163,7 +164,7 @@
             Content="{Binding ButtonText}"
             VerticalAlignment="Center" HorizontalAlignment="Right"
             ClickMode="Release"
-            Command="{Binding OnStartStopCommand}"
+            Command="{Binding OnStartStop}"
             
             Width="160" Height ="40"
             FontSize ="20"
@@ -175,7 +176,7 @@
             Content="SVG Extractor"
             VerticalAlignment="Center" HorizontalAlignment="Left"
             ClickMode="Release"
-            Command="{Binding OnSvgCommand}"
+            Command="{Binding OnSvg}"
             
             Width="160" Height ="40"
             FontSize ="20"

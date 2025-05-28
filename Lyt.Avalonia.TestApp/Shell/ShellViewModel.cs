@@ -1,8 +1,17 @@
 ﻿namespace Lyt.Avalonia.TestApp.Shell;
 
-public sealed class ShellViewModel : Bindable<ShellView>
+public sealed partial class ShellViewModel : ViewModel<ShellView>
 {
     private readonly TimingModel timingModel;
+
+    [ObservableProperty]
+    public string? buttonText;
+
+    [ObservableProperty]
+    public string? tickCount;
+
+    [ObservableProperty]
+    public string? isTicking;
 
     public ShellViewModel()
     {
@@ -10,13 +19,12 @@ public sealed class ShellViewModel : Bindable<ShellView>
         this.timingModel.SubscribeToUpdates(this.OnTimingModelUpdated, withUiDispatch: true);
         this.TickCount = "Hello Avalonia!";
         this.IsTicking = string.Empty;
-        this.OnStartStopCommand = new Command(this.OnStartStop);
-        this.OnSvgCommand = new Command(this.OnSvg);
     }
 
-    public WorkflowManager<WorkflowState, WorkflowTrigger>? Workflow { get; private set; }
+    public Lyt.Orchestrator.WorkflowManager<WorkflowState, WorkflowTrigger>? Workflow { get; private set; }
 
-    private void OnStartStop(object? _)
+    [RelayCommand]
+    public void OnStartStop()
     {
         if (this.timingModel.IsTicking)
         {
@@ -33,7 +41,8 @@ public sealed class ShellViewModel : Bindable<ShellView>
         // throw new NotImplementedException("wtf");
     }
 
-    private void OnSvg(object? _)
+    [RelayCommand]
+    public void OnSvg()
     {
         string source = this.View!.callIcon.Source;
         this.View.callIcon.Source = source == "call" ? "call_end" : "call";
@@ -76,7 +85,7 @@ public sealed class ShellViewModel : Bindable<ShellView>
         //}
     }
 
-    protected override /* async */ void OnViewLoaded()
+    public override async void OnViewLoaded()
     {
         base.OnViewLoaded();
 
@@ -90,8 +99,8 @@ public sealed class ShellViewModel : Bindable<ShellView>
         this.SetupWorkflow();
         if (this.Workflow is not null)
         {
-            //await this.Workflow.Initialize();
-            //_ = this.Workflow.Start();
+            await this.Workflow.Initialize();
+            _ = this.Workflow.Start();
         }
     }
 
@@ -114,19 +123,19 @@ public sealed class ShellViewModel : Bindable<ShellView>
 
     private void SetupWorkflow()
     {
-        StateDefinition<WorkflowState, WorkflowTrigger, Bindable> Create<TViewModel, TView>(
+        StateDefinition<WorkflowState, WorkflowTrigger, ViewModel> Create<TViewModel, TView>(
             WorkflowState state, WorkflowTrigger trigger, WorkflowState target)
-            where TViewModel : Bindable, new()
-            where TView : Control, new()
+            where TViewModel : ViewModel, new()
+            where TView : Control, IView, new()
         {
             var vm = App.GetRequiredService<TViewModel>();
             vm.Bind(new TView());
-            if (vm is WorkflowPage<WorkflowState, WorkflowTrigger> page)
+            if (vm is Lyt.Orchestrator.WorkflowPage<WorkflowState, WorkflowTrigger> page)
             {
                 page.State = state;
                 page.Title = state.ToString();
                 return
-                    new StateDefinition<WorkflowState, WorkflowTrigger, Bindable>(
+                    new StateDefinition<WorkflowState, WorkflowTrigger, ViewModel>(
                         state, page, null, null, null, null,
                         [
                             new TriggerDefinition<WorkflowState, WorkflowTrigger> ( trigger, target , null )
@@ -144,27 +153,18 @@ public sealed class ShellViewModel : Bindable<ShellView>
         var login = Create<LoginViewModel, LoginView>(WorkflowState.Login, WorkflowTrigger.LoggedIn, WorkflowState.Select);
         var select = Create<SelectViewModel, SelectView>(WorkflowState.Select, WorkflowTrigger.Selected, WorkflowState.Process);
         var process = Create<ProcessViewModel, ProcessView>(WorkflowState.Process, WorkflowTrigger.Complete, WorkflowState.Login);
-
         var stateMachineDefinition =
-            new StateMachineDefinition<WorkflowState, WorkflowTrigger, Bindable>(
+            new StateMachineDefinition<WorkflowState, WorkflowTrigger, ViewModel>(
                 WorkflowState.Startup, // Initial state
                 [ 
                     // List of state definitions
                     startup, login , select, process,
                 ]);
 
+        var hostControl = 
+            this.View!.WorkflowContent ?? throw new Exception("Workflow Host control is null");
         this.Workflow =
-            new WorkflowManager<WorkflowState, WorkflowTrigger>(
-                this.Logger, this.Messenger, this.View!.WorkflowContent!, stateMachineDefinition);
+            new Lyt.Orchestrator.WorkflowManager<WorkflowState, WorkflowTrigger>(
+                this.Logger, this.Messenger, hostControl, stateMachineDefinition);
     }
-
-    public ICommand? OnStartStopCommand { get => this.Get<ICommand>(); set => this.Set(value); }
-
-    public ICommand? OnSvgCommand { get => this.Get<ICommand>(); set => this.Set(value); }
-
-    public string? ButtonText { get => this.Get<string>(); set => this.Set(value); }
-
-    public string? TickCount { get => this.Get<string>(); set => this.Set(value); }
-
-    public string? IsTicking { get => this.Get<string>(); set => this.Set(value); }
 }

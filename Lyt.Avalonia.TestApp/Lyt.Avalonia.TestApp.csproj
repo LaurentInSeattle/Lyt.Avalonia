@@ -23,10 +23,13 @@
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.0" />
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Lyt.Framework\Lyt.Model\Lyt.Model.csproj" />
+    <ProjectReference Include="..\..\Lyt.Framework\Lyt.Mvvm\Lyt.Mvvm.csproj" />
+    <ProjectReference Include="..\..\Lyt.Framework\Lyt.Orchestrator\Lyt.Orchestrator.csproj" />
     <ProjectReference Include="..\..\Lyt.Framework\Lyt.Persistence\Lyt.Persistence.csproj" />
     <ProjectReference Include="..\..\Lyt.Framework\Lyt.StateMachine\Lyt.StateMachine.csproj" />
     <ProjectReference Include="..\..\Lyt.Framework\Lyt.UserAdministration\Lyt.UserAdministration.csproj" />
