@@ -1,5 +1,4 @@
-﻿
-namespace Lyt.Avalonia.Mvvm.Dialogs;
+﻿namespace Lyt.Avalonia.Mvvm.Dialogs;
 
 public sealed class DialogService(IMessenger messenger, ILogger logger) : IDialogService
 {
@@ -69,71 +68,6 @@ public sealed class DialogService(IMessenger messenger, ILogger logger) : IDialo
             throw;
         }
     }
-
-    /// <summary> Run a view/view model modally, when no other is doing so. </summary>
-    public void RunModal<TDialog, TParameters>(
-        object maybePanel,
-        DialogBindable<TDialog, TParameters> viewModel,
-        Action<object, bool>? onClose = null,
-        TParameters? parameters = null)
-        where TDialog : UserControl, new()
-        where TParameters : class
-    {
-        try
-        {
-            Panel panel = this.GuardPanel(maybePanel, isReplace: false);
-            viewModel.CreateViewAndBind();
-            viewModel.Initialize(onClose, parameters);
-            this.ShowInternal(panel, viewModel.View);
-            if (!this.isClassHandlerRegistered)
-            {
-                ApplicationBase.MainWindow.AddHandler(
-                    InputElement.KeyDownEvent, this.OnKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
-                this.isClassHandlerRegistered = true;
-            }
-        }
-        catch (Exception ex)
-        {
-            this.logger.Error("Failed to launch dialog, exception thrown: \n" + ex.ToString());
-            throw;
-        }
-    }
-
-    /// <summary> Run a view/view model modally, when there is another on doing so. </summary>
-    public void ReplaceRunModal<TDialog, TParameters>(
-        DialogBindable<TDialog, TParameters> viewModel,
-        Action<object, bool>? onClose = null,
-        TParameters? parameters = null)
-        where TDialog : UserControl, new()
-        where TParameters : class
-    {
-        try
-        {
-            if ((this.modalUserControl is not null) &&
-                (this.modalUserControl.DataContext is Bindable bindable))
-            {
-                // This will try to invoke an OnClose delegate if any is defined 
-                bindable.CancelViewModel();
-            }
-
-            _ = this.GuardPanel(null, isReplace: true);
-            viewModel.CreateViewAndBind();
-            viewModel.Initialize(onClose, parameters);
-            this.ShowInternalReplace(viewModel.View);
-            if (!this.isClassHandlerRegistered)
-            {
-                ApplicationBase.MainWindow.AddHandler(
-                    InputElement.KeyDownEvent, this.OnKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
-                this.isClassHandlerRegistered = true;
-            }
-        }
-        catch (Exception ex)
-        {
-            this.logger.Error("Failed to launch dialog, exception thrown: \n" + ex.ToString());
-            throw;
-        }
-    }
-
 
     /// <summary> Run a view/view model modally, when no other is doing so. </summary>
     public void RunViewModelModal<TDialog, TParameters>(
@@ -206,19 +140,19 @@ public sealed class DialogService(IMessenger messenger, ILogger logger) : IDialo
     {
         if ((this.IsModal) &&
             (this.modalUserControl is not null) &&
-            (this.modalUserControl.DataContext is Bindable bindable))
+            (this.modalUserControl.DataContext is ViewModel viewModel))
         {
             if ((args.Key == Key.Escape) || (args.Key == Key.Enter))
             {
-                if (bindable.CanEscape && (args.Key == Key.Escape))
+                if (viewModel.CanEscape && (args.Key == Key.Escape))
                 {
                     args.Handled = true;
-                    bindable.Cancel();
+                    viewModel.Cancel();
                 }
-                else if (bindable.CanEnter && (args.Key == Key.Enter))
+                else if (viewModel.CanEnter && (args.Key == Key.Enter))
                 {
                     args.Handled = true;
-                    bindable.TrySaveAndClose();
+                    viewModel.TrySaveAndClose();
                 }
 
                 // Here; We could have Key == Enter and CanEnter == false 

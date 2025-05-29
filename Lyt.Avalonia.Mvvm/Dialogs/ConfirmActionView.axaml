@@ -93,7 +93,7 @@
 			ButtonBackground="BorderlessRectangle"
 			GlyphStrokeThickness="0"
 			GlyphAngle="0"
-			Command="{Binding DismissCommand}"
+			Command="{Binding OnDismiss}"
     		/>
 		<glyphs:GlyphButton
 			x:Name="actionButton"
@@ -109,7 +109,7 @@
 			ButtonBackground="BorderOnly"
 			GlyphStrokeThickness="0.1"
 			GlyphAngle="0"
-			Command="{Binding ActionCommand}"
+			Command="{Binding OnAction}"
     		/>
 	</Grid>
 </UserControl>

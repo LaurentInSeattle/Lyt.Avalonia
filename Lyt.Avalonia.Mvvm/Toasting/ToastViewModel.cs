@@ -1,12 +1,24 @@
 ﻿namespace Lyt.Avalonia.Mvvm.Toasting;
 
-public sealed class ToastViewModel : Bindable<ToastView> 
+public sealed partial class ToastViewModel : ViewModel<ToastView> 
 {
     private const int NoDelay = 0;
     private const int MinDelay = 1_000;
     private const int MaxDelay = 60_000;
 
     private readonly IToaster toaster;
+
+    [ObservableProperty]
+    private SolidColorBrush colorLevel;
+
+    [ObservableProperty]
+    private StreamGeometry iconGeometry;
+
+    [ObservableProperty]
+    private string? title;
+
+    [ObservableProperty]
+    private string? message;
 
     public ToastViewModel(IToaster toaster)
     {
@@ -23,7 +35,6 @@ public sealed class ToastViewModel : Bindable<ToastView>
         this.Message = message;
         this.IconGeometry = toastLevel.ToIconGeometry();
         this.ColorLevel = toastLevel.ToBrush();
-        this.DismissCommand = new Command(this.Dismiss);
         string loggedMessage =
             "Toast: " + toastLevel.ToString() + " - " + title + " - " + message;
         if (toastLevel == InformationLevel.Error)
@@ -68,7 +79,8 @@ public sealed class ToastViewModel : Bindable<ToastView>
 
     private void DismissTimerTick(object? _, EventArgs e) => this.Dismiss();
 
-    private void Dismiss(object? _) => this.Dismiss();
+    [RelayCommand]
+    public void OnDismiss() => this.Dismiss();
 
     public void Dismiss()
     {
@@ -84,18 +96,4 @@ public sealed class ToastViewModel : Bindable<ToastView>
             this.dismissTimer = null;
         }
     }
-
-    public ICommand DismissCommand { get => this.Get<ICommand>()!; set => this.Set(value); }
-
-    /// <summary> Gets or sets the ColorLevel bound property.</summary>
-    public SolidColorBrush ColorLevel { get => this.Get<SolidColorBrush>()!; [DoNotLog] set => _ = this.Set(value); }
-
-    /// <summary> Gets or sets the IconName bound property.</summary>
-    public StreamGeometry IconGeometry { get => this.Get<StreamGeometry>()!; [DoNotLog] set => _ = this.Set(value); }
-
-    /// <summary> Gets or sets the Title bound property.</summary>
-    public string? Title { get => this.Get<string>(); [DoNotLog] set => _ = this.Set(value); }
-
-    /// <summary> Gets or sets the Message bound property.</summary>
-    public string? Message { get => this.Get<string>(); [DoNotLog] set => _ = this.Set(value); }
 }

@@ -1,6 +1,6 @@
 namespace Lyt.Avalonia.Mvvm.Dialogs;
 
-public partial class ConfirmActionView : UserControl
+public partial class ConfirmActionView : UserControl, IView
 {
     public ConfirmActionView()
     {

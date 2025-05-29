@@ -1,6 +1,6 @@
 namespace Lyt.Avalonia.Mvvm.Toasting;
 
-public partial class ToastView : UserControl
+public partial class ToastView : UserControl, IView
 {
     public ToastView()
     {

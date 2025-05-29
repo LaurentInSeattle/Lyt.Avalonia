@@ -21,6 +21,10 @@ global using System.Windows.Input;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 
+global using CommunityToolkit.Mvvm.ComponentModel;
+global using CommunityToolkit.Mvvm.Input;
+
+
 global using Avalonia;
 global using Avalonia.Animation;
 global using Avalonia.Collections;
@@ -51,7 +55,6 @@ global using Lyt.Avalonia.Interfaces.UserInterface;
 
 global using Lyt.Avalonia.Mvvm.Animations;
 global using Lyt.Avalonia.Mvvm.Behaviors;
-global using Lyt.Avalonia.Mvvm.Core;
 global using Lyt.Avalonia.Mvvm.Logging;
 global using Lyt.Avalonia.Mvvm.Splash;
 global using Lyt.Avalonia.Mvvm.Utilities;

@@ -90,7 +90,7 @@
 			ButtonBackground="BorderlessRectangle"
 			GlyphStrokeThickness="0"
 			GlyphAngle="0"
-			Command="{Binding DismissCommand}"
+			Command="{Binding OnDismiss}"
     		/>
 	</Grid>
 </UserControl>
