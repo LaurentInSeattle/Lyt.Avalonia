@@ -1,4 +1,5 @@
-﻿namespace Lyt.Avalonia.Mvvm.Dialogs;
+﻿
+namespace Lyt.Avalonia.Mvvm.Dialogs;
 
 public sealed class DialogService(IMessenger messenger, ILogger logger) : IDialogService
 {
@@ -123,6 +124,73 @@ public sealed class DialogService(IMessenger messenger, ILogger logger) : IDialo
             {
                 ApplicationBase.MainWindow.AddHandler(
                     InputElement.KeyDownEvent, this.OnKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
+                this.isClassHandlerRegistered = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            this.logger.Error("Failed to launch dialog, exception thrown: \n" + ex.ToString());
+            throw;
+        }
+    }
+
+
+    /// <summary> Run a view/view model modally, when no other is doing so. </summary>
+    public void RunViewModelModal<TDialog, TParameters>(
+        object maybePanel,
+        DialogViewModel<TDialog, TParameters> viewModel,
+        Action<object, bool>? onClose = null,
+        TParameters? parameters = null)
+        where TDialog : UserControl, IView, new()
+        where TParameters : class
+    {
+        try
+        {
+            Panel panel = this.GuardPanel(maybePanel, isReplace: false);
+            viewModel.CreateViewAndBind();
+            viewModel.Initialize(onClose, parameters);
+            this.ShowInternal(panel, viewModel.View);
+            if (!this.isClassHandlerRegistered)
+            {
+                ApplicationBase.MainWindow.AddHandler(
+                    InputElement.KeyDownEvent, this.OnKeyDown, 
+                    RoutingStrategies.Tunnel, handledEventsToo: true);
+                this.isClassHandlerRegistered = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            this.logger.Error("Failed to launch dialog, exception thrown: \n" + ex.ToString());
+            throw;
+        }
+    }
+
+    /// <summary> Run a view/view model modally, when there is another doing so, closing it. </summary>
+    public void ReplaceRunViewModelModal<TDialog, TParameters>(
+        DialogViewModel<TDialog, TParameters> viewModel,
+        Action<object, bool>? onClose = null,
+        TParameters? parameters = null)
+        where TDialog : UserControl, IView, new()
+        where TParameters : class
+    {
+        try
+        {
+            if ((this.modalUserControl is not null) &&
+                (this.modalUserControl.DataContext is ViewModel replacedViewModel))
+            {
+                // This will try to invoke an OnClose delegate if any is defined 
+                replacedViewModel.CancelViewModel();
+            }
+
+            _ = this.GuardPanel(null, isReplace: true);
+            viewModel.CreateViewAndBind();
+            viewModel.Initialize(onClose, parameters);
+            this.ShowInternalReplace(viewModel.View);
+            if (!this.isClassHandlerRegistered)
+            {
+                ApplicationBase.MainWindow.AddHandler(
+                    InputElement.KeyDownEvent, this.OnKeyDown, 
+                    RoutingStrategies.Tunnel, handledEventsToo: true);
                 this.isClassHandlerRegistered = true;
             }
         }
