@@ -1,5 +1,7 @@
 ﻿namespace Lyt.Avalonia.Mvvm.Utilities;
 
+using global::Avalonia;
+using global::Avalonia.LogicalTree;
 using static Lyt.Avalonia.Controls.Utilities;
 
 public static class MiscUtilities
