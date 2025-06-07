@@ -16,7 +16,9 @@ public sealed class Focuser : IFocuser
             return false;
         }
 
-        _ = child.Focus();
-        return child.IsFocused;
+        return child.Focus();
+        
+        // This should work, but does not :( 
+        // return child.IsFocused;
     }
 }
