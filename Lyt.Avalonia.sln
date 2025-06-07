@@ -23,8 +23,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lyt.Model", "..\Lyt.Framewo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lyt.Avalonia.Interfaces", "Lyt.Avalonia.Interfaces\Lyt.Avalonia.Interfaces.csproj", "{2B341DF9-3D5C-4813-823C-555E066D6998}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lyt.Avalonia.Orchestrator", "Lyt.Avalonia.Orchestrator\Lyt.Avalonia.Orchestrator.csproj", "{C8BA2DBB-E952-5D57-68A8-9EF4E7A10CD5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lyt.StateMachine", "..\Lyt.Framework\Lyt.StateMachine\Lyt.StateMachine.csproj", "{B66E955F-1CAE-6036-7E54-F822B4E764EF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lyt.Avalonia.Themes", "Lyt.Avalonia.Themes\Lyt.Avalonia.Themes.csproj", "{E866D5FA-9A1C-8BD3-18DF-A991B3002A69}"
@@ -85,10 +83,6 @@ Global
 		{2B341DF9-3D5C-4813-823C-555E066D6998}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B341DF9-3D5C-4813-823C-555E066D6998}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B341DF9-3D5C-4813-823C-555E066D6998}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C8BA2DBB-E952-5D57-68A8-9EF4E7A10CD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C8BA2DBB-E952-5D57-68A8-9EF4E7A10CD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C8BA2DBB-E952-5D57-68A8-9EF4E7A10CD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C8BA2DBB-E952-5D57-68A8-9EF4E7A10CD5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B66E955F-1CAE-6036-7E54-F822B4E764EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B66E955F-1CAE-6036-7E54-F822B4E764EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B66E955F-1CAE-6036-7E54-F822B4E764EF}.Release|Any CPU.ActiveCfg = Release|Any CPU

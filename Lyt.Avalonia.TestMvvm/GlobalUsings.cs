@@ -36,7 +36,6 @@ global using Lyt.Framework.Interfaces.Profiling;
 
 
 global using Lyt.Avalonia.Mvvm;
-global using Lyt.Avalonia.Mvvm.Core;
 global using Lyt.Avalonia.Mvvm.Logging;
 global using Lyt.Avalonia.Controls;
 global using Lyt.Avalonia.Controls.BadgeControl;

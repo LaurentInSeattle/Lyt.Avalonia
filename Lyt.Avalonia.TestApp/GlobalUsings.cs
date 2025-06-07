@@ -33,18 +33,17 @@ global using Lyt.Framework.Interfaces.Logging;
 global using Lyt.Framework.Interfaces.Profiling;
 
 global using Lyt.Avalonia.Mvvm;
-global using Lyt.Avalonia.Mvvm.Core;
 global using Lyt.Avalonia.Mvvm.Logging;
 global using Lyt.Avalonia.Mvvm.Utilities;
 global using Lyt.Avalonia.Controls;
 global using Lyt.Avalonia.Controls.BadgeControl;
-global using Lyt.Avalonia.Orchestrator;
 global using Lyt.Persistence;
 global using Lyt.Avalonia.Themes;
 
 global using Lyt.Mvvm;
 global using Lyt.Model;
 global using Lyt.Messaging;
+global using Lyt.Orchestrator;
 global using Lyt.Utilities;
 global using Lyt.Utilities.Profiling;
 global using Lyt.StateMachine;

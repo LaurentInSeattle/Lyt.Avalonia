@@ -28,7 +28,7 @@ public sealed partial class ShellViewModel : ViewModel<ShellView>
         this.TickCount = "Hello Avalonia!";
         Debug.WriteLine(this.TickCount);
         this.Set("Invoked Set", "TickCount");
-        string? value = this.Get("TickCount");
+        string? value = this.Get<string?>(nameof(this.TickCount));
         Debug.WriteLine(value);
     }
 
