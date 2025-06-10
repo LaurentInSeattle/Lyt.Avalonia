@@ -89,10 +89,6 @@ public sealed partial class ShellViewModel : ViewModel<ShellView>
     {
         base.OnViewLoaded();
 
-        //List<string> excludedNamespaces =["System.", "Microsoft.", "Avalonia."]; 
-        //var reflector = new Reflector.ReflectionGraph(Assembly.GetExecutingAssembly(), excludedNamespaces); 
-        //reflector.BuildGraph();
-
         //this.timingModel.Stop();
 
         this.timingModel.Start();
