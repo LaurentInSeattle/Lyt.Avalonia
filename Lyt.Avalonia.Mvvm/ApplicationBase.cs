@@ -330,6 +330,7 @@ public class ApplicationBase(
     private async Task Startup()
     {
         await ApplicationBase.AppHost.StartAsync();
+        ViewModel.TypeInitialize(ApplicationBase.AppHost);
         await this.OnStartupBegin();
 
         var logger = ApplicationBase.GetRequiredService<ILogger>();
