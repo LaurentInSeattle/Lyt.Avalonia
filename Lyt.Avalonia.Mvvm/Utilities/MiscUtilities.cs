@@ -1,7 +1,5 @@
 ﻿namespace Lyt.Avalonia.Mvvm.Utilities;
 
-using global::Avalonia;
-using global::Avalonia.LogicalTree;
 using static Lyt.Avalonia.Controls.Utilities;
 
 public static class MiscUtilities
@@ -36,7 +34,7 @@ public static class MiscUtilities
     public static StreamGeometry ToIconGeometry( this InformationLevel informationLevel)
     {
         string resourceName = informationLevel.ToIconName();
-        if( TryFindResource<StreamGeometry>(resourceName, out StreamGeometry? streamGeometry))
+        if (TryFindResource<StreamGeometry>(resourceName, out StreamGeometry? streamGeometry))
         {
             if ( streamGeometry is not null )
             {
