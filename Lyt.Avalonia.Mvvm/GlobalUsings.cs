@@ -53,6 +53,8 @@ global using Lyt.Framework.Interfaces.Profiling;
 
 global using Lyt.Avalonia.Interfaces.UserInterface;
 
+global using Lyt.Avalonia.Controls.Glyphs;
+
 global using Lyt.Avalonia.Mvvm.Animations;
 global using Lyt.Avalonia.Mvvm.Behaviors;
 global using Lyt.Avalonia.Mvvm.Logging;
