@@ -3,18 +3,18 @@
 public sealed class ViewSelector<TViewEnum> where TViewEnum : Enum
 {
     private readonly ContentControl primaryContainer;
-    private readonly ContentControl secondaryContainer;
-    private readonly SelectionGroup selector;
+    private readonly ContentControl? secondaryContainer;
+    private readonly SelectionGroup? selector;
     private readonly IEnumerable<SelectableView<TViewEnum>> selectableViews;
     private readonly Action<TViewEnum>? onViewSelected;
 
     public ViewSelector(
         IMessenger messenger,
         ContentControl primaryContainer,
-        ContentControl secondaryContainer,
-        SelectionGroup selector,
+        ContentControl? secondaryContainer,
+        SelectionGroup? selector,
         IEnumerable<SelectableView<TViewEnum>> selectableViews,
-        Action<TViewEnum> onViewSelected)
+        Action<TViewEnum>? onViewSelected)
     {
         this.primaryContainer = primaryContainer;
         this.secondaryContainer = secondaryContainer;
@@ -32,7 +32,7 @@ public sealed class ViewSelector<TViewEnum> where TViewEnum : Enum
         => messenger.Publish(
             new ViewSelectMessage((int)(object)viewEnum, activationParameter));
 
-    public ViewModel? CurrentViewModel ()
+    public ViewModel? CurrentViewModel()
     {
         object? currentView = this.primaryContainer.Content;
         if (currentView is Control control && control.DataContext is ViewModel currentViewModel)
@@ -61,23 +61,33 @@ public sealed class ViewSelector<TViewEnum> where TViewEnum : Enum
         }
 
         // Setup secondary content if present 
-        ViewModel? secondaryViewModel = this.SecondaryViewModelFrom(viewEnum);
-        this.secondaryContainer.Content =
-            secondaryViewModel is null ? null : secondaryViewModel.ViewBase;
+        if (this.secondaryContainer is not null)
+        {
+            ViewModel? secondaryViewModel = this.SecondaryViewModelFrom(viewEnum);
+            if (secondaryViewModel is not null)
+            {
+                this.secondaryContainer.Content =
+                    secondaryViewModel is null ? null : secondaryViewModel.ViewBase;
+            }
+        }
 
         // Setup primary content 
         newViewModel.Activate(viewSelectMessage.ActivationParameter);
         this.primaryContainer.Content = newViewModel.ViewBase;
 
         // Reflect in the navigation toolbar the programmatic change 
-        Control? selectorControl = this.ControlFrom(viewEnum);
-        if (selectorControl is not null &&
-            selectorControl.GetType().Implements<ICanSelect>())
+        if (this.selector is not null)
         {
-            var canSelect = selectorControl as ICanSelect;
-            this.selector.Select(canSelect!);
+            Control? selectorControl = this.ControlFrom(viewEnum);
+            if (selectorControl is not null &&
+                selectorControl.GetType().Implements<ICanSelect>())
+            {
+                var canSelect = selectorControl as ICanSelect;
+                this.selector.Select(canSelect!);
+            }
         }
 
+        // Invoke callback if present for potential extra processing on view change
         this.onViewSelected?.Invoke(viewEnum);
     }
 
