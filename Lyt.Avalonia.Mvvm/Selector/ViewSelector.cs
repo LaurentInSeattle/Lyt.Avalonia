@@ -2,16 +2,19 @@
 
 public sealed class ViewSelector<TViewEnum> where TViewEnum : Enum
 {
-    private readonly ContentControl primaryContainer;
-    private readonly ContentControl? secondaryContainer;
+    private readonly Panel primaryContainer;
+    private readonly Panel? secondaryContainer;
     private readonly SelectionGroup? selector;
     private readonly IEnumerable<SelectableView<TViewEnum>> selectableViews;
     private readonly Action<TViewEnum>? onViewSelected;
 
+    private ViewModel? activePrimaryViewModel;
+    private ViewModel? activeSecondaryViewModel;
+
     public ViewSelector(
         IMessenger messenger,
-        ContentControl primaryContainer,
-        ContentControl? secondaryContainer,
+        Panel primaryContainer,
+        Panel? secondaryContainer,
         SelectionGroup? selector,
         IEnumerable<SelectableView<TViewEnum>> selectableViews,
         Action<TViewEnum>? onViewSelected)
@@ -21,6 +24,24 @@ public sealed class ViewSelector<TViewEnum> where TViewEnum : Enum
         this.selector = selector;
         this.selectableViews = selectableViews;
         this.onViewSelected = onViewSelected;
+
+        foreach (var selectableView in selectableViews)
+        {
+            if (selectableView.PrimaryViewModel.ViewBase is Control primaryControl)
+            {
+                primaryControl.IsVisible = false;
+                this.primaryContainer.Children.Add(primaryControl);
+            }
+
+            if (selectableView.SecondaryViewModel is not null)
+            {
+                if (selectableView.SecondaryViewModel.ViewBase is Control secondaryControl)
+                {
+                    secondaryControl.IsVisible = false;
+                    this.primaryContainer.Children.Add(secondaryControl);
+                }
+            }
+        }
 
         messenger.Subscribe<ViewSelectMessage>(this.OnSelect);
     }
@@ -32,48 +53,48 @@ public sealed class ViewSelector<TViewEnum> where TViewEnum : Enum
         => messenger.Publish(
             new ViewSelectMessage((int)(object)viewEnum, activationParameter));
 
-    public ViewModel? CurrentViewModel()
-    {
-        object? currentView = this.primaryContainer.Content;
-        if (currentView is Control control && control.DataContext is ViewModel currentViewModel)
-        {
-            return currentViewModel;
-        }
-
-        return null;
-    }
-
     private void OnSelect(ViewSelectMessage viewSelectMessage)
     {
         var viewEnum = (TViewEnum)(object)viewSelectMessage.ViewEnum;
 
-        // Deactivate current VM if present 
-        var newViewModel = this.PrimaryViewModelFrom(viewEnum);
-        object? currentView = this.primaryContainer.Content;
-        if (currentView is Control control && control.DataContext is ViewModel currentViewModel)
+        static void HideAndDeactivate(ViewModel? viewModel)
         {
-            if (newViewModel == currentViewModel)
+            if (viewModel is null)
             {
                 return;
             }
 
-            currentViewModel.Deactivate();
+            if (viewModel.ViewBase is IView view)
+            {
+                view.IsVisible = false;
+            }
+
+            viewModel.Deactivate();
         }
 
-        // Setup secondary content if present 
-        if (this.secondaryContainer is not null)
+        static void ActivateAndShow(ViewModel? viewModel, object? activationParameters)
         {
-            ViewModel? secondaryViewModel = this.SecondaryViewModelFrom(viewEnum);
-            if (secondaryViewModel is not null)
+            if (viewModel is null)
             {
-                this.secondaryContainer.Content =
-                    secondaryViewModel is null ? null : secondaryViewModel.ViewBase;
+                return;
+            }
+
+            viewModel.Activate(activationParameters);
+            if (viewModel.ViewBase is IView view)
+            {
+                view.IsVisible = true;
             }
         }
 
-        // Setup primary content 
-        newViewModel.Activate(viewSelectMessage.ActivationParameter);
-        this.primaryContainer.Content = newViewModel.ViewBase;
+        // Deactivate current View models if present 
+        HideAndDeactivate(this.activePrimaryViewModel);
+        HideAndDeactivate(this.activeSecondaryViewModel);
+        ViewModel newPrimaryViewModel = this.PrimaryViewModelFrom(viewEnum);
+        ViewModel? secondaryNewViewModel = this.SecondaryViewModelFrom(viewEnum);
+        ActivateAndShow(newPrimaryViewModel, viewSelectMessage.ActivationParameter);
+        ActivateAndShow(secondaryNewViewModel, viewSelectMessage.ActivationParameter);
+        this.activePrimaryViewModel = newPrimaryViewModel;
+        this.activeSecondaryViewModel = secondaryNewViewModel;
 
         // Reflect in the navigation toolbar the programmatic change 
         if (this.selector is not null)
