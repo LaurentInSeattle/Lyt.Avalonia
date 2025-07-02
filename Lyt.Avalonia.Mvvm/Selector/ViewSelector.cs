@@ -2,8 +2,6 @@
 
 public sealed class ViewSelector<TViewEnum> where TViewEnum : Enum
 {
-    private readonly Panel primaryContainer;
-    private readonly Panel? secondaryContainer;
     private readonly SelectionGroup? selector;
     private readonly IEnumerable<SelectableView<TViewEnum>> selectableViews;
     private readonly Action<TViewEnum>? onViewSelected;
@@ -19,8 +17,6 @@ public sealed class ViewSelector<TViewEnum> where TViewEnum : Enum
         IEnumerable<SelectableView<TViewEnum>> selectableViews,
         Action<TViewEnum>? onViewSelected)
     {
-        this.primaryContainer = primaryContainer;
-        this.secondaryContainer = secondaryContainer;
         this.selector = selector;
         this.selectableViews = selectableViews;
         this.onViewSelected = onViewSelected;
@@ -30,16 +26,15 @@ public sealed class ViewSelector<TViewEnum> where TViewEnum : Enum
             if (selectableView.PrimaryViewModel.ViewBase is Control primaryControl)
             {
                 primaryControl.IsVisible = false;
-                this.primaryContainer.Children.Add(primaryControl);
+                primaryContainer.Children.Add(primaryControl);
             }
 
-            if (selectableView.SecondaryViewModel is not null)
+            if (secondaryContainer is not null &&
+                selectableView.SecondaryViewModel is not null &&
+                selectableView.SecondaryViewModel.ViewBase is Control secondaryControl)
             {
-                if (selectableView.SecondaryViewModel.ViewBase is Control secondaryControl)
-                {
-                    secondaryControl.IsVisible = false;
-                    this.primaryContainer.Children.Add(secondaryControl);
-                }
+                secondaryControl.IsVisible = false;
+                secondaryContainer.Children.Add(secondaryControl);
             }
         }
 
@@ -52,6 +47,10 @@ public sealed class ViewSelector<TViewEnum> where TViewEnum : Enum
         object? activationParameter = null)
         => messenger.Publish(
             new ViewSelectMessage((int)(object)viewEnum, activationParameter));
+
+    public ViewModel? CurrentPrimaryViewModel => this.activePrimaryViewModel;
+
+    public ViewModel? CurrentSecondaryViewModel => this.activeSecondaryViewModel;
 
     private void OnSelect(ViewSelectMessage viewSelectMessage)
     {
@@ -89,10 +88,13 @@ public sealed class ViewSelector<TViewEnum> where TViewEnum : Enum
         // Deactivate current View models if present 
         HideAndDeactivate(this.activePrimaryViewModel);
         HideAndDeactivate(this.activeSecondaryViewModel);
+
+        // Activate, show and flag as active the new view models
         ViewModel newPrimaryViewModel = this.PrimaryViewModelFrom(viewEnum);
         ViewModel? secondaryNewViewModel = this.SecondaryViewModelFrom(viewEnum);
-        ActivateAndShow(newPrimaryViewModel, viewSelectMessage.ActivationParameter);
-        ActivateAndShow(secondaryNewViewModel, viewSelectMessage.ActivationParameter);
+        object? activationParameters = viewSelectMessage.ActivationParameter; 
+        ActivateAndShow(newPrimaryViewModel, activationParameters);
+        ActivateAndShow(secondaryNewViewModel, activationParameters);
         this.activePrimaryViewModel = newPrimaryViewModel;
         this.activeSecondaryViewModel = secondaryNewViewModel;
 
