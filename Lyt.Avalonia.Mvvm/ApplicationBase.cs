@@ -428,12 +428,12 @@ public class ApplicationBase(
 
     private void GlobalExceptionHandler(Exception? exception)
     {
-        if (Debugger.IsAttached) { Debugger.Break(); }
-
         if ((this.Logger is not null) && (exception is not null))
         {
             this.Logger.Error(exception.ToString());
         }
+
+        if (Debugger.IsAttached) { Debugger.Break(); }
 
         // ??? 
         // What can we do here ? 
