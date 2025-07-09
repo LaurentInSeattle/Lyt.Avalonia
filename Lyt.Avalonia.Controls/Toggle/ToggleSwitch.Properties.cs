@@ -168,7 +168,7 @@ public partial class ToggleSwitch
             inherits: false,
             defaultBindingMode: BindingMode.OneWay,
             validate: null,
-            coerce: null,
+            coerce: CoerceTrueText,
             enableDataValidation: false);
 
     /// <summary> Gets or sets the Text property.</summary>
@@ -182,6 +182,17 @@ public partial class ToggleSwitch
         }
     }
 
+    /// <summary> Coerces the TrueText value. </summary>
+    private static string CoerceTrueText(AvaloniaObject sender, string newText)
+    {
+        if (sender is ToggleSwitch toggleSwitch)
+        {
+            toggleSwitch.trueTextBlock.Text = newText;
+        }
+
+        return newText;
+    }
+
     /// <summary> FalseText Styled Property </summary>
     public static readonly StyledProperty<string> FalseTextProperty =
         AvaloniaProperty.Register<ToggleSwitch, string>(
@@ -190,7 +201,7 @@ public partial class ToggleSwitch
             inherits: false,
             defaultBindingMode: BindingMode.OneWay,
             validate: null,
-            coerce: null,
+            coerce: CoerceFalseText,
             enableDataValidation: false);
 
     /// <summary> Gets or sets the FalseText property.</summary>
@@ -202,6 +213,17 @@ public partial class ToggleSwitch
             this.SetValue(FalseTextProperty, value);
             this.falseTextBlock.Text = value;
         }
+    }
+
+    /// <summary> Coerces the FalseText value. </summary>
+    private static string CoerceFalseText(AvaloniaObject sender, string newText)
+    {
+        if (sender is ToggleSwitch toggleSwitch)
+        {
+            toggleSwitch.falseTextBlock.Text = newText;
+        }
+
+        return newText;
     }
 
     /// <summary> Typography Styled Property </summary>
