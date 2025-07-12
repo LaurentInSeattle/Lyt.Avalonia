@@ -1,6 +1,7 @@
 ﻿using Lyt.Framework.Interfaces.Localizing;
 using Lyt.Model;
 using Lyt.Persistence;
+using System.Globalization;
 
 namespace Lyt.Avalonia.Localizer;
 
@@ -66,28 +67,28 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
             return false;
         }
 
-        var mergedDictionaries = this.application.Resources.MergedDictionaries.ToList();
-        if (mergedDictionaries is null)
-        {
-            this.Logger.Warning("Failed get the MergedDictionaries");
-            return false;
-        }
-
-        var translations =
-            mergedDictionaries.OfType<ResourceInclude>()
-            .FirstOrDefault(x => x.Source?.OriginalString?.Contains(this.configuration.LanguagesSubFolder) ?? false);
-        if (translations is not null)
-        {
-            this.Logger.Info("Removed current language");
-            mergedDictionaries.Remove(translations);
-        }
-        else
-        {
-            this.Logger.Warning("Failed get any Resource Includes");
-        }
-
         try
         {
+            var mergedDictionaries = this.application.Resources.MergedDictionaries.ToList();
+            if (mergedDictionaries is null)
+            {
+                this.Logger.Warning("Failed get the MergedDictionaries");
+                return false;
+            }
+
+            var translations =
+                mergedDictionaries.OfType<ResourceInclude>()
+                .FirstOrDefault(x => x.Source?.OriginalString?.Contains(this.configuration.LanguagesSubFolder) ?? false);
+            if (translations is not null)
+            {
+                this.Logger.Info("Removed current language");
+                mergedDictionaries.Remove(translations);
+            }
+            else
+            {
+                this.Logger.Warning("Failed get any Resource Includes");
+            }
+
             string? oldLanguageKey = this.currentLanguage;
             string uriString = this.configuration.ResourceFileUriString(targetLanguage);
             var uri = new Uri(uriString);
@@ -97,6 +98,12 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
             this.currentLanguage = targetLanguage;
             this.Logger.Info("Added new language: " + targetLanguage);
             this.Messenger.Publish(new LanguageChangedMessage(oldLanguageKey, this.currentLanguage));
+
+            var cultureInfo = new CultureInfo(this.currentLanguage);
+            var currentThread = Thread.CurrentThread;
+            currentThread.CurrentCulture = cultureInfo;
+            currentThread.CurrentUICulture = cultureInfo;
+
             return true;
         }
         catch (Exception ex)
