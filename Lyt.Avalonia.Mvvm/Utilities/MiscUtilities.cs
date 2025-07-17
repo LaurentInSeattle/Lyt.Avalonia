@@ -1,11 +1,13 @@
-﻿namespace Lyt.Avalonia.Mvvm.Utilities;
+﻿using Avalonia.VisualTree;
+
+namespace Lyt.Avalonia.Mvvm.Utilities;
 
 using static Lyt.Avalonia.Controls.Utilities;
-
 public static class MiscUtilities
 {
     /// <summary> Find first parent of type T in VisualTree. </summary>
-    public static TControl? FindParentControl<TControl>(this StyledElement control) where TControl : StyledElement
+    public static TControl? FindParentControl<TControl>(this StyledElement control) 
+        where TControl : StyledElement
     {
         StyledElement? parent = control.Parent;
         while ((parent is not null) && (parent is not TControl))
@@ -19,6 +21,19 @@ public static class MiscUtilities
         }
 
         return null;
+    }
+
+    /// <summary> Find first child of type T in VisualTree. </summary>
+    public static TControl? FindChildControl<TControl>(this Control control) 
+        where TControl : Control
+    {
+        var descendants = control.GetVisualDescendants().OfType<TControl>();
+        if (descendants is null || !descendants.Any())
+        {
+            return null;
+        } 
+
+        return descendants.FirstOrDefault();
     }
 
     public static string ToIconName(this InformationLevel informationLevel)
