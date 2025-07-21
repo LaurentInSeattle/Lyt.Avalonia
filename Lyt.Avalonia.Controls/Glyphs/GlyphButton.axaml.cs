@@ -59,8 +59,14 @@ public partial class GlyphButton : UserControl, ICanSelect
 
     #region Layout Updates 
 
+    private bool HasXamlContent
+        => (this.xamlContent.Content is not null) &&
+            (this.Layout == ButtonLayout.IconOnly ||
+            this.Layout == ButtonLayout.IconTextRightSide ||
+            this.Layout == ButtonLayout.IconTextBelow);
+
     private bool HasIcon
-        => (this.icon is not null) &&
+        => (this.icon.Content is not null) &&
             (this.Layout == ButtonLayout.IconOnly ||
             this.Layout == ButtonLayout.IconTextRightSide ||
             this.Layout == ButtonLayout.IconTextBelow);
@@ -225,6 +231,11 @@ public partial class GlyphButton : UserControl, ICanSelect
             this.GlyphAngle = this.glyphAngle;
         }
 
+        if (this.HasXamlContent && this.XamlContent is not null)
+        {
+            this.XamlContent.Foreground = pressedColor;
+        }
+
         if (this.HasText)
         {
             this.textBlock.Foreground = pressedColor;
@@ -251,6 +262,12 @@ public partial class GlyphButton : UserControl, ICanSelect
             // Consider creating a property for this 'feature'...
             // feature that has been given some negative feedback.
             // this.GlyphAngle = this.glyphAngle + 3.0; 
+            this.viewBox.Margin = new Thickness(this.viewboxMargin + 2.0);
+        }
+
+        if (this.HasXamlContent && this.XamlContent is not null)
+        {
+            this.XamlContent.Foreground = hotColor;
             this.viewBox.Margin = new Thickness(this.viewboxMargin + 2.0);
         }
 
@@ -281,6 +298,12 @@ public partial class GlyphButton : UserControl, ICanSelect
             this.viewBox.Margin = new Thickness(this.viewboxMargin);
         }
 
+        if (this.HasXamlContent && this.XamlContent is not null)
+        {
+            this.XamlContent.Foreground = this.GeneralVisualState.Normal;
+            this.viewBox.Margin = new Thickness(this.viewboxMargin);
+        }
+
         if (this.HasText)
         {
             this.textBlock.Foreground = this.GeneralVisualState.Normal;
@@ -307,6 +330,12 @@ public partial class GlyphButton : UserControl, ICanSelect
             this.GlyphAngle = this.glyphAngle;
         }
 
+        if (this.HasXamlContent && this.XamlContent is not null)
+        {
+            this.XamlContent.Foreground = this.GeneralVisualState.Selected;
+            this.viewBox.Margin = new Thickness(this.viewboxMargin);
+        }
+
         if (this.HasText)
         {
             this.textBlock.Foreground = this.GeneralVisualState.Selected;
@@ -330,6 +359,11 @@ public partial class GlyphButton : UserControl, ICanSelect
         {
             this.icon.Foreground = disabledColor;
             this.GlyphAngle = this.glyphAngle;
+        }
+
+        if (this.HasXamlContent && this.XamlContent is not null)
+        {
+            this.XamlContent.Foreground = disabledColor;
         }
 
         if (this.HasText)

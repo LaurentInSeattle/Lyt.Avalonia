@@ -166,6 +166,37 @@ public partial class GlyphButton
         return newGroup; 
     }
 
+    /// <summary> XamlContent Styled Property </summary>
+    public static readonly StyledProperty<UserControl?> XamlContentProperty =
+        AvaloniaProperty.Register<GlyphButton, UserControl?>(
+            nameof(XamlContent),
+            defaultValue: null,
+            inherits: false,
+            defaultBindingMode: BindingMode.OneWay,
+            validate: null,
+            coerce: CoerceXamlContent,
+            enableDataValidation: false);
+
+    /// <summary> Gets or sets the XamlContent property.</summary>
+    public UserControl? XamlContent
+    {
+        get => this.GetValue(XamlContentProperty);
+        set => this.SetValue(XamlContentProperty, value);
+    }
+
+    /// <summary> Coerces the XamlContent value. </summary>
+    private static UserControl? CoerceXamlContent(AvaloniaObject sender, UserControl? newXamlContent)
+    {
+        if ((sender is GlyphButton glyphButton) && (newXamlContent is not null))
+        {
+            glyphButton.xamlContent.Content = newXamlContent;
+            glyphButton.xamlContent.IsVisible = true;
+            glyphButton.icon.IsVisible = false;
+        }
+
+        return newXamlContent;
+    }
+
     #endregion State and Layout Styled Properties 
 
     #region Commanding Styled Properties 
