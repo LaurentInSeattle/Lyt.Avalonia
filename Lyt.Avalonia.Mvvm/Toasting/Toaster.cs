@@ -35,7 +35,7 @@ public sealed class Toaster : IToaster
     // Provide access to the View so that it can eventually moved around, re-aligned, etc
     public object? View
     {
-        get 
+        get
         {
             if (this.current is ToastViewModel viewModel)
             {
@@ -55,7 +55,7 @@ public sealed class Toaster : IToaster
 
         this.messenger.Publish(
             new ToastMessage.Show { Title = title, Message = message, Delay = dismissDelay, Level = toastLevel });
-    } 
+    }
 
     public void Dismiss()
     {
@@ -116,9 +116,9 @@ public sealed class Toaster : IToaster
                 // Save hit test status and make the panel clickable so that we can 
                 // dismiss toasts if needed.
                 this.hostPanelHitTestVisibility = panel.IsHitTestVisible;
-                panel.IsHitTestVisible = true ;
+                panel.IsHitTestVisible = true;
                 panel.Children.Add(view);
-            } 
+            }
         }
     }
 }
