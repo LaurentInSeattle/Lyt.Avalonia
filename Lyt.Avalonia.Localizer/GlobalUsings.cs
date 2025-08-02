@@ -4,6 +4,7 @@ global using System.Collections.Concurrent;
 global using System.Collections.Generic;
 global using System.ComponentModel;
 global using System.Diagnostics;
+global using System.Globalization;
 global using System.Linq;
 global using System.Reflection;
 global using System.Runtime.CompilerServices;
@@ -29,8 +30,11 @@ global using Avalonia.Platform;
 global using Avalonia.Threading;
 
 global using Lyt.Framework.Interfaces;
+global using Lyt.Framework.Interfaces.Localizing;
 global using Lyt.Framework.Interfaces.Logging;
 global using Lyt.Framework.Interfaces.Messaging;
 global using Lyt.Framework.Interfaces.Modeling;
 global using Lyt.Framework.Interfaces.Profiling;
 
+global using Lyt.Model;
+global using Lyt.Persistence;

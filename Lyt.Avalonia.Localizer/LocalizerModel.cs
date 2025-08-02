@@ -1,9 +1,4 @@
-﻿using Lyt.Framework.Interfaces.Localizing;
-using Lyt.Model;
-using Lyt.Persistence;
-using System.Globalization;
-
-namespace Lyt.Avalonia.Localizer;
+﻿namespace Lyt.Avalonia.Localizer;
 
 public sealed class LocalizerModel : ModelBase, ILocalizer
 {
