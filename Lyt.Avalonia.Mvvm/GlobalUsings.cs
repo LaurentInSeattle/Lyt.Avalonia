@@ -42,6 +42,8 @@ global using Avalonia.Platform;
 global using Avalonia.Reactive;
 global using Avalonia.Styling;
 global using Avalonia.Threading;
+global using Avalonia.VisualTree;
+
 
 global using Lyt.Framework.Interfaces.Binding;
 global using Lyt.Framework.Interfaces.Dispatching;

@@ -1,8 +1,7 @@
-﻿using Avalonia.VisualTree;
-
-namespace Lyt.Avalonia.Mvvm.Utilities;
+﻿namespace Lyt.Avalonia.Mvvm.Utilities;
 
 using static Lyt.Avalonia.Controls.Utilities;
+
 public static class MiscUtilities
 {
     /// <summary> Find first parent of type T in VisualTree. </summary>

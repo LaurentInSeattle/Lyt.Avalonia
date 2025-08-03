@@ -1,29 +1,34 @@
 ﻿namespace Lyt.Avalonia.Mvvm;
 
-public class View : UserControl, IView
+public class View : UserControl, IView, ISupportBehaviors
 {
+    public List<object> Behaviors { get; private set; } = [];
+
     public View()
     {
         var methodInfo = this.GetType().GetMethod("InitializeComponent");
         if (methodInfo is not null)
         {
             _ = methodInfo.Invoke(this, [true]);
-        } 
+        }
 
-        this.DataContextChanged += (s, e) =>
-        {
-            if (this.DataContext is not null && this.DataContext is ViewModel viewModel)
-            {
-                viewModel.BindOnDataContextChanged(this); 
-            }
-        };
+        this.DataContextChanged += this.OnDataContextChanged;
+        this.Loaded += this.OnLoaded;
+    }
 
-        this.Loaded += (s, e) =>
+    protected virtual void OnLoaded(object? sender, RoutedEventArgs e)
+    {
+        if (this.DataContext is ViewModel viewModel)
         {
-            if (this.DataContext is not null && this.DataContext is ViewModel viewModel)
-            {
-                viewModel.OnViewLoaded();
-            }
-        };
+            viewModel.OnViewLoaded();
+        }
+    }
+
+    protected virtual void OnDataContextChanged(object? sender, EventArgs e)
+    {
+        if (this.DataContext is ViewModel viewModel)
+        {
+            viewModel.BindOnDataContextChanged(this);
+        }
     }
 }
