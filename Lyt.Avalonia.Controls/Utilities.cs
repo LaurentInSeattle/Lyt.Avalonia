@@ -73,15 +73,14 @@ public static class Utilities
         }
     }
 
-    public static bool IsPointerInside(this Control control, PointerEventArgs args)
+    public static bool IsPointerInside(this Control control, PointerEventArgs args, bool inflate = true)
     {
         PointerPoint pp = args.GetCurrentPoint(control);
         var rectangle = new Rect ( control.Bounds.Size) ;
-        Rect inflated = rectangle.Inflate(0.5);
-        //Debug.WriteLine( inflated.ToString() );
-        //Debug.WriteLine(pp.Position.ToString());
-        bool inside = inflated.Contains(pp.Position);
-        // Debug.WriteLine(inside ? "Inside": "Outside");
+        Rect reflated = inflate ? rectangle.Inflate(0.5) : rectangle.Deflate(1.5);
+        bool inside = reflated.Contains(pp.Position);
+        Debug.WriteLine( 
+            (inflate ? "Inflated: " : "Deflated :") +  ( inside ? "Inside": "Outside"));
         return inside;
     }
 
