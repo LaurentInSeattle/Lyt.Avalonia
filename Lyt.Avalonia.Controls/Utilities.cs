@@ -79,8 +79,8 @@ public static class Utilities
         var rectangle = new Rect ( control.Bounds.Size) ;
         Rect reflated = inflate ? rectangle.Inflate(0.5) : rectangle.Deflate(1.5);
         bool inside = reflated.Contains(pp.Position);
-        Debug.WriteLine( 
-            (inflate ? "Inflated: " : "Deflated :") +  ( inside ? "Inside": "Outside"));
+        //Debug.WriteLine( 
+        //    (inflate ? "Inflated: " : "Deflated :") +  ( inside ? "Inside": "Outside"));
         return inside;
     }
 
