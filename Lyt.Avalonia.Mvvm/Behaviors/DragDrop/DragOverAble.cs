@@ -15,7 +15,7 @@ public class DragOverAble(
     protected override void OnAttached()
     {
         View view = base.GuardAssociatedObject();
-        Debug.WriteLine("DragOverAble | Attached to: " + this.AssociatedObject!.GetType().Name);
+        // Debug.WriteLine("DragOverAble | Attached to: " + this.AssociatedObject!.GetType().Name);
         global::Avalonia.Input.DragDrop.SetAllowDrop(view, true);
         view.AddHandler(global::Avalonia.Input.DragDrop.DragOverEvent, this.OnDragOver);
     }

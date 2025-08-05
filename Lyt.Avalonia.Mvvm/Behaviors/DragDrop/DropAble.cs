@@ -11,7 +11,7 @@ public class DropAble(Action<IDropTarget?> hideDropTarget) : BehaviorBase<View>
     protected override void OnAttached()
     {
         View view = this.GuardAssociatedObject();
-        Debug.WriteLine("DropAble | Attached to: " + this.AssociatedObject!.GetType().Name);
+        // Debug.WriteLine("DropAble | Attached to: " + this.AssociatedObject!.GetType().Name);
         global::Avalonia.Input.DragDrop.SetAllowDrop(view, true);
         view.AddHandler(global::Avalonia.Input.DragDrop.DropEvent, this.OnDrop);
     }

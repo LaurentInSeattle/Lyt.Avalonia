@@ -4,7 +4,7 @@
 public sealed class DragAble(Canvas canvas) : BehaviorBase<View>
 {
     /// <summary> Delay triggering the Long Press event on the view model.</summary>
-    private const int LongPressDelay = 777; // milliseconds
+    private const int LongPressDelay = 500; // milliseconds
 
     /// <summary> Minimal drag distance triggering the drag abd drop operation.</summary>
     private const double MinimalDragDistance = 4.5; // pixels
@@ -21,6 +21,7 @@ public sealed class DragAble(Canvas canvas) : BehaviorBase<View>
     protected override void OnAttached()
     {
         _ = this.Guard();
+        // Debug.WriteLine("DragAble | Attached to: " + this.AssociatedObject!.GetType().Name);
         this.HookPointerEvents();
     }
 
@@ -165,7 +166,7 @@ public sealed class DragAble(Canvas canvas) : BehaviorBase<View>
 
         this.dragCanvas.Children.Add(this.ghostView);
         this.AdjustGhostPosition(pointerEventArgs.GetPosition(this.dragCanvas));
-        Debug.WriteLine("ghost view created");
+        // Debug.WriteLine("ghost view created");
 
         // Launch the DragDrop task, fire and forget 
         this.DoDragDrop(pointerEventArgs, this.dragCanvas);
