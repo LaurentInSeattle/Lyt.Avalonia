@@ -18,8 +18,7 @@ public partial class ToggleSwitch
         set
         {
             this.SetValue(ValueProperty, value);
-            this.switchEllipse.HorizontalAlignment =
-                value ? HorizontalAlignment.Left : HorizontalAlignment.Right;
+            this.PositionEllipse(); 
             this.UpdateVisualState();
         }
     }
@@ -51,7 +50,7 @@ public partial class ToggleSwitch
         set
         {
             this.SetValue(IsShownProperty, value);
-            this.mainGrid.IsVisible = value;
+            this.mainGridHorizontal.IsVisible = value;
         }
     }
 
@@ -66,6 +65,21 @@ public partial class ToggleSwitch
         set
         {
             this.SetValue(IsDisabledProperty, value);
+            this.UpdateVisualState();
+        }
+    }
+
+    /// <summary> Orientation Styled Property </summary>
+    public static readonly StyledProperty<Orientation> OrientationProperty =
+        AvaloniaProperty.Register<ToggleSwitch, Orientation>(nameof(Orientation), defaultValue: Orientation.Horizontal);
+
+    /// <summary> Gets or sets the Orientation property.</summary>
+    public Orientation Orientation
+    {
+        get => this.GetValue(OrientationProperty);
+        set
+        {
+            this.SetValue(OrientationProperty, value);
             this.UpdateVisualState();
         }
     }

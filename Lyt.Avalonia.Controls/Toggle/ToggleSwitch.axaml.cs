@@ -1,18 +1,33 @@
 namespace Lyt.Avalonia.Controls.Toggle;
 
+using System.Reflection;
+using System.Reflection.Metadata;
+
 public partial class ToggleSwitch : UserControl
 {
+    private Rectangle rectangleBackground;
+    private TextBlock trueTextBlock;
+    private TextBlock falseTextBlock;
+    private Ellipse switchEllipse;
+    private Rectangle eventingRectangle;
+
     private bool isOver;
     private bool isPressed;
 
     public ToggleSwitch()
     {
         this.InitializeComponent();
+        this.CreateChildren();
+        // this.SetupHorizontalLayout();
+        this.Orientation = Orientation.Vertical;
+        this.SetupVerticalLayout();
+
         this.eventingRectangle.PointerPressed += this.OnPointerPressed;
         this.eventingRectangle.PointerReleased += this.OnPointerReleased;
         this.eventingRectangle.PointerEntered += this.OnPointerEnter;
         this.eventingRectangle.PointerExited += this.OnPointerLeave;
         this.eventingRectangle.PointerMoved += this.OnPointerMoved;
+
         this.Loaded += this.OnLoaded;
     }
 
@@ -28,10 +43,25 @@ public partial class ToggleSwitch : UserControl
     private void OnLoaded(object? sender, RoutedEventArgs e)
     {
         this.ChangeTypography(this.Typography);
-        this.switchEllipse.HorizontalAlignment =
-            this.Value ? HorizontalAlignment.Left : HorizontalAlignment.Right;
+        this.PositionEllipse();
         this.UpdateVisualState();
         this.InvalidateVisual();
+    }
+
+    private void PositionEllipse()
+    {
+        if (this.Orientation == Orientation.Vertical)
+        {
+            this.switchEllipse.HorizontalAlignment = HorizontalAlignment.Center;
+            this.switchEllipse.VerticalAlignment =
+                this.Value ? VerticalAlignment.Top : VerticalAlignment.Bottom;
+        }
+        else
+        {
+            this.switchEllipse.VerticalAlignment = VerticalAlignment.Center;
+            this.switchEllipse.HorizontalAlignment =
+                this.Value ? HorizontalAlignment.Left : HorizontalAlignment.Right;
+        }
     }
 
     // According to Forum discussion:
@@ -45,14 +75,195 @@ public partial class ToggleSwitch : UserControl
         this.falseTextBlock.Text = this.FalseText;
     }
 
+    /*
+            <Rectangle
+                x:Name="rectangleBackground"
+                Grid.Column="1"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Margin="0"
+                IsHitTestVisible="False"
+                RadiusX="8" RadiusY="8"
+                Stroke="Aquamarine"
+                StrokeThickness="1"
+                Fill="Transparent"
+                />
+            <TextBlock
+                x:Name="trueTextBlock"
+                Margin="0 0 10 0"
+                Grid.Column="0"
+                Background="Transparent"
+                Foreground="AntiqueWhite"
+                VerticalAlignment="Center" HorizontalAlignment="Right"
+                TextWrapping="Wrap"
+                IsHitTestVisible="False"
+                />
+            <TextBlock
+                x:Name="falseTextBlock"
+                Margin="10 0 0 0"
+                Grid.Column="2"
+                Background="Transparent"
+                Foreground="AntiqueWhite"
+                VerticalAlignment="Center" HorizontalAlignment="Left"
+                TextWrapping="Wrap"
+                IsHitTestVisible="False"
+                />
+            <Ellipse
+                x:Name="switchEllipse"
+                Margin="4"
+                Grid.Column="1"
+                Height="16" Width="16"
+                VerticalAlignment="Center" HorizontalAlignment="Left"
+                Fill="Aquamarine"
+                IsHitTestVisible="False"
+                />
+            <!-- Rectangle used for eventing MUST be above everything else -->
+            <Rectangle
+                x:Name="eventingRectangle"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                Grid.Column="1"
+                Margin="0"
+                IsHitTestVisible="True"
+                Fill="Transparent"
+                />			
+     */
+    private void SetupVerticalLayout()
+    {
+        this.rectangleBackground.SetValue(Grid.ColumnProperty, 0);
+        this.rectangleBackground.SetValue(Grid.RowProperty, 1);
+
+        this.trueTextBlock.Margin = new Thickness(8, 0, 0, 0);
+        this.trueTextBlock.SetValue(Grid.RowProperty, 0);
+        this.trueTextBlock.VerticalAlignment = VerticalAlignment.Top;
+        this.trueTextBlock.HorizontalAlignment = HorizontalAlignment.Left;
+
+        this.falseTextBlock.Margin = new Thickness(8, 0, 0, 0);
+        this.falseTextBlock.SetValue(Grid.RowProperty, 1);
+        this.falseTextBlock.VerticalAlignment = VerticalAlignment.Bottom;
+        this.falseTextBlock.HorizontalAlignment = HorizontalAlignment.Left;
+
+        this.switchEllipse.SetValue(Grid.ColumnProperty, 0);
+        this.switchEllipse.SetValue(Grid.RowProperty, 1);
+        this.switchEllipse.VerticalAlignment = VerticalAlignment.Top;
+        this.switchEllipse.HorizontalAlignment = HorizontalAlignment.Center;
+
+        this.eventingRectangle.SetValue(Grid.ColumnProperty, 0);
+        this.eventingRectangle.SetValue(Grid.RowProperty, 1);
+
+        this.mainGridHorizontal.IsVisible = false;
+        this.mainGridHorizontal.Children.Clear();
+
+        this.mainGridVertical.IsVisible = true;
+
+        Grid? innerGridVertical = null;
+        foreach (var child in this.mainGridVertical.Children)
+        {
+            if (child is Grid grid)
+            {
+                innerGridVertical = grid;
+            } 
+        }
+        
+        this.mainGridVertical.Children.Clear();
+        this.mainGridVertical.Children.Add(this.rectangleBackground);
+        this.mainGridVertical.Children.Add(this.switchEllipse);
+        this.mainGridVertical.Children.Add(this.eventingRectangle);
+
+        if (innerGridVertical is not null)
+        {
+            this.mainGridVertical.Children.Add(innerGridVertical);
+            this.innerGridVertical.Children.Clear();
+            this.innerGridVertical.Children.Add(this.trueTextBlock);
+            this.innerGridVertical.Children.Add(this.falseTextBlock);
+        } 
+    }
+
+    private void SetupHorizontalLayout()
+    {
+        this.rectangleBackground.SetValue(Grid.ColumnProperty, 1);
+
+        this.trueTextBlock.Margin = new Thickness(0, 0, 8, 0);
+        this.trueTextBlock.SetValue(Grid.ColumnProperty, 0);
+        this.trueTextBlock.VerticalAlignment = VerticalAlignment.Center;
+        this.trueTextBlock.HorizontalAlignment = HorizontalAlignment.Right;
+
+        this.falseTextBlock.Margin = new Thickness(8, 0, 0, 0);
+        this.falseTextBlock.SetValue(Grid.ColumnProperty, 2);
+        this.falseTextBlock.VerticalAlignment = VerticalAlignment.Center;
+        this.falseTextBlock.HorizontalAlignment = HorizontalAlignment.Left;
+
+        this.switchEllipse.SetValue(Grid.ColumnProperty, 1);
+        this.switchEllipse.VerticalAlignment = VerticalAlignment.Center;
+        this.switchEllipse.HorizontalAlignment = HorizontalAlignment.Left;
+
+        this.eventingRectangle.SetValue(Grid.ColumnProperty, 1);
+
+        this.mainGridVertical.IsVisible = false;
+        this.mainGridVertical.Children.Clear();
+
+        this.mainGridHorizontal.IsVisible = true;
+        this.mainGridHorizontal.Children.Clear();
+        this.mainGridHorizontal.Children.Add(this.rectangleBackground);
+        this.mainGridHorizontal.Children.Add(this.trueTextBlock);
+        this.mainGridHorizontal.Children.Add(this.falseTextBlock);
+        this.mainGridHorizontal.Children.Add(this.switchEllipse);
+        this.mainGridHorizontal.Children.Add(this.eventingRectangle);
+    }
+
+    private void CreateChildren()
+    {
+        // Rectangle used as background: MUST be below everything else
+        this.rectangleBackground = new Rectangle
+        {
+            IsHitTestVisible = false,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            RadiusX = 8,
+            RadiusY = 8,
+            StrokeThickness = 1.0,
+            Fill = new SolidColorBrush(Colors.Transparent),
+        };
+
+        this.trueTextBlock = new TextBlock()
+        {
+            IsHitTestVisible = false,
+            TextWrapping = TextWrapping.Wrap,
+            Background = new SolidColorBrush(Colors.Transparent),
+        };
+
+        this.falseTextBlock = new TextBlock()
+        {
+            IsHitTestVisible = false,
+            TextWrapping = TextWrapping.Wrap,
+            Background = new SolidColorBrush(Colors.Transparent),
+        };
+
+        this.switchEllipse = new Ellipse()
+        {
+            Margin = new Thickness(4),
+            Height = 16.0,
+            Width = 16.0,
+            IsHitTestVisible = false,
+        };
+
+        // Rectangle used for eventing MUST be above everything else 
+        this.eventingRectangle = new Rectangle
+        {
+            IsHitTestVisible = true,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Fill = new SolidColorBrush(Colors.Transparent),
+        };
+    }
+
     #region Visual States 
 
     private bool IsHot => !this.isPressed && this.isOver && !this.IsDisabled;
 
     private void UpdateVisualState()
     {
-        if ((this.GeneralVisualState is null) || 
-            (this.BackgroundVisualState is null) || 
+        if ((this.GeneralVisualState is null) ||
+            (this.BackgroundVisualState is null) ||
             (this.BackgroundBorderVisualState is null))
         {
             return;
