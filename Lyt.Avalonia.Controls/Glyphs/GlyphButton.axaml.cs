@@ -429,14 +429,19 @@ public partial class GlyphButton : UserControl, ICanSelect
             return;
         }
 
-        //if (!this.eventingRectangle.IsPointerOver)
-        //{
-        //    this.Leave();
-        //}
-
-        if (!this.eventingRectangle.IsPointerInside(args))
+        if (this.Behaviour == ButtonBehaviour.Continuous)
         {
-            this.Leave();
+            if (!this.eventingRectangle.IsPointerInside(args))
+            {
+                this.Leave();
+            }
+        }
+        else
+        {
+            if (!this.eventingRectangle.IsPointerOver)
+            {
+                this.Leave();
+            }
         }
     }
 
