@@ -11,12 +11,65 @@ public partial class ToggleSwitch : UserControl
     private bool isOver;
     private bool isPressed;
 
+#pragma warning disable CS8618 
+    // Non-nullable field must contain a non-null value when exiting constructor.
     public ToggleSwitch()
+#pragma warning restore CS8618 
     {
+        void CreateChildren()
+        {
+            // Rectangle used as background: MUST be below everything else
+            this.rectangleBackground = new Rectangle
+            {
+                IsHitTestVisible = false,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                RadiusX = 8,
+                RadiusY = 8,
+                StrokeThickness = 1.0,
+                Fill = new SolidColorBrush(Colors.Transparent),
+            };
+
+            this.trueTextBlock = new TextBlock()
+            {
+                IsHitTestVisible = false,
+                TextWrapping = TextWrapping.Wrap,
+                Background = new SolidColorBrush(Colors.Transparent),
+            };
+
+            this.falseTextBlock = new TextBlock()
+            {
+                IsHitTestVisible = false,
+                TextWrapping = TextWrapping.Wrap,
+                Background = new SolidColorBrush(Colors.Transparent),
+            };
+
+            this.switchEllipse = new Ellipse()
+            {
+                Margin = new Thickness(4),
+                Height = 16.0,
+                Width = 16.0,
+                IsHitTestVisible = false,
+            };
+
+            // Rectangle used for eventing MUST be above everything else 
+            this.eventingRectangle = new Rectangle
+            {
+                IsHitTestVisible = true,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                Fill = new SolidColorBrush(Colors.Transparent),
+            };
+        }
+
         this.InitializeComponent();
-        this.CreateChildren();
-        this.Orientation = Orientation.Vertical;
-        this.SetupVerticalLayout();
+
+        CreateChildren();
+
+        if (this.eventingRectangle is null)
+        {
+            throw new Exception("SNH"); 
+        }
 
         this.eventingRectangle.PointerPressed += this.OnPointerPressed;
         this.eventingRectangle.PointerReleased += this.OnPointerReleased;
@@ -24,6 +77,8 @@ public partial class ToggleSwitch : UserControl
         this.eventingRectangle.PointerExited += this.OnPointerLeave;
         this.eventingRectangle.PointerMoved += this.OnPointerMoved;
 
+        this.Orientation = Orientation.Vertical;
+        this.SetupVerticalLayout();
         this.Loaded += this.OnLoaded;
     }
 
@@ -114,9 +169,9 @@ public partial class ToggleSwitch : UserControl
             if (child is Grid grid)
             {
                 innerGridVertical = grid;
-            } 
+            }
         }
-        
+
         this.mainGridVertical.Children.Clear();
         this.mainGridVertical.Children.Add(this.rectangleBackground);
         this.mainGridVertical.Children.Add(this.switchEllipse);
@@ -128,7 +183,7 @@ public partial class ToggleSwitch : UserControl
             this.innerGridVertical.Children.Clear();
             this.innerGridVertical.Children.Add(this.trueTextBlock);
             this.innerGridVertical.Children.Add(this.falseTextBlock);
-        } 
+        }
     }
 
     private void SetupHorizontalLayout()
@@ -161,52 +216,6 @@ public partial class ToggleSwitch : UserControl
         this.mainGridHorizontal.Children.Add(this.falseTextBlock);
         this.mainGridHorizontal.Children.Add(this.switchEllipse);
         this.mainGridHorizontal.Children.Add(this.eventingRectangle);
-    }
-
-    private void CreateChildren()
-    {
-        // Rectangle used as background: MUST be below everything else
-        this.rectangleBackground = new Rectangle
-        {
-            IsHitTestVisible = false,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            RadiusX = 8,
-            RadiusY = 8,
-            StrokeThickness = 1.0,
-            Fill = new SolidColorBrush(Colors.Transparent),
-        };
-
-        this.trueTextBlock = new TextBlock()
-        {
-            IsHitTestVisible = false,
-            TextWrapping = TextWrapping.Wrap,
-            Background = new SolidColorBrush(Colors.Transparent),
-        };
-
-        this.falseTextBlock = new TextBlock()
-        {
-            IsHitTestVisible = false,
-            TextWrapping = TextWrapping.Wrap,
-            Background = new SolidColorBrush(Colors.Transparent),
-        };
-
-        this.switchEllipse = new Ellipse()
-        {
-            Margin = new Thickness(4),
-            Height = 16.0,
-            Width = 16.0,
-            IsHitTestVisible = false,
-        };
-
-        // Rectangle used for eventing MUST be above everything else 
-        this.eventingRectangle = new Rectangle
-        {
-            IsHitTestVisible = true,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            Fill = new SolidColorBrush(Colors.Transparent),
-        };
     }
 
     #region Visual States 
