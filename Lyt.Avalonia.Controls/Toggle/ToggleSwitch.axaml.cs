@@ -1,8 +1,5 @@
 namespace Lyt.Avalonia.Controls.Toggle;
 
-using System.Reflection;
-using System.Reflection.Metadata;
-
 public partial class ToggleSwitch : UserControl
 {
     private Rectangle rectangleBackground;
@@ -18,7 +15,6 @@ public partial class ToggleSwitch : UserControl
     {
         this.InitializeComponent();
         this.CreateChildren();
-        // this.SetupHorizontalLayout();
         this.Orientation = Orientation.Vertical;
         this.SetupVerticalLayout();
 
@@ -42,6 +38,15 @@ public partial class ToggleSwitch : UserControl
 
     private void OnLoaded(object? sender, RoutedEventArgs e)
     {
+        if (this.Orientation == Orientation.Vertical)
+        {
+            this.SetupVerticalLayout();
+        }
+        else
+        {
+            this.SetupHorizontalLayout();
+        }
+
         this.ChangeTypography(this.Typography);
         this.PositionEllipse();
         this.UpdateVisualState();
@@ -75,58 +80,6 @@ public partial class ToggleSwitch : UserControl
         this.falseTextBlock.Text = this.FalseText;
     }
 
-    /*
-            <Rectangle
-                x:Name="rectangleBackground"
-                Grid.Column="1"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Margin="0"
-                IsHitTestVisible="False"
-                RadiusX="8" RadiusY="8"
-                Stroke="Aquamarine"
-                StrokeThickness="1"
-                Fill="Transparent"
-                />
-            <TextBlock
-                x:Name="trueTextBlock"
-                Margin="0 0 10 0"
-                Grid.Column="0"
-                Background="Transparent"
-                Foreground="AntiqueWhite"
-                VerticalAlignment="Center" HorizontalAlignment="Right"
-                TextWrapping="Wrap"
-                IsHitTestVisible="False"
-                />
-            <TextBlock
-                x:Name="falseTextBlock"
-                Margin="10 0 0 0"
-                Grid.Column="2"
-                Background="Transparent"
-                Foreground="AntiqueWhite"
-                VerticalAlignment="Center" HorizontalAlignment="Left"
-                TextWrapping="Wrap"
-                IsHitTestVisible="False"
-                />
-            <Ellipse
-                x:Name="switchEllipse"
-                Margin="4"
-                Grid.Column="1"
-                Height="16" Width="16"
-                VerticalAlignment="Center" HorizontalAlignment="Left"
-                Fill="Aquamarine"
-                IsHitTestVisible="False"
-                />
-            <!-- Rectangle used for eventing MUST be above everything else -->
-            <Rectangle
-                x:Name="eventingRectangle"
-                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                Grid.Column="1"
-                Margin="0"
-                IsHitTestVisible="True"
-                Fill="Transparent"
-                />			
-     */
     private void SetupVerticalLayout()
     {
         this.rectangleBackground.SetValue(Grid.ColumnProperty, 0);
@@ -335,16 +288,18 @@ public partial class ToggleSwitch : UserControl
     {
         var normalColor = this.GeneralVisualState.Normal;
         var disabledColor = this.GeneralVisualState.Disabled;
-        this.switchEllipse.Fill = normalColor;
+        var selectedColor = this.GeneralVisualState.Selected;
         if (this.Value)
         {
-            this.trueTextBlock.Foreground = normalColor;
+            this.trueTextBlock.Foreground = selectedColor;
             this.falseTextBlock.Foreground = disabledColor;
+            this.switchEllipse.Fill = selectedColor;
         }
         else
         {
             this.trueTextBlock.Foreground = disabledColor;
             this.falseTextBlock.Foreground = normalColor;
+            this.switchEllipse.Fill = normalColor;
         }
 
         this.rectangleBackground.Fill = this.BackgroundVisualState.Normal;

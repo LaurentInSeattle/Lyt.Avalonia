@@ -51,7 +51,8 @@ public enum ButtonTag
 public enum ButtonLayout
 {
     IconOnly , 
-    IconTextBelow, 
+    IconTextBelow,
+    IconTextBelowNoBackground,
     IconTextRightSide,
     TextOnly,
 }

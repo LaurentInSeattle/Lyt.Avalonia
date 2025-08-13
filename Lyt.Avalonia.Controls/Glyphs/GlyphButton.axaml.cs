@@ -63,18 +63,21 @@ public partial class GlyphButton : UserControl, ICanSelect
         => (this.xamlContent.Content is not null) &&
             (this.Layout == ButtonLayout.IconOnly ||
             this.Layout == ButtonLayout.IconTextRightSide ||
-            this.Layout == ButtonLayout.IconTextBelow);
+            this.Layout == ButtonLayout.IconTextBelow||
+            this.Layout == ButtonLayout.IconTextBelowNoBackground);
 
     private bool HasIcon
         => (this.icon.Content is not null) &&
             (this.Layout == ButtonLayout.IconOnly ||
             this.Layout == ButtonLayout.IconTextRightSide ||
+            this.Layout == ButtonLayout.IconTextBelowNoBackground ||
             this.Layout == ButtonLayout.IconTextBelow);
 
     private bool HasText
         => (this.textBlock is not null) &&
             (this.Layout == ButtonLayout.IconTextRightSide ||
             this.Layout == ButtonLayout.IconTextBelow ||
+            this.Layout == ButtonLayout.IconTextBelowNoBackground||
             this.Layout == ButtonLayout.TextOnly);
 
     private bool HasBackgroundRectangle
@@ -99,6 +102,7 @@ public partial class GlyphButton : UserControl, ICanSelect
 
     private void ChangeLayout(ButtonLayout layout)
     {
+        // One time setup: Not supposed to change button layout on the fly
         switch (layout)
         {
             default:
@@ -118,8 +122,23 @@ public partial class GlyphButton : UserControl, ICanSelect
                 this.textBlock.SetValue(Grid.ColumnProperty, 0);
                 this.textBlock.SetValue(Grid.ColumnSpanProperty, 1);
                 this.textBlock.HorizontalAlignment = HorizontalAlignment.Center;
+                this.textBlock.Margin = new Thickness(0, 0, 0, 0);
+                this.mainGrid.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Auto);
+                break;
+
+            case ButtonLayout.IconTextBelowNoBackground:
+                this.icon.IsVisible = true; //Visibility.Visible;
+                this.textBlock.IsVisible = true; //Visibility.Visible;
+                this.textBlock.SetValue(Grid.RowProperty, 1);
+                this.textBlock.SetValue(Grid.ColumnProperty, 0);
+                this.textBlock.SetValue(Grid.ColumnSpanProperty, 1);
+                this.textBlock.HorizontalAlignment = HorizontalAlignment.Center;
                 this.textBlock.Margin = new Thickness(0, 2, 0, 0);
                 this.mainGrid.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Auto);
+                this.rectangleBackground.SetValue(Grid.RowSpanProperty, 1);
+                this.rectangleBackground.Margin = new Thickness(8, 0, 8, 0);
+                this.rectangleBackground.RadiusX = 10;
+                this.rectangleBackground.RadiusY = 10;
                 break;
 
             case ButtonLayout.IconTextRightSide:
