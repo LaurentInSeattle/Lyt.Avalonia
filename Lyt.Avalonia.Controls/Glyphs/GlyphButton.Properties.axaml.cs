@@ -65,6 +65,22 @@ public partial class GlyphButton
         }
     }
 
+    /// <summary> BackgroundMargin Styled Property </summary>
+    public static readonly StyledProperty<double> BackgroundMarginProperty =
+        AvaloniaProperty.Register<GlyphButton, double>(
+            nameof(BackgroundMargin),
+            defaultValue: 4.0,
+            inherits: false,
+            defaultBindingMode: BindingMode.OneWay);
+
+
+    /// <summary> Gets or sets the BackgroundMargin property.</summary>
+    public double BackgroundMargin
+    {
+        get => this.GetValue(BackgroundMarginProperty);
+        set => this.SetValue(BackgroundMarginProperty, value);
+    }
+
     /// <summary> IsShown Styled Property </summary>
     public static readonly StyledProperty<bool> IsShownProperty =
         AvaloniaProperty.Register<GlyphButton, bool>(nameof(IsShown), defaultValue: true);

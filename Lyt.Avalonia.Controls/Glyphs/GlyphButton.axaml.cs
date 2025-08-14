@@ -136,7 +136,8 @@ public partial class GlyphButton : UserControl, ICanSelect
                 this.textBlock.Margin = new Thickness(0, 2, 0, 0);
                 this.mainGrid.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Auto);
                 this.rectangleBackground.SetValue(Grid.RowSpanProperty, 1);
-                this.rectangleBackground.Margin = new Thickness(8, 0, 8, 0);
+                double margin = this.BackgroundMargin;
+                this.rectangleBackground.Margin = new Thickness(margin, 0, margin, 0);
                 this.rectangleBackground.RadiusX = 10;
                 this.rectangleBackground.RadiusY = 10;
                 break;
