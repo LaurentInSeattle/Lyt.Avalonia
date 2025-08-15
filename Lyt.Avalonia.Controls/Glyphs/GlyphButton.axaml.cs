@@ -138,8 +138,8 @@ public partial class GlyphButton : UserControl, ICanSelect
                 this.rectangleBackground.SetValue(Grid.RowSpanProperty, 1);
                 double margin = this.BackgroundMargin;
                 this.rectangleBackground.Margin = new Thickness(margin, 0, margin, 0);
-                this.rectangleBackground.RadiusX = 10;
-                this.rectangleBackground.RadiusY = 10;
+                this.rectangleBackground.RadiusX = 8;
+                this.rectangleBackground.RadiusY = 8;
                 break;
 
             case ButtonLayout.IconTextRightSide:
