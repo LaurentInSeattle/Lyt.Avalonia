@@ -1,5 +1,3 @@
-using Avalonia.Controls;
-
 namespace Lyt.Avalonia.Controls.Glyphs; 
 
 public interface ICanSelect

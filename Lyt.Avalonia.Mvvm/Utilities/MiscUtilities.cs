@@ -5,7 +5,7 @@ using static Lyt.Avalonia.Controls.Utilities;
 public static class MiscUtilities
 {
     /// <summary> Find first parent of type T in VisualTree. </summary>
-    public static TControl? FindParentControl<TControl>(this StyledElement control) 
+    public static TControl? FindParentControl<TControl>(this StyledElement control)
         where TControl : StyledElement
     {
         StyledElement? parent = control.Parent;
@@ -23,16 +23,57 @@ public static class MiscUtilities
     }
 
     /// <summary> Find first child of type T in VisualTree. </summary>
-    public static TControl? FindChildControl<TControl>(this Control control) 
+    public static TControl? FindChildControl<TControl>(this Control control)
         where TControl : Control
     {
         var descendants = control.GetVisualDescendants().OfType<TControl>();
         if (descendants is null || !descendants.Any())
         {
             return null;
-        } 
+        }
 
         return descendants.FirstOrDefault();
+    }
+
+    /// <summary> Find first child of type T in VisualTree that is tagged with provided tag string. </summary>
+    public static TControl? FindChildControlTagged<TControl>(this Control control, string tag)
+        where TControl : Control
+    {
+        var descendants = control.GetVisualDescendants().OfType<TControl>();
+        if (descendants is null || !descendants.Any())
+        {
+            return null;
+        }
+
+        return 
+            descendants.Where(descendant => (descendant.Tag is string t) && (t == tag)).FirstOrDefault();
+    }
+
+    /// <summary> Find first child of type T in VisualTree that is tagged with provided command parameter string. </summary>
+    public static TControl? FindChildControlParametrized<TControl>(this Control control, string parameter)
+        where TControl : Control
+    {
+        var descendants = control.GetVisualDescendants().OfType<TControl>();
+        if (descendants is null || !descendants.Any())
+        {
+            return null;
+        }
+
+        var commandables = 
+            (from descendant in descendants 
+             where descendant.Implements<ICommandSource>() 
+             select descendant as ICommandSource);
+        var commandSource =
+            (from ICommandSource commandable in commandables 
+             where ((commandable.CommandParameter is string param ) && (param == parameter))
+             select commandable).FirstOrDefault();
+
+        if ( commandSource is TControl child )
+        {
+            return child;
+        }
+
+        return null;
     }
 
     public static string ToIconName(this InformationLevel informationLevel)
@@ -45,12 +86,12 @@ public static class MiscUtilities
             _ => throw new Exception("Missing resource for InformationLevel"),
         };
 
-    public static StreamGeometry ToIconGeometry( this InformationLevel informationLevel)
+    public static StreamGeometry ToIconGeometry(this InformationLevel informationLevel)
     {
         string resourceName = informationLevel.ToIconName();
         if (TryFindResource<StreamGeometry>(resourceName, out StreamGeometry? streamGeometry))
         {
-            if ( streamGeometry is not null )
+            if (streamGeometry is not null)
             {
                 return streamGeometry;
             }
@@ -61,7 +102,7 @@ public static class MiscUtilities
 
     public static SolidColorBrush ToBrush(this InformationLevel informationLevel)
     {
-        SolidColorBrush? brush= null;
+        SolidColorBrush? brush = null;
         switch (informationLevel)
         {
             case InformationLevel.Success:

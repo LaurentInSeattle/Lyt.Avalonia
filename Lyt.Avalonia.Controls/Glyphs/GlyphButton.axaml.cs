@@ -1,6 +1,6 @@
 namespace Lyt.Avalonia.Controls.Glyphs;
 
-public partial class GlyphButton : UserControl, ICanSelect 
+public partial class GlyphButton : UserControl, ICommandSource, ICanSelect 
 {
     // private const double KeyboardPressMilliseconds = 600.0;
 
@@ -805,6 +805,8 @@ public partial class GlyphButton : UserControl, ICanSelect
             this.Group.Select(this);
         }
     }
+
+    public void CanExecuteChanged(object sender, EventArgs e) { }
 
     #endregion Commanding 
 
