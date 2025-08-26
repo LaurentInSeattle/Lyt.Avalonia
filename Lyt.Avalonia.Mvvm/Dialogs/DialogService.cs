@@ -1,8 +1,7 @@
 ﻿namespace Lyt.Avalonia.Mvvm.Dialogs;
 
-public sealed class DialogService(WeakReferenceMessenger messenger, ILogger logger) : IDialogService
+public sealed class DialogService(ILogger logger) : IDialogService
 {
-    private readonly WeakReferenceMessenger messenger = messenger;
     private readonly ILogger logger = logger;
 
     private bool isClassHandlerRegistered;
