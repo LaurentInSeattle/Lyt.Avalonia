@@ -11,7 +11,9 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
     private ResourceInclude? currentLanguageResource;
 
     public LocalizerModel(
-        IApplicationBase application, IMessenger messenger, ILogger logger, FileManagerModel fileManagerModel) : base(messenger, logger)
+        IApplicationBase application, 
+        ILogger logger, 
+        FileManagerModel fileManagerModel) : base(logger)
     {
         if (application is not Application avaloniaApplication)
         {
@@ -92,7 +94,7 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
             this.currentLanguageResource = newLanguage;
             this.currentLanguage = targetLanguage;
             this.Logger.Info("Added new language: " + targetLanguage);
-            this.Messenger.Publish(new LanguageChangedMessage(oldLanguageKey, this.currentLanguage));
+            new LanguageChangedMessage(oldLanguageKey, this.currentLanguage).Publish();
 
             var cultureInfo = new CultureInfo(this.currentLanguage);
             var currentThread = Thread.CurrentThread;

@@ -1,6 +1,7 @@
 ﻿namespace Lyt.Avalonia.Mvvm.Selector;
 
-public sealed class ViewSelector<TViewEnum> where TViewEnum : Enum
+public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewSelectMessage>
+    where TViewEnum : Enum
 {
     private readonly SelectionGroup? selector;
     private readonly IEnumerable<SelectableView<TViewEnum>> selectableViews;
@@ -10,7 +11,6 @@ public sealed class ViewSelector<TViewEnum> where TViewEnum : Enum
     private ViewModel? activeSecondaryViewModel;
 
     public ViewSelector(
-        IMessenger messenger,
         Panel primaryContainer,
         Panel? secondaryContainer,
         SelectionGroup? selector,
@@ -38,21 +38,19 @@ public sealed class ViewSelector<TViewEnum> where TViewEnum : Enum
             }
         }
 
-        messenger.Subscribe<ViewSelectMessage>(this.OnSelect);
+        this.Subscribe<ViewSelectMessage>();
     }
 
     public static void Select(
-        IMessenger messenger,
         TViewEnum viewEnum,
         object? activationParameter = null)
-        => messenger.Publish(
-            new ViewSelectMessage((int)(object)viewEnum, activationParameter));
+        => new ViewSelectMessage((int)(object)viewEnum, activationParameter).Publish();
 
     public ViewModel? CurrentPrimaryViewModel => this.activePrimaryViewModel;
 
     public ViewModel? CurrentSecondaryViewModel => this.activeSecondaryViewModel;
 
-    private void OnSelect(ViewSelectMessage viewSelectMessage)
+    public void Receive(ViewSelectMessage viewSelectMessage)
     {
         var viewEnum = (TViewEnum)(object)viewSelectMessage.ViewEnum;
 
@@ -146,4 +144,5 @@ public sealed class ViewSelector<TViewEnum> where TViewEnum : Enum
             selectableView.Button :
             throw new ArgumentException("No such view", nameof(viewEnum));
     }
+
 }

@@ -1,8 +1,8 @@
 ﻿namespace Lyt.Avalonia.Mvvm.Dialogs;
 
-public sealed class DialogService(IMessenger messenger, ILogger logger) : IDialogService
+public sealed class DialogService(WeakReferenceMessenger messenger, ILogger logger) : IDialogService
 {
-    private readonly IMessenger messenger = messenger;
+    private readonly WeakReferenceMessenger messenger = messenger;
     private readonly ILogger logger = logger;
 
     private bool isClassHandlerRegistered;
@@ -224,7 +224,7 @@ public sealed class DialogService(IMessenger messenger, ILogger logger) : IDialo
         }
         finally
         {
-            this.messenger.Publish(new ModalMessage(ModalMessage.Modal.Leave));
+            new ModalMessage(ModalMessage.Modal.Leave).Publish();
         }
     }
 
@@ -235,7 +235,7 @@ public sealed class DialogService(IMessenger messenger, ILogger logger) : IDialo
         var host = new ModalHostControl();
         panel.Children.Add(host);
         host.ContentGrid.Children.Add(dialog);
-        this.messenger.Publish(new ModalMessage(ModalMessage.Modal.Enter));
+        new ModalMessage(ModalMessage.Modal.Enter).Publish();
         this.modalHostPanel = panel;
         this.modalHostControl = host;
         this.modalUserControl = dialog;

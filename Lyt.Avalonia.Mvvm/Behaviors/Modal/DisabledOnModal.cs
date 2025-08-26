@@ -1,6 +1,6 @@
 ﻿namespace Lyt.Avalonia.Mvvm.Behaviors.Modal;
 
-public sealed class DisabledOnModal : BehaviorBase<ViewModel>
+public sealed class DisabledOnModal : BehaviorBase<ViewModel>, IRecipient<ModalMessage>
 {
     protected override void OnAttached()
     {
@@ -9,8 +9,7 @@ public sealed class DisabledOnModal : BehaviorBase<ViewModel>
             return;
         }
 
-        var messenger = this.AssociatedObject.Messenger;
-        messenger.Subscribe<ModalMessage>(this.OnModalChanged);
+        this.Subscribe<ModalMessage>();
     }
 
     protected override void OnDetaching()
@@ -18,15 +17,14 @@ public sealed class DisabledOnModal : BehaviorBase<ViewModel>
         if ((this.AssociatedObject is not null) &&
             (this.AssociatedObject.ViewBase is Control control))
         {
-            var messenger = this.AssociatedObject.Messenger;
-            messenger?.Unregister(this);
+            this.Unregister<ModalMessage>();
 
             control.IsEnabled = true;
             control.Opacity = 1.0;
         }
     }
 
-    private void OnModalChanged(ModalMessage message)
+    public void Receive(ModalMessage message) 
     {
         if ((this.AssociatedObject is not null) &&
             (this.AssociatedObject.ViewBase is Control control))

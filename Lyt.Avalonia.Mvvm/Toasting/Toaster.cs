@@ -1,18 +1,16 @@
 ﻿namespace Lyt.Avalonia.Mvvm.Toasting;
 
-public sealed class Toaster : IToaster
+public sealed class Toaster : IToaster, IRecipient<ToastMessage.Show>, IRecipient<ToastMessage.Dismiss>
 {
-    private readonly IMessenger messenger;
+    public Panel? HostPanel;
+
     private ToastViewModel? current;
     private bool hostPanelHitTestVisibility;
 
-    public Panel? HostPanel;
-
-    public Toaster(IMessenger messenger)
+    public Toaster()
     {
-        this.messenger = messenger;
-        this.messenger.Subscribe<ToastMessage.Show>(this.OnShow, withUiDispatch: true);
-        this.messenger.Subscribe<ToastMessage.Dismiss>(this.OnDismiss, withUiDispatch: true);
+        this.Subscribe<ToastMessage.Show>();
+        this.Subscribe<ToastMessage.Dismiss>();
     }
 
     public bool BreakOnError { get; set; } = true;
@@ -52,9 +50,8 @@ public sealed class Toaster : IToaster
         {
             Debugger.Break();
         }
-
-        this.messenger.Publish(
-            new ToastMessage.Show { Title = title, Message = message, Delay = dismissDelay, Level = toastLevel });
+        
+        new ToastMessage.Show { Title = title, Message = message, Delay = dismissDelay, Level = toastLevel }.Publish();
     }
 
     public void Dismiss()
@@ -87,12 +84,12 @@ public sealed class Toaster : IToaster
             panel.Children.Remove(view);
         }
 
-        this.messenger.Publish(new ToastMessage.OnDismiss());
+        new ToastMessage.OnDismiss().Publish();
     }
 
-    private void OnDismiss(ToastMessage.Dismiss _) => this.Dismiss();
+    public void Receive(ToastMessage.Dismiss message) => this.Dismiss();
 
-    private void OnShow(ToastMessage.Show show)
+    public void Receive(ToastMessage.Show message)
     {
         if (this.Host is not Panel panel)
         {
@@ -110,7 +107,7 @@ public sealed class Toaster : IToaster
         ToastView? view = this.current.View;
         if (view is not null)
         {
-            this.current.Show(show.Title, show.Message, show.Delay, show.Level);
+            this.current.Show(message.Title, message.Message, message.Delay, message.Level);
             if (!panel.Children.Contains(view))
             {
                 // Save hit test status and make the panel clickable so that we can 

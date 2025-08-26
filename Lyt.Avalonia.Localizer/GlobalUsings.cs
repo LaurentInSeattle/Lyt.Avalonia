@@ -13,6 +13,7 @@ global using System.Threading.Tasks;
 global using System.Windows.Input;
 
 global using Microsoft.Extensions.DependencyInjection;
+global using CommunityToolkit.Mvvm.Messaging;
 
 global using Avalonia;
 global using Avalonia.Controls;
@@ -38,3 +39,4 @@ global using Lyt.Framework.Interfaces.Profiling;
 
 global using Lyt.Model;
 global using Lyt.Persistence;
+
