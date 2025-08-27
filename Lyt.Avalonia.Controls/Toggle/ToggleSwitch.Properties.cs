@@ -80,6 +80,7 @@ public partial class ToggleSwitch
         set
         {
             this.SetValue(OrientationProperty, value);
+            this.SetupLayout();
             this.UpdateVisualState();
         }
     }

@@ -1,5 +1,7 @@
 namespace Lyt.Avalonia.Controls.Toggle;
 
+using global::Avalonia.VisualTree;
+
 public partial class ToggleSwitch : UserControl
 {
     private Rectangle rectangleBackground;
@@ -10,6 +12,8 @@ public partial class ToggleSwitch : UserControl
 
     private bool isOver;
     private bool isPressed;
+    private bool isSetupHorizontal ;
+    private bool isSetupVertical;
 
 #pragma warning disable CS8618 
     // Non-nullable field must contain a non-null value when exiting constructor.
@@ -93,6 +97,14 @@ public partial class ToggleSwitch : UserControl
 
     private void OnLoaded(object? sender, RoutedEventArgs e)
     {
+        this.SetupLayout(); 
+        this.ChangeTypography(this.Typography);
+        this.UpdateVisualState();
+        this.InvalidateVisual();
+    }
+
+    private void SetupLayout ()
+    {
         if (this.Orientation == Orientation.Vertical)
         {
             this.SetupVerticalLayout();
@@ -102,10 +114,7 @@ public partial class ToggleSwitch : UserControl
             this.SetupHorizontalLayout();
         }
 
-        this.ChangeTypography(this.Typography);
-        this.PositionEllipse();
-        this.UpdateVisualState();
-        this.InvalidateVisual();
+        this.PositionEllipse(); 
     }
 
     private void PositionEllipse()
@@ -137,6 +146,18 @@ public partial class ToggleSwitch : UserControl
 
     private void SetupVerticalLayout()
     {
+        if ( this.isSetupVertical )
+        {
+            return;
+        }
+
+        this.mainGridHorizontal.IsVisible = false;
+        this.mainGridHorizontal.Children.Remove(this.rectangleBackground);
+        this.mainGridHorizontal.Children.Remove(this.trueTextBlock);
+        this.mainGridHorizontal.Children.Remove(this.falseTextBlock);
+        this.mainGridHorizontal.Children.Remove(this.switchEllipse);
+        this.mainGridHorizontal.Children.Remove(this.eventingRectangle);
+
         this.rectangleBackground.SetValue(Grid.ColumnProperty, 0);
         this.rectangleBackground.SetValue(Grid.RowProperty, 1);
 
@@ -158,36 +179,32 @@ public partial class ToggleSwitch : UserControl
         this.eventingRectangle.SetValue(Grid.ColumnProperty, 0);
         this.eventingRectangle.SetValue(Grid.RowProperty, 1);
 
-        this.mainGridHorizontal.IsVisible = false;
-        this.mainGridHorizontal.Children.Clear();
-
         this.mainGridVertical.IsVisible = true;
 
-        Grid? innerGridVertical = null;
-        foreach (var child in this.mainGridVertical.Children)
-        {
-            if (child is Grid grid)
-            {
-                innerGridVertical = grid;
-            }
-        }
-
-        this.mainGridVertical.Children.Clear();
         this.mainGridVertical.Children.Add(this.rectangleBackground);
         this.mainGridVertical.Children.Add(this.switchEllipse);
+        this.innerGridVertical.Children.Add(this.trueTextBlock);
+        this.innerGridVertical.Children.Add(this.falseTextBlock);
         this.mainGridVertical.Children.Add(this.eventingRectangle);
 
-        if (innerGridVertical is not null)
-        {
-            this.mainGridVertical.Children.Add(innerGridVertical);
-            this.innerGridVertical.Children.Clear();
-            this.innerGridVertical.Children.Add(this.trueTextBlock);
-            this.innerGridVertical.Children.Add(this.falseTextBlock);
-        }
+        this.isSetupHorizontal = false;
+        this.isSetupVertical = true;
     }
 
     private void SetupHorizontalLayout()
     {
+        if (this.isSetupHorizontal)
+        {
+            return;
+        } 
+
+        this.mainGridVertical.IsVisible = false;
+        this.mainGridVertical.Children.Remove(this.rectangleBackground);
+        this.mainGridVertical.Children.Remove(this.switchEllipse);
+        this.mainGridVertical.Children.Remove(this.eventingRectangle);
+        this.innerGridVertical.Children.Remove(this.trueTextBlock);
+        this.innerGridVertical.Children.Remove(this.falseTextBlock);
+
         this.rectangleBackground.SetValue(Grid.ColumnProperty, 1);
 
         this.trueTextBlock.Margin = new Thickness(0, 0, 8, 0);
@@ -206,16 +223,15 @@ public partial class ToggleSwitch : UserControl
 
         this.eventingRectangle.SetValue(Grid.ColumnProperty, 1);
 
-        this.mainGridVertical.IsVisible = false;
-        this.mainGridVertical.Children.Clear();
-
         this.mainGridHorizontal.IsVisible = true;
-        this.mainGridHorizontal.Children.Clear();
         this.mainGridHorizontal.Children.Add(this.rectangleBackground);
+        this.mainGridHorizontal.Children.Add(this.switchEllipse);
         this.mainGridHorizontal.Children.Add(this.trueTextBlock);
         this.mainGridHorizontal.Children.Add(this.falseTextBlock);
-        this.mainGridHorizontal.Children.Add(this.switchEllipse);
         this.mainGridHorizontal.Children.Add(this.eventingRectangle);
+
+        this.isSetupHorizontal = true;
+        this.isSetupVertical = false;
     }
 
     #region Visual States 
