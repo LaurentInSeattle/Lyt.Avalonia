@@ -77,8 +77,8 @@ public partial class ToggleSwitch : UserControl
         this.eventingRectangle.PointerExited += this.OnPointerLeave;
         this.eventingRectangle.PointerMoved += this.OnPointerMoved;
 
-        this.Orientation = Orientation.Vertical;
-        this.SetupVerticalLayout();
+        this.Orientation = Orientation.Horizontal;
+        this.SetupHorizontalLayout();
         this.Loaded += this.OnLoaded;
     }
 
