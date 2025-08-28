@@ -1,6 +1,8 @@
 ﻿namespace Lyt.Avalonia.TestApp.Shell;
 
-public sealed partial class ShellViewModel : ViewModel<ShellView>
+using CommunityToolkit.Mvvm.Messaging;
+
+public sealed partial class ShellViewModel : ViewModel<ShellView>, IRecipient<ModelUpdateMessage>
 {
     private readonly TimingModel timingModel;
 
@@ -15,13 +17,13 @@ public sealed partial class ShellViewModel : ViewModel<ShellView>
 
     public ShellViewModel()
     {
-        this.timingModel = ApplicationBase.GetModel<TimingModel>();
-        this.timingModel.SubscribeToUpdates(this.OnTimingModelUpdated, withUiDispatch: true);
+        this.timingModel = App.GetRequiredService<TimingModel>();  
+        this.Subscribe<ModelUpdateMessage>();
         this.TickCount = "Hello Avalonia!";
         this.IsTicking = string.Empty;
     }
 
-    public Lyt.Orchestrator.WorkflowManager<WorkflowState, WorkflowTrigger>? Workflow { get; private set; }
+    public WorkflowManager<WorkflowState, WorkflowTrigger>? Workflow { get; private set; }
 
     [RelayCommand]
     public void OnStartStop()
@@ -100,21 +102,24 @@ public sealed partial class ShellViewModel : ViewModel<ShellView>
         }
     }
 
-    private void OnTimingModelUpdated(ModelUpdateMessage _)
+    public void Receive(ModelUpdateMessage _)
     {
-        int ticks = this.timingModel.TickCount;
-        this.TickCount = string.Format("Ticks: {0}", ticks);
-        bool modelIsTicking = this.timingModel.IsTicking;
-        this.IsTicking = modelIsTicking ? "Ticking" : "Stopped";
-        this.ButtonText = modelIsTicking ? "Stop" : "Start";
-        var profiler = App.GetRequiredService<IProfiler>();
-        profiler.MemorySnapshot();
-        if (this.Workflow is not null)
+        Dispatch.OnUiThread(() =>
         {
+            int ticks = this.timingModel.TickCount;
+            this.TickCount = string.Format("Ticks: {0}", ticks);
+            bool modelIsTicking = this.timingModel.IsTicking;
+            this.IsTicking = modelIsTicking ? "Ticking" : "Stopped";
+            this.ButtonText = modelIsTicking ? "Stop" : "Start";
+            var profiler = App.GetRequiredService<IProfiler>();
+            profiler.MemorySnapshot();
+            if (this.Workflow is not null)
+            {
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
-            var fireAndForget = this.Workflow.Next();
-#pragma warning restore IDE0059 
-        }
+                var fireAndForget = this.Workflow.Next();
+#pragma warning restore IDE0059
+            }
+        });
     }
 
     private void SetupWorkflow()
@@ -126,7 +131,7 @@ public sealed partial class ShellViewModel : ViewModel<ShellView>
         {
             var vm = App.GetRequiredService<TViewModel>();
             vm.Bind(new TView());
-            if (vm is Lyt.Orchestrator.WorkflowPage<WorkflowState, WorkflowTrigger> page)
+            if (vm is WorkflowPage<WorkflowState, WorkflowTrigger> page)
             {
                 page.State = state;
                 page.Title = state.ToString();
@@ -160,7 +165,6 @@ public sealed partial class ShellViewModel : ViewModel<ShellView>
         var hostControl = 
             this.View!.WorkflowContent ?? throw new Exception("Workflow Host control is null");
         this.Workflow =
-            new Lyt.Orchestrator.WorkflowManager<WorkflowState, WorkflowTrigger>(
-                this.Logger, this.Messenger, hostControl, stateMachineDefinition);
+            new WorkflowManager<WorkflowState, WorkflowTrigger>(this.Logger, hostControl, stateMachineDefinition);
     }
 }

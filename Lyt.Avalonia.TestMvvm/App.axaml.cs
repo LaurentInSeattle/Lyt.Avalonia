@@ -31,7 +31,6 @@ public partial class App : ApplicationBase
 #endif
             new Tuple<Type, Type>(typeof(IDispatch), typeof(Dispatch)),
             new Tuple<Type, Type>(typeof(IProfiler), typeof(Profiler)),
-            new Tuple<Type, Type>(typeof(IMessenger), typeof(Messenger)),
         ],
         singleInstanceRequested: true)
     {

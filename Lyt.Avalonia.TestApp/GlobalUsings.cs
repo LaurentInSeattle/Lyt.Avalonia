@@ -42,7 +42,6 @@ global using Lyt.Avalonia.Themes;
 
 global using Lyt.Mvvm;
 global using Lyt.Model;
-global using Lyt.Messaging;
 global using Lyt.Orchestrator;
 global using Lyt.Utilities;
 global using Lyt.Utilities.Profiling;

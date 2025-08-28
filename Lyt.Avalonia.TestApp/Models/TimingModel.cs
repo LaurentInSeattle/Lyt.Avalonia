@@ -1,7 +1,6 @@
 ﻿namespace Lyt.Avalonia.TestApp.Models; 
 
-public sealed class TimingModel(IMessenger messenger, ILogger logger) 
-    : ModelBase(messenger, logger), IModel
+public sealed class TimingModel(ILogger logger) : ModelBase(logger), IModel
 {
     private DispatcherTimer? dispatcherTimer;
 
