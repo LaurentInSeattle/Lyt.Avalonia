@@ -52,7 +52,7 @@
 			Margin="0"
 			IsHitTestVisible="False"
 			RadiusX="4" RadiusY="4"
-			Stroke="Aquamarine"
+			Stroke="#10000000"
 			StrokeThickness="1"
 			Fill="Transparent"
 			/>
@@ -69,7 +69,7 @@
 					HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
 					IsHitTestVisible="False"
 					Background="Transparent"
-					Foreground="DodgerBlue"
+					Foreground="#10000000"
 					Wadding="0"
 					/>
 				<ContentControl
@@ -94,7 +94,7 @@
 				Margin="0"
 				IsHitTestVisible="False"
 				Background="Transparent"
-				Foreground="AntiqueWhite"
+				Foreground="#10000000"
 				VerticalAlignment="Center" HorizontalAlignment="Stretch"
 				TextAlignment="Center"
 				TextWrapping="Wrap"
