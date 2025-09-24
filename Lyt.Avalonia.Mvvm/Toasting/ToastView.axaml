@@ -30,7 +30,7 @@
 			<ColumnDefinition Width="64"/>
 			<ColumnDefinition Width="12"/>
 			<ColumnDefinition Width="*"/>
-			<ColumnDefinition Width="56"/>
+			<ColumnDefinition Width="72"/>
 		</Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -83,8 +83,8 @@
 			Layout="IconTextBelow"
 			Behaviour="Tap"
 			HorizontalAlignment="Center" VerticalAlignment="Center"
-			Width="48" Height="48"
-			Margin="8 0 8 0"
+			Width="64" Height="48"
+			Margin="4 0 4 0"
 			GlyphSource="dismiss"
 			Text="{DynamicResource Toast.Dismiss}"
 			ButtonBackground="BorderlessRectangle"
