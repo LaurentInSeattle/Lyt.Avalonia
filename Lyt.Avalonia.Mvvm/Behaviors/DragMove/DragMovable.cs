@@ -2,13 +2,13 @@
 
 using global::Avalonia.Input;
 
-/// <summary> Behaviour for objects that are dragged around. </summary>
+/// <summary> Behaviour for objects that are dragged around, but dropped. </summary>
 public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
 {
     /// <summary> Delay triggering the Long Press event on the view model.</summary>
     private const int LongPressDelay = 500; // milliseconds
 
-    /// <summary> Minimal drag distance triggering the drag abd drop operation.</summary>
+    /// <summary> Minimal drag distance triggering the dragging operation.</summary>
     private const double MinimalDragDistance = 4.5; // pixels
 
     private readonly Canvas dragCanvas = canvas;
@@ -16,15 +16,17 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
     private bool isPointerPressed;
     private bool isDragging;
     private PointerPoint pointerPressedPoint;
-    private Point startPosition; 
+    private Point pointerStartPosition;
+    private Point viewStartPosition;
     private IDragMovableViewModel? dragMovableViewModel;
     private DispatcherTimer? timer;
+    private int zindex; 
 
     protected override void OnAttached()
     {
-        _ = this.Guard();
-        // Debug.WriteLine("DragAble | Attached to: " + this.AssociatedObject!.GetType().Name);
+        var view = this.Guard();
         this.HookPointerEvents();
+        this.zindex = view.GetValue<int>(Canvas.ZIndexProperty);
     }
 
     protected override void OnDetaching() => this.UnhookPointerEvents();
@@ -89,6 +91,7 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
 
     private void OnPointerMoved(object? sender, PointerEventArgs pointerEventArgs)
     {
+        // Debug.WriteLine("Moved");
         if (!this.isPointerPressed)
         {
             this.isPointerPressed = false;
@@ -117,7 +120,7 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
 
             // Drag move begins, it's not going to be a long press, therefore stop the timer.
             this.StopTimer();
-            this.BeginMove(pointerEventArgs, currentPosition);
+            this.BeginMove(pointerEventArgs);
         }
     }
 
@@ -139,7 +142,7 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
         } 
     }
 
-    private void BeginMove(PointerEventArgs pointerEventArgs, Point startPosition)
+    private void BeginMove(PointerEventArgs pointerEventArgs)
     {
         // Debug.WriteLine("Try Begin Drag");
         if (this.isDragging)
@@ -147,8 +150,14 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
             return;
         }
 
-        _ = this.GuardAssociatedObject();
-        bool allowDrag = this.DragMovableViewModel.OnBeginMove(this.startPosition);
+        View view = this.GuardAssociatedObject();
+        view.SetValue<int>(Canvas.ZIndexProperty, 999_999);
+        this.pointerStartPosition = pointerEventArgs.GetPosition(this.dragCanvas);
+        double x = view.GetValue(Canvas.LeftProperty);
+        double y = view.GetValue(Canvas.TopProperty);
+        // Debug.WriteLine("X " + x.ToString("F2") + " Y " + y.ToString("F2"));
+        this.viewStartPosition = new Point(x, y);
+        bool allowDrag = this.DragMovableViewModel.OnBeginMove(this.pointerStartPosition);
         if (!allowDrag)
         {
             // Debug.WriteLine("Dragging rejected");
@@ -157,31 +166,40 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
 
         // Debug.WriteLine("Drag == true ");
         this.isDragging = true;
-        this.startPosition = startPosition;
         this.AdjustPosition(pointerEventArgs);
-
-        //// Launch the DragDrop task, fire and forget 
-        //this.DoDragDrop(pointerEventArgs, this.dragCanvas);
     }
 
     private void EndMove(PointerEventArgs pointerEventArgs)
     {
         // Debug.WriteLine("Drag == false");
-        View view = this.View;
-        Point endPosition = pointerEventArgs.GetPosition(view);
+        Point endPosition = pointerEventArgs.GetPosition(this.dragCanvas);
         this.isPointerPressed = false;
         this.isDragging = false;
-        this.DragMovableViewModel.OnEndMove(this.startPosition, endPosition);
+        View view = this.GuardAssociatedObject();
+        view.SetValue<int>(Canvas.ZIndexProperty, this.zindex);
+        this.DragMovableViewModel.OnEndMove(this.pointerStartPosition, endPosition);
     }
 
     private void AdjustPosition(PointerEventArgs pointerEventArgs)
     {
-        // Debug.WriteLine("AdjustPosition from pointer");
+        // Debug.WriteLine("AdjustPosition");
         Point position = pointerEventArgs.GetPosition(this.dragCanvas);
+        double deltaX = position.X - this.pointerStartPosition.X;
+        double deltaY = position.Y - this.pointerStartPosition.Y;
+
+        //Debug.WriteLine("Start position: " + this.pointerStartPosition);
+        //Debug.WriteLine("Pointer position: " + position);
+        //Debug.WriteLine("Delta: X " + deltaX.ToString("F2") + " Y " + deltaY.ToString("F2"));
+
         View view = this.View;
-        Point newPosition = new(position.X + 4, position.Y + 4);
-        view.SetValue(Canvas.LeftProperty, newPosition.X);
-        view.SetValue(Canvas.TopProperty, newPosition.Y);
+        double x = this.viewStartPosition.X;
+        double y = this.viewStartPosition.Y;
+        view.SetValue(Canvas.LeftProperty, x + deltaX);
+        view.SetValue(Canvas.TopProperty, y + deltaY);
+
+        //x = view.GetValue(Canvas.LeftProperty);
+        //y = view.GetValue(Canvas.TopProperty);
+        //Debug.WriteLine("X " + x.ToString("F2") + " Y " + y.ToString("F2"));
     }
 
     #region Timer
