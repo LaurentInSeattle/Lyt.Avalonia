@@ -5,6 +5,10 @@ using global::Avalonia.Input;
 /// <summary> Behaviour for objects that are dragged around, but dropped. </summary>
 public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
 {
+    private static int zindex;
+
+    static DragMovable() => zindex = int.MinValue;
+
     /// <summary> Delay triggering the Long Press event on the view model.</summary>
     private const int LongPressDelay = 500; // milliseconds
 
@@ -15,18 +19,22 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
 
     private bool isPointerPressed;
     private bool isDragging;
+    private bool isDraggingRejected;
     private PointerPoint pointerPressedPoint;
     private Point pointerStartPosition;
     private Point viewStartPosition;
     private IDragMovableViewModel? dragMovableViewModel;
     private DispatcherTimer? timer;
-    private int zindex; 
 
     protected override void OnAttached()
     {
         var view = this.Guard();
         this.HookPointerEvents();
-        this.zindex = view.GetValue<int>(Canvas.ZIndexProperty);
+        int viewZindex = view.GetValue<int>(Canvas.ZIndexProperty);
+        if (viewZindex > zindex)
+        {
+            zindex = viewZindex;
+        } 
     }
 
     protected override void OnDetaching() => this.UnhookPointerEvents();
@@ -136,10 +144,16 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
         }
         else
         {
-            // It's a Click 
-            bool isRightClick = args.InitialPressMouseButton == MouseButton.Right;
-            this.DragMovableViewModel.OnClicked(isRightClick);
-        } 
+            if (!this.isDraggingRejected)
+            {
+                // It's a Click 
+                bool isRightClick = args.InitialPressMouseButton == MouseButton.Right;
+                this.DragMovableViewModel.OnClicked(isRightClick);
+            } 
+        }
+
+        this.isDragging = false;
+        this.isDraggingRejected = false; 
     }
 
     private void BeginMove(PointerEventArgs pointerEventArgs)
@@ -151,7 +165,8 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
         }
 
         View view = this.GuardAssociatedObject();
-        view.SetValue<int>(Canvas.ZIndexProperty, 999_999);
+        ++zindex;
+        view.SetValue<int>(Canvas.ZIndexProperty, zindex);
         this.pointerStartPosition = pointerEventArgs.GetPosition(this.dragCanvas);
         double x = view.GetValue(Canvas.LeftProperty);
         double y = view.GetValue(Canvas.TopProperty);
@@ -161,6 +176,7 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
         if (!allowDrag)
         {
             // Debug.WriteLine("Dragging rejected");
+            this.isDraggingRejected = true;
             return;
         }
 
@@ -175,8 +191,6 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
         Point endPosition = pointerEventArgs.GetPosition(this.dragCanvas);
         this.isPointerPressed = false;
         this.isDragging = false;
-        View view = this.GuardAssociatedObject();
-        view.SetValue<int>(Canvas.ZIndexProperty, this.zindex);
         this.DragMovableViewModel.OnEndMove(this.pointerStartPosition, endPosition);
     }
 
