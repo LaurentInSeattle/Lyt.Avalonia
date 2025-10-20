@@ -23,6 +23,7 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
     private PointerPoint pointerPressedPoint;
     private Point pointerStartPosition;
     private Point viewStartPosition;
+    private Point viewEndPosition;
     private IDragMovableViewModel? dragMovableViewModel;
     private DispatcherTimer? timer;
 
@@ -188,10 +189,10 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
     private void EndMove(PointerEventArgs pointerEventArgs)
     {
         // Debug.WriteLine("Drag == false");
-        Point endPosition = pointerEventArgs.GetPosition(this.dragCanvas);
         this.isPointerPressed = false;
         this.isDragging = false;
-        this.DragMovableViewModel.OnEndMove(this.pointerStartPosition, endPosition);
+        this.AdjustPosition(pointerEventArgs);
+        this.DragMovableViewModel.OnEndMove(this.viewStartPosition, this.viewEndPosition);
     }
 
     private void AdjustPosition(PointerEventArgs pointerEventArgs)
@@ -206,11 +207,11 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
         //Debug.WriteLine("Delta: X " + deltaX.ToString("F2") + " Y " + deltaY.ToString("F2"));
 
         View view = this.View;
-        double x = this.viewStartPosition.X;
-        double y = this.viewStartPosition.Y;
-        view.SetValue(Canvas.LeftProperty, x + deltaX);
-        view.SetValue(Canvas.TopProperty, y + deltaY);
-
+        double x = this.viewStartPosition.X + deltaX;
+        double y = this.viewStartPosition.Y + deltaY;
+        view.SetValue(Canvas.LeftProperty, x );
+        view.SetValue(Canvas.TopProperty, y );
+        this.viewEndPosition = new Point( x, y );
         //x = view.GetValue(Canvas.LeftProperty);
         //y = view.GetValue(Canvas.TopProperty);
         //Debug.WriteLine("X " + x.ToString("F2") + " Y " + y.ToString("F2"));
