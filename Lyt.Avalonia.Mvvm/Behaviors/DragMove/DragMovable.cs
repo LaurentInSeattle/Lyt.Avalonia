@@ -5,9 +5,9 @@ using global::Avalonia.Input;
 /// <summary> Behaviour for objects that are dragged around, but dropped. </summary>
 public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
 {
-    private static int zindex;
+    public static int ZIndex;
 
-    static DragMovable() => zindex = int.MinValue;
+    static DragMovable() => ZIndex = int.MinValue;
 
     /// <summary> Delay triggering the Long Press event on the view model.</summary>
     private const int LongPressDelay = 500; // milliseconds
@@ -32,9 +32,9 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
         var view = this.Guard();
         this.HookPointerEvents();
         int viewZindex = view.GetValue<int>(Canvas.ZIndexProperty);
-        if (viewZindex > zindex)
+        if (viewZindex > ZIndex)
         {
-            zindex = viewZindex;
+            ZIndex = viewZindex;
         } 
     }
 
@@ -167,8 +167,8 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
         }
 
         View view = this.GuardAssociatedObject();
-        ++zindex;
-        view.SetValue<int>(Canvas.ZIndexProperty, zindex);
+        ++ZIndex;
+        view.SetValue<int>(Canvas.ZIndexProperty, ZIndex);
         this.pointerStartPosition = pointerEventArgs.GetPosition(this.dragCanvas);
         double x = view.GetValue(Canvas.LeftProperty);
         double y = view.GetValue(Canvas.TopProperty);
