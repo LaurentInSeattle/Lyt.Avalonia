@@ -14,5 +14,7 @@ public interface IDragMovableViewModel
     // Returns true if move is currently allowed 
     bool OnBeginMove(Point fromPoint);
 
+    void OnMove(Point fromPoint, Point toPoint);
+
     void OnEndMove(Point fromPoint, Point toPoint);
 }

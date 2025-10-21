@@ -113,6 +113,7 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
 
             // Debug.WriteLine("Dragging...");
             this.AdjustPosition(pointerEventArgs);
+            this.DragMovableViewModel.OnMove(this.viewStartPosition, this.viewEndPosition);
             return;
         }
         else
