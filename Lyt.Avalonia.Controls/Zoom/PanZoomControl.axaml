@@ -12,16 +12,19 @@
 		VerticalScrollBarVisibility="Visible"
 		Background="{Binding}"
 		Margin="0"
+		ClipToBounds="False"
 		>
 		<Grid
 			x:Name="Grid"
 			Width="2000"
 			Height="1000"
+			ClipToBounds="False"
 			>
 			<Viewbox
 				x:Name="Viewbox"
 				HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
 				MinWidth="8" MinHeight="8"
+				ClipToBounds="False"
 				>
 				<ContentPresenter
 					x:Name="ZoomContentPresenter"
