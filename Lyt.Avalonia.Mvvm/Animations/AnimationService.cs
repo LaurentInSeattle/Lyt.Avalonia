@@ -16,15 +16,15 @@ public sealed class AnimationService : IAnimationService
             {
                 if (cancellationTokenSource is not null) // && !cancellationTokenSource.IsCancellationRequested) 
                 {
-                    Debug.WriteLine("Cancelling Fade Out"); 
+                    // Debug.WriteLine("Cancelling Fade Out"); 
                     cancellationTokenSource.Cancel();
-                    Debug.WriteLine("Fade Out entry removed");
+                    // Debug.WriteLine("Fade Out entry removed");
                     this.fadeOutAnimations.Remove(control);
                 }
             }
         }
 
-        Debug.WriteLine("Fade IN begins");
+        // Debug.WriteLine("Fade IN begins");
         this.StartAnimation(
             control, Control.OpacityProperty, 1.0, durationSeconds,
             OneIteration, PlaybackDirection.Normal, FillMode.Forward, onAnimationCompleted);
@@ -32,18 +32,18 @@ public sealed class AnimationService : IAnimationService
 
     public void FadeOut(Control control, double durationSeconds = 1.5, Action? onAnimationCompleted = null)
     {
-        Debug.WriteLine("Fade OUT begins");
+        // Debug.WriteLine("Fade OUT begins");
         CancellationTokenSource cancellationTokenSource = 
             this.StartAnimation(control, Control.OpacityProperty, 0.0, durationSeconds,
                 OneIteration, PlaybackDirection.Normal, FillMode.Forward, 
                 ()=>
                 {
-                    Debug.WriteLine("Fade Out Complete");
+                    // Debug.WriteLine("Fade Out Complete");
                     if (this.fadeOutAnimations is not null)
                     {
                         if (this.fadeOutAnimations.TryGetValue(control, out CancellationTokenSource? cancellationTokenSource))
                         {
-                            Debug.WriteLine("Fade Out entry removed");
+                            // Debug.WriteLine("Fade Out entry removed");
                             this.fadeOutAnimations.Remove(control);
                         }
                     }
@@ -56,7 +56,7 @@ public sealed class AnimationService : IAnimationService
 
         if (this.fadeOutAnimations.ContainsKey(control))
         {
-            Debug.WriteLine("Fade Out entry removed");
+            // Debug.WriteLine("Fade Out entry removed");
             this.fadeOutAnimations.Remove(control);
         }
 
