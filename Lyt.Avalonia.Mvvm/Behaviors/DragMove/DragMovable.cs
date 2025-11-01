@@ -2,8 +2,8 @@
 
 using global::Avalonia.Input;
 
-/// <summary> Behaviour for objects that are dragged around, but dropped. </summary>
-public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
+/// <summary> Behaviour for objects that are dragged around, but not dropped. </summary>
+public sealed class DragMovable(Canvas canvas, bool adjustPosition = true) : BehaviorBase<View>
 {
     public static int ZIndex;
 
@@ -16,6 +16,7 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
     private const double MinimalDragDistance = 4.5; // pixels
 
     private readonly Canvas dragCanvas = canvas;
+    private readonly bool adjustPosition = adjustPosition; 
 
     private bool isPointerPressed;
     private bool isDragging;
@@ -198,6 +199,11 @@ public sealed class DragMovable(Canvas canvas) : BehaviorBase<View>
 
     private void AdjustPosition(PointerEventArgs pointerEventArgs)
     {
+        if ( ! this.adjustPosition)
+        {
+            return; 
+        }
+
         // Debug.WriteLine("AdjustPosition");
         Point position = pointerEventArgs.GetPosition(this.dragCanvas);
         double deltaX = position.X - this.pointerStartPosition.X;
