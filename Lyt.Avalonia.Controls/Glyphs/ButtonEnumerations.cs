@@ -11,13 +11,6 @@
 //  Continuous.     Activate associated function while control is being pressed (on touch-down) and stop activation
 //                  on touch-up. For functions that need continuous confirmation as a safety mitigation
 
-// WhilePressing    if we decide to show sometime like a tooltips. I.e, we show a screen element, like a help text,
-//                  while the user is pressing an icon.
-//                  I currently have one of these on the boot screen (an (i) icon) to show SW version number and
-//                  system ID(although I may get rid of that extra action and just show the detail onscreen
-//                  because hiding it doesn’t really make sense to me).
-//                  So there are 4. I’ll define all these and make sure they get documented in some sort of spec.
-
 // Keyboard         Keyboard behavior allowing entry of diacritics by showing addition additional buttons after a medium 
 //                  (not too long) press.                
 
@@ -30,9 +23,6 @@ public enum ButtonBehaviour
     Keyboard,       // Medium timeout while pressed triggers an additional action, cancelled on touch up
                     // Triggers the appearance of additional popup keyboard
     PopupKeyboard,  // Behaviour of the buttons of the popup keyboard
-
-    // this one below is not implemented yet, but seems to be a simplification of Continuous 
-    WhilePressing,  
 }
 
 public enum ButtonTag
