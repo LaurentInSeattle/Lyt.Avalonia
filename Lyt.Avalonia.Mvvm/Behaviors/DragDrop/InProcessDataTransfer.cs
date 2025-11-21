@@ -2,11 +2,13 @@
 
 public sealed class InProcessDataTransfer(object inProcessData) : IDataTransfer
 {
-    public object InProcessData { get; set; } = inProcessData;
+    private object? inProcessData = inProcessData;
+
+    public object InProcessData => this.inProcessData!;
 
     IReadOnlyList<DataFormat> IDataTransfer.Formats => [];
     
     IReadOnlyList<IDataTransferItem> IDataTransfer.Items => [];
     
-    void IDisposable.Dispose() { }
+    void IDisposable.Dispose() => this.inProcessData = null;
 }
