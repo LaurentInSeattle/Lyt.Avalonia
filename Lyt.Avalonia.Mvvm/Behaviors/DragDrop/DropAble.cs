@@ -32,37 +32,60 @@ public class DropAble(Action<IDropTarget?> hideDropTarget) : BehaviorBase<View>
             return;
         }
 
-        IDropTarget? target = null; 
-        var data = dragEventArgs.Data;
-        var formats = data.GetDataFormats().ToList();
-        if (formats is not null && formats.Count > 0)
+        IDropTarget? target = null;
+
+        var dndDataTransfer = dragEventArgs.DataTransfer;
+        if (dndDataTransfer is InProcessDataTransfer inProcessDataTransfer)
         {
-            foreach (string? format in formats)
+            object dragDropObject = inProcessDataTransfer.InProcessData;
+            if (dragDropObject is IDragAbleViewModel draggableBindable)
             {
-                if (string.IsNullOrWhiteSpace(format))
+                DragAble? draggable = draggableBindable.DragAble;
+                if (draggable is not null)
                 {
-                    continue;
-                } 
-
-                object? dragDropObject = data.Get(format);
-                if (dragDropObject is IDragAbleViewModel draggableViewModel)
-                {
-                    var draggable = draggableViewModel.DragAble;
-                    if (draggable is null)
-                    {
-                        break;
-                    }
-
                     if (view.DataContext is IDropTarget dropTarget)
                     {
                         target = dropTarget;
                         dropTarget.OnDrop(dragEventArgs.GetPosition(view), dragDropObject);
                     }
-
-                    break;
                 }
             }
         }
+
+        #region Old API 
+
+        //var data = dragEventArgs.Data;
+        //var formats = data.GetDataFormats().ToList();
+        //if (formats is not null && formats.Count > 0)
+        //{
+        //    foreach (string? format in formats)
+        //    {
+        //        if (string.IsNullOrWhiteSpace(format))
+        //        {
+        //            continue;
+        //        } 
+
+        //        object? dragDropObject = data.Get(format);
+        //        if (dragDropObject is IDragAbleViewModel draggableViewModel)
+        //        {
+        //            var draggable = draggableViewModel.DragAble;
+        //            if (draggable is null)
+        //            {
+        //                break;
+        //            }
+
+        //            if (view.DataContext is IDropTarget dropTarget)
+        //            {
+        //                target = dropTarget;
+        //                dropTarget.OnDrop(dragEventArgs.GetPosition(view), dragDropObject);
+        //            }
+
+        //            break;
+        //        }
+        //    }
+        //}
+
+        #endregion Old API 
 
         this.hideDropTarget?.Invoke(target);
         dragEventArgs.Handled = true;

@@ -41,26 +41,16 @@ public class DragOverAble(
 
         IDropTarget? target = null;
         bool showedDropTarget = false;
-        var data = dragEventArgs.Data;
-        var formats = data.GetDataFormats().ToList();
-        if (formats is not null && formats.Count > 0)
+
+        var dndDataTransfer = dragEventArgs.DataTransfer;
+        if (dndDataTransfer is InProcessDataTransfer inProcessDataTransfer)
         {
-            foreach (string? format in formats)
+            object dragDropObject = inProcessDataTransfer.InProcessData;
+            if (dragDropObject is IDragAbleViewModel draggableBindable)
             {
-                if (string.IsNullOrWhiteSpace(format))
+                DragAble? draggable = draggableBindable.DragAble;
+                if (draggable is not null)
                 {
-                    continue;
-                }
-
-                object? dragDropObject = data.Get(format);
-                if (dragDropObject is IDragAbleViewModel draggableBindable)
-                {
-                    var draggable = draggableBindable.DragAble;
-                    if (draggable is null)
-                    {
-                        break;
-                    }
-
                     draggable.OnParentDragOver(dragEventArgs);
                     if (view.DataContext is IDropTarget dropTarget)
                     {
@@ -75,10 +65,51 @@ public class DragOverAble(
                             }
                         }
                     }
-
-                    break;
                 }
             }
+
+            #region OLD API 
+            //var dndData = dragEventArgs.DataTransfer;
+            //var data = dragEventArgs.Data;
+            //var formats = data.GetDataFormats().ToList();
+            //if (formats is not null && formats.Count > 0)
+            //{
+            //    foreach (string? format in formats)
+            //    {
+            //        if (string.IsNullOrWhiteSpace(format))
+            //        {
+            //            continue;
+            //        }
+
+            //        object? dragDropObject = data.Get(format);
+            //        if (dragDropObject is IDragAbleViewModel draggableBindable)
+            //        {
+            //            var draggable = draggableBindable.DragAble;
+            //            if (draggable is null)
+            //            {
+            //                break;
+            //            }
+
+            //            draggable.OnParentDragOver(dragEventArgs);
+            //            if (view.DataContext is IDropTarget dropTarget)
+            //            {
+            //                Point position = dragEventArgs.GetPosition(view);
+            //                if (dropTarget.CanDrop(position, dragDropObject))
+            //                {
+            //                    dragEventArgs.DragEffects = DragDropEffects.Move;
+            //                    if (this.showDropTarget is not null)
+            //                    {
+            //                        target = dropTarget;
+            //                        showedDropTarget = this.showDropTarget.Invoke(dropTarget, position);
+            //                    }
+            //                }
+            //            }
+
+            //            break;
+            //        }
+            //    }
+            //}
+            #endregion  OLD API 
         }
 
         if (!showedDropTarget)

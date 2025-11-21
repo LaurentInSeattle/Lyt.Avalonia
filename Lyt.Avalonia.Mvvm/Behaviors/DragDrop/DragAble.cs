@@ -1,15 +1,19 @@
 ﻿namespace Lyt.Avalonia.Mvvm.Behaviors.DragDrop;
 
+// Note => Updated API 
+// See: https://github.com/AvaloniaUI/Avalonia/issues/20097
+
 /// <summary> Behaviour for objects that are dragged around. </summary>
-public sealed class DragAble(Canvas canvas) : BehaviorBase<View>
+public sealed class DragAble(Canvas canvas, bool inProcess = true) : BehaviorBase<View>
 {
     /// <summary> Delay triggering the Long Press event on the view model.</summary>
     private const int LongPressDelay = 500; // milliseconds
 
     /// <summary> Minimal drag distance triggering the drag abd drop operation.</summary>
-    private const double MinimalDragDistance = 4.5; // pixels
+    private const double MinimalDragDistance = 3.5; // pixels
 
     private readonly Canvas dragCanvas = canvas;
+    private readonly bool inProcess = inProcess;
 
     private bool isPointerPressed;
     private bool isDragging;
@@ -20,6 +24,11 @@ public sealed class DragAble(Canvas canvas) : BehaviorBase<View>
 
     protected override void OnAttached()
     {
+        if ( !this.inProcess)
+        {
+            throw new NotImplementedException("Out of process drag and drop is not implemented yet.");
+        }
+
         _ = this.Guard();
         // Debug.WriteLine("DragAble | Attached to: " + this.AssociatedObject!.GetType().Name);
         this.HookPointerEvents();
@@ -181,16 +190,32 @@ public sealed class DragAble(Canvas canvas) : BehaviorBase<View>
         }
 
         this.UnhookPointerEvents();
-        var dragData = new DataObject();
-        string dragAndDropFormat = this.DraggableBindable.DragDropFormat;
-        dragData.Set(dragAndDropFormat, this.DraggableBindable);
 
-        // Debug.WriteLine("Sarting DnD thread");
-        /* var result = */ 
-            await global::Avalonia.Input.DragDrop.DoDragDrop(pointerEventArgs, dragData, DragDropEffects.Move);
+        Debug.WriteLine("Sarting DnD thread");
+        
+        #region OLD API 
+        //var dragData = new DataObject();
+        //string dragAndDropFormat = this.DraggableBindable.DragDropFormat;
+        //dragData.Set(dragAndDropFormat, this.DraggableBindable);
+        //var result =  
+        //    await global::Avalonia.Input.DragDrop.DoDragDrop(pointerEventArgs, dragData, DragDropEffects.Move);
         // Debug.WriteLine($"DragAndDrop result: {result}");
+        #endregion OLD API 
 
-        canvas.Children.Remove(this.ghostView);
+        if (this.inProcess)
+        {
+            var dndData = new InProcessDataTransfer(this.DraggableBindable);
+            var result = 
+                await global::Avalonia.Input.DragDrop.DoDragDropAsync(pointerEventArgs, dndData, DragDropEffects.Move);
+            Debug.WriteLine($"DragAndDrop result: {result}");
+        }
+        else
+        {
+            throw new NotImplementedException("Out of process drag and drop is not implemented yet.");
+        }
+
+
+            canvas.Children.Remove(this.ghostView);
         this.ghostView.DataContext = null;
 
         // Debug.WriteLine("Nullifying ghost view");

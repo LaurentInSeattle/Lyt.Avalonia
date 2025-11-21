@@ -13,7 +13,7 @@ public sealed class DragMovable(Canvas canvas, bool adjustPosition = true) : Beh
     private const int LongPressDelay = 500; // milliseconds
 
     /// <summary> Minimal drag distance triggering the dragging operation.</summary>
-    private const double MinimalDragDistance = 2.7; // pixels
+    private const double MinimalDragDistance = 2.4; // pixels
 
     private readonly Canvas dragCanvas = canvas;
     private readonly bool adjustPosition = adjustPosition; 
