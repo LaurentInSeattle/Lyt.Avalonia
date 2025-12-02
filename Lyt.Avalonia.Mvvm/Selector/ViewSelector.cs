@@ -1,8 +1,16 @@
 ﻿namespace Lyt.Avalonia.Mvvm.Selector;
 
+using Lyt.Mvvm;
+
 public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewSelectMessage>
     where TViewEnum : Enum
 {
+#pragma warning disable CS8618 
+    // Non-nullable field must contain a non-null value when exiting constructor. 
+    // There can only be one instance of ViewSelector<TViewEnum> for the entire app.
+    private static ViewSelector<TViewEnum> viewSelector;
+#pragma warning restore CS8618 
+
     private readonly SelectionGroup? selector;
     private readonly IEnumerable<SelectableView<TViewEnum>> selectableViews;
     private readonly Action<TViewEnum>? onViewSelected;
@@ -17,6 +25,7 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
         IEnumerable<SelectableView<TViewEnum>> selectableViews,
         Action<TViewEnum>? onViewSelected)
     {
+        viewSelector = this;
         this.selector = selector;
         this.selectableViews = selectableViews;
         this.onViewSelected = onViewSelected;
@@ -44,7 +53,43 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
     public static void Select(
         TViewEnum viewEnum,
         object? activationParameter = null)
-        => new ViewSelectMessage((int)(object)viewEnum, activationParameter).Publish();
+    {
+        var selectableView = viewSelector.SelectableViewFrom(viewEnum);
+        if (selectableView.IsEnabled)
+        {
+            new ViewSelectMessage((int)(object)viewEnum, activationParameter).Publish();
+        }
+    }
+
+    public static void Disable(TViewEnum viewEnum)
+    {
+        var selectableView = viewSelector.SelectableViewFrom(viewEnum);
+        if (selectableView.IsEnabled)
+        {
+            selectableView.IsEnabled = false;
+            var control = selectableView.Button;
+            if (control is not null)
+            {
+                control.IsEnabled = false;
+                control.Opacity= 0.4;
+            }
+        }
+    }
+
+    public static void Enable(TViewEnum viewEnum)
+    {
+        var selectableView = viewSelector.SelectableViewFrom(viewEnum);
+        if (!selectableView.IsEnabled)
+        {
+            selectableView.IsEnabled = true;
+            var control = selectableView.Button;
+            if (control is not null)
+            {
+                control.IsEnabled = true;
+                control.Opacity = 1;
+            }
+        }
+    }
 
     public ViewModel? CurrentPrimaryViewModel => this.activePrimaryViewModel;
 
@@ -110,6 +155,17 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
 
         // Invoke callback if present for potential extra processing on view change
         this.onViewSelected?.Invoke(viewEnum);
+    }
+
+    private SelectableView<TViewEnum> SelectableViewFrom(TViewEnum viewEnum)
+    {
+        var selectableView =
+            (from SelectableView<TViewEnum> selectable in this.selectableViews
+             where selectable.ViewEnum.Equals(viewEnum)
+             select selectable).FirstOrDefault();
+        return selectableView is not null ?
+            selectableView :
+            throw new ArgumentException("No such view", nameof(viewEnum));
     }
 
     private ViewModel PrimaryViewModelFrom(TViewEnum viewEnum)
