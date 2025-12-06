@@ -128,6 +128,17 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
             }
         }
 
+        // Unselect all in case we have a special view with no selectable button
+        if (this.selector is not null && this.activePrimaryViewModel is not null)
+        {
+            Control? selectorControl = this.ControlFrom(this.activePrimaryViewModel);
+            if (selectorControl is not null &&
+                selectorControl.GetType().Implements<ICanSelect>())
+            {
+                this.selector.Clear();
+            }
+        }
+
         // Deactivate current View models if present 
         HideAndDeactivate(this.activePrimaryViewModel);
         HideAndDeactivate(this.activeSecondaryViewModel);
@@ -201,4 +212,14 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
             throw new ArgumentException("No such view", nameof(viewEnum));
     }
 
+    private Control? ControlFrom(ViewModel viewModel)
+    {
+        var selectableView =
+            (from SelectableView<TViewEnum> selectable in this.selectableViews
+             where selectable.PrimaryViewModel.Equals(viewModel)
+             select selectable).FirstOrDefault();
+        return selectableView is not null ?
+            selectableView.Button :
+            throw new ArgumentException("No such view model", viewModel.GetType().Name);
+    }
 }

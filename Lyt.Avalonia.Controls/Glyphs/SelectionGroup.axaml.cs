@@ -1,4 +1,4 @@
-namespace Lyt.Avalonia.Controls.Glyphs; 
+namespace Lyt.Avalonia.Controls.Glyphs;
 
 public interface ICanSelect
 {
@@ -15,7 +15,7 @@ public partial class SelectionGroup : UserControl
     {
         foreach (var member in this.Members)
         {
-                member.IsSelected = false;
+            member.IsSelected = false;
         }
     }
 
@@ -23,27 +23,27 @@ public partial class SelectionGroup : UserControl
     {
         if (this.Members.Contains(selectable))
         {
-            return; 
+            return;
         }
 
         this.Members.Add(selectable);
-    } 
+    }
 
     public void Select(ICanSelect selectable)
     {
-        if(selectable.IsSelected)
+        if (selectable.IsSelected)
         {
-            return; 
+            return;
         }
 
         foreach (var member in this.Members)
         {
-            if ( member != selectable )
-            { 
+            if (member != selectable)
+            {
                 member.IsSelected = false;
             }
-        } 
+        }
 
         selectable.IsSelected = true;
-    } 
+    }
 }
