@@ -52,6 +52,11 @@ public class ApplicationBase(
 
     private IClassicDesktopStyleApplicationLifetime? desktop;
 
+    public static Tuple<Type, Type> Service<TInterface, TImplementation>()
+        where TInterface : class
+        where TImplementation : class, TInterface
+        => new(typeof(TInterface), typeof(TImplementation));
+
     public static T GetRequiredService<T>() where T : notnull
         => ApplicationBase.AppHost!.Services.GetRequiredService<T>();
 
