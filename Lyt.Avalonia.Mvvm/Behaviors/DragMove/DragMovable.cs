@@ -5,7 +5,10 @@ using global::Avalonia.Input;
 /// <summary> Behaviour for objects that are dragged around, but not dropped. </summary>
 public sealed class DragMovable(Canvas canvas, bool adjustPosition = true) : BehaviorBase<View>
 {
+#pragma warning disable CA2211 
+    // Non-constant fields should not be visible
     public static int ZIndex;
+#pragma warning restore CA2211 
 
     static DragMovable() => ZIndex = int.MinValue;
 
