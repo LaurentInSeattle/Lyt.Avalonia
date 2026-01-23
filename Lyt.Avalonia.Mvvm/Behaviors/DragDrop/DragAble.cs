@@ -34,6 +34,8 @@ public sealed class DragAble(Canvas canvas, bool inProcess = true) : BehaviorBas
         this.HookPointerEvents();
     }
 
+    public Canvas DragCanvas => this.dragCanvas;
+
     protected override void OnDetaching() => this.UnhookPointerEvents();
 
     public View View => this.GuardAssociatedObject();
