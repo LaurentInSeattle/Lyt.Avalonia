@@ -193,7 +193,7 @@ public sealed class DragAble(Canvas canvas, bool inProcess = true) : BehaviorBas
 
         this.UnhookPointerEvents();
 
-        Debug.WriteLine("Sarting DnD thread");
+        // Debug.WriteLine("Sarting DnD thread");
         
         #region OLD API 
         //var dragData = new DataObject();
@@ -209,7 +209,7 @@ public sealed class DragAble(Canvas canvas, bool inProcess = true) : BehaviorBas
             var dndData = new InProcessDataTransfer(this.DraggableBindable);
             var result = 
                 await global::Avalonia.Input.DragDrop.DoDragDropAsync(pointerEventArgs, dndData, DragDropEffects.Move);
-            Debug.WriteLine($"DragAndDrop result: {result}");
+            // Debug.WriteLine($"DragAndDrop result: {result}");
         }
         else
         {
