@@ -3,7 +3,7 @@
 using global::Avalonia.Input;
 
 /// <summary> Behaviour for objects that are dragged around, but not dropped. </summary>
-public sealed class DragMovable(Canvas canvas, bool adjustPosition = true) : BehaviorBase<View>
+public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) : BehaviorBase<View>
 {
 #pragma warning disable CA2211 
     // Non-constant fields should not be visible
@@ -18,7 +18,7 @@ public sealed class DragMovable(Canvas canvas, bool adjustPosition = true) : Beh
     /// <summary> Minimal drag distance triggering the dragging operation.</summary>
     private const double MinimalDragDistance = 2.4; // pixels
 
-    private readonly Canvas dragCanvas = canvas;
+    private readonly DragCanvas dragCanvas = canvas;
     private readonly bool adjustPosition = adjustPosition; 
 
     private bool isPointerPressed;
@@ -34,6 +34,8 @@ public sealed class DragMovable(Canvas canvas, bool adjustPosition = true) : Beh
     protected override void OnAttached()
     {
         var view = this.Guard();
+
+        // Disable later
         this.HookPointerEvents();
         int viewZindex = view.GetValue<int>(Canvas.ZIndexProperty);
         if (viewZindex > ZIndex)
@@ -104,7 +106,7 @@ public sealed class DragMovable(Canvas canvas, bool adjustPosition = true) : Beh
 
     private void OnPointerMoved(object? sender, PointerEventArgs pointerEventArgs)
     {
-        Debug.WriteLine("Moved");
+        // Debug.WriteLine("Moved");
         if (!this.isPointerPressed)
         {
             this.isPointerPressed = false;
