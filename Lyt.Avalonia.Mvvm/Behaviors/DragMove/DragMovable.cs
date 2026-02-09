@@ -104,7 +104,7 @@ public sealed class DragMovable(Canvas canvas, bool adjustPosition = true) : Beh
 
     private void OnPointerMoved(object? sender, PointerEventArgs pointerEventArgs)
     {
-        // Debug.WriteLine("Moved");
+        Debug.WriteLine("Moved");
         if (!this.isPointerPressed)
         {
             this.isPointerPressed = false;
