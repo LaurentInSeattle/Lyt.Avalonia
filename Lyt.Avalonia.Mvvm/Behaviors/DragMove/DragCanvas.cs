@@ -12,7 +12,7 @@ public sealed class DragCanvas : Canvas
 
     public void InitializeBuckets()
     {
-        if(dragMovables.Count > 0)
+        if (dragMovables.Count > 0)
         {
             this.dragMovables.Clear();
         }
@@ -26,7 +26,7 @@ public sealed class DragCanvas : Canvas
                 int x = (int)position.X;
                 int y = (int)position.Y;
                 Debug.WriteLine("Canvas: Position at: " + x.ToString() + " - " + y.ToString());
-                int bucketId  = (x / 128) + (( y / 64) << 8) ;
+                int bucketId = (x / 128) + ((y / 64) << 8);
                 if (!this.dragMovables.TryGetValue(bucketId, out List<DragMovable>? bucket))
                 {
                     bucket = [];
@@ -51,12 +51,12 @@ public sealed class DragCanvas : Canvas
         var position = pointerPressedEventArgs.GetPosition(this);
         int x = (int)position.X;
         int y = (int)position.Y;
-        Debug.WriteLine("Canvas: Pressed at: " + x.ToString() + " - " + y.ToString() );
+        Debug.WriteLine("Canvas: Pressed at: " + x.ToString() + " - " + y.ToString());
 
         int bucketId = (x / 128) + ((y / 64) << 8);
         if (this.dragMovables.TryGetValue(bucketId, out List<DragMovable>? bucket))
         {
-            if ( bucket is not null && bucket.Count == 1 )
+            if (bucket is not null && bucket.Count == 1)
             {
                 var dragMovable = bucket[0];
                 var view = dragMovable.View;
