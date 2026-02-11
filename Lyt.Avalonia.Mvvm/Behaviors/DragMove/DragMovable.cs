@@ -12,11 +12,8 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
 
     static DragMovable() => ZIndex = int.MinValue;
 
-    /// <summary> Delay triggering the Long Press event on the view model.</summary>
-    private const int LongPressDelay = 500; // milliseconds
-
     /// <summary> Minimal drag distance triggering the dragging operation.</summary>
-    private const double MinimalDragDistance = 2.4; // pixels
+    private const double MinimalDragDistance = 1.5; // pixels
 
     private readonly DragCanvas dragCanvas = canvas;
     private readonly bool adjustPosition = adjustPosition; 
