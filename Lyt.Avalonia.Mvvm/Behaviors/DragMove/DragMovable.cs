@@ -29,7 +29,6 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
     private Point viewStartPosition;
     private Point viewEndPosition;
     private IDragMovableViewModel? dragMovableViewModel;
-    private DispatcherTimer? timer;
 
     protected override void OnAttached()
     {
@@ -75,8 +74,6 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
         view.PointerPressed += this.OnPointerPressed;
         view.PointerReleased += this.OnPointerReleased;
         view.PointerMoved += this.OnPointerMoved;
-        view.PointerEntered += this.OnPointerEntered;
-        view.PointerExited += this.OnPointerExited;
     }
 
     private void UnhookPointerEvents()
@@ -85,15 +82,7 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
         view.PointerPressed -= this.OnPointerPressed;
         view.PointerReleased -= this.OnPointerReleased;
         view.PointerMoved -= this.OnPointerMoved;
-        view.PointerEntered -= this.OnPointerEntered;
-        view.PointerExited -= this.OnPointerExited;
     }
-
-    private void OnPointerEntered(object? sender, PointerEventArgs pointerEventArgs)
-        => this.DragMovableViewModel.OnEntered();
-
-    private void OnPointerExited(object? sender, PointerEventArgs pointerEventArgs)
-        => this.DragMovableViewModel.OnExited();
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs pointerPressedEventArgs)
     {
@@ -101,7 +90,6 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
         View view = this.View;
         this.isPointerPressed = true;
         this.pointerPressedPoint = pointerPressedEventArgs.GetCurrentPoint(view);
-        this.StartTimer();
     }
 
     private void OnPointerMoved(object? sender, PointerEventArgs pointerEventArgs)
@@ -115,8 +103,6 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
 
         if (this.isDragging)
         {
-            this.StopTimer();
-
             // Debug.WriteLine("Dragging...");
             this.AdjustPosition(pointerEventArgs);
             this.DragMovableViewModel.OnMove(this.viewStartPosition, this.viewEndPosition);
@@ -134,8 +120,7 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
                 return;
             }
 
-            // Drag move begins, it's not going to be a long press, therefore stop the timer.
-            this.StopTimer();
+            // Drag move begins
             this.BeginMove(pointerEventArgs);
         }
     }
@@ -143,7 +128,6 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs args)
     {
         // Debug.WriteLine("Released");
-        this.StopTimer();
         this.isPointerPressed = false;
         if (this.isDragging)
         {
@@ -228,41 +212,4 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
         //y = view.GetValue(Canvas.TopProperty);
         //Debug.WriteLine("X " + x.ToString("F2") + " Y " + y.ToString("F2"));
     }
-
-    #region Timer
-
-    private void StartTimer()
-    {
-        this.StopTimer();
-        this.timer = new DispatcherTimer()
-        {
-            Interval = TimeSpan.FromMilliseconds(LongPressDelay),
-            IsEnabled = true,
-        };
-        this.timer.Tick += this.OnTimerTick;
-    }
-
-    private void StopTimer()
-    {
-        if (this.timer is not null)
-        {
-            this.timer.IsEnabled = false;
-            this.timer.Stop();
-            this.timer.Tick -= this.OnTimerTick;
-            this.timer = null;
-        }
-    }
-
-    private void OnTimerTick(object? sender, EventArgs e)
-    {
-        this.StopTimer();
-        if ((this.dragMovableViewModel is not null) &&
-            (this.isPointerPressed) &&
-            (!this.isDragging))
-        {
-            this.dragMovableViewModel.OnLongPress();
-        }
-    }
-
-    #endregion Timer
 }
