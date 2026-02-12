@@ -3,7 +3,7 @@
 using global::Avalonia.Input;
 
 /// <summary> Behaviour for objects that are dragged around, but not dropped. </summary>
-public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) : BehaviorBase<View>
+public sealed class DragMovable(Canvas canvas, bool adjustPosition = true) : BehaviorBase<View>
 {
 #pragma warning disable CA2211 
     // Non-constant fields should not be visible
@@ -13,10 +13,10 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
     static DragMovable() => ZIndex = int.MinValue;
 
     /// <summary> Minimal drag distance triggering the dragging operation.</summary>
-    private const double MinimalDragDistance = 1.5; // pixels
+    private const double MinimalDragDistance = 2.0; // pixels
 
-    private readonly DragCanvas dragCanvas = canvas;
-    private readonly bool adjustPosition = adjustPosition;
+    private readonly Canvas dragCanvas = canvas;
+    private readonly bool adjustPosition = adjustPosition; 
 
     private bool isPointerPressed;
     private bool isDragging;
@@ -30,21 +30,15 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
     protected override void OnAttached()
     {
         var view = this.Guard();
-
-        // MAYBE: Disable later
-        // this.HookPointerPressedEvent();
+        this.HookPointerEvents();
         int viewZindex = view.GetValue<int>(Canvas.ZIndexProperty);
         if (viewZindex > ZIndex)
         {
             ZIndex = viewZindex;
-        }
+        } 
     }
 
-    protected override void OnDetaching()
-    {
-        this.UnhookPointerPressedEvent();
-        this.UnhookOtherPointerEvents();
-    }
+    protected override void OnDetaching() => this.UnhookPointerEvents();
 
     public View View => this.GuardAssociatedObject();
 
@@ -69,40 +63,33 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
         return view;
     }
 
-    private void HookPointerPressedEvent()
-        => this.View.PointerPressed += this.OnPointerPressed;
-
-    private void UnhookPointerPressedEvent()
-        => this.View.PointerPressed -= this.OnPointerPressed;
-
-    private void HookOtherPointerEvents()
+    private void HookPointerEvents()
     {
         View view = this.View;
-        view.IsHitTestVisible = true;
+        view.PointerPressed += this.OnPointerPressed;
         view.PointerReleased += this.OnPointerReleased;
         view.PointerMoved += this.OnPointerMoved;
     }
 
-    private void UnhookOtherPointerEvents()
+    private void UnhookPointerEvents()
     {
         View view = this.View;
-        view.IsHitTestVisible = false;
+        view.PointerPressed -= this.OnPointerPressed;
         view.PointerReleased -= this.OnPointerReleased;
         view.PointerMoved -= this.OnPointerMoved;
     }
 
-    public void OnPointerPressed(object? sender, PointerPressedEventArgs pointerPressedEventArgs)
+    private void OnPointerPressed(object? sender, PointerPressedEventArgs pointerPressedEventArgs)
     {
-        Debug.WriteLine("Pressed");
+        // Debug.WriteLine("Pressed");
         View view = this.View;
         this.isPointerPressed = true;
         this.pointerPressedPoint = pointerPressedEventArgs.GetCurrentPoint(view);
-        this.HookOtherPointerEvents();
     }
 
     private void OnPointerMoved(object? sender, PointerEventArgs pointerEventArgs)
     {
-        Debug.WriteLine("Moved");
+        //Debug.WriteLine("Moved");
         if (!this.isPointerPressed)
         {
             this.isPointerPressed = false;
@@ -111,20 +98,20 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
 
         if (this.isDragging)
         {
-            Debug.WriteLine("Dragging...");
+            // Debug.WriteLine("Dragging...");
             this.AdjustPosition(pointerEventArgs);
             this.DragMovableViewModel.OnMove(this.viewStartPosition, this.viewEndPosition);
             return;
         }
         else
         {
-            Debug.WriteLine("Moving...");
+            // Debug.WriteLine("Moving...");
             View view = this.View;
             Point currentPosition = pointerEventArgs.GetPosition(view);
             double distance = Point.Distance(currentPosition, pointerPressedPoint.Position);
             if (distance <= MinimalDragDistance)
             {
-                Debug.WriteLine("Too close.");
+                // Debug.WriteLine("Too close.");
                 return;
             }
 
@@ -135,7 +122,7 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
 
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs args)
     {
-        Debug.WriteLine("Released");
+        // Debug.WriteLine("Released");
         this.isPointerPressed = false;
         if (this.isDragging)
         {
@@ -149,12 +136,11 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
                 // It's a Click 
                 bool isRightClick = args.InitialPressMouseButton == MouseButton.Right;
                 this.DragMovableViewModel.OnClicked(isRightClick);
-            }
+            } 
         }
 
         this.isDragging = false;
-        this.isDraggingRejected = false;
-        this.UnhookOtherPointerEvents();
+        this.isDraggingRejected = false; 
     }
 
     private void BeginMove(PointerEventArgs pointerEventArgs)
@@ -162,7 +148,6 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
         // Debug.WriteLine("Try Begin Drag");
         if (this.isDragging)
         {
-            this.UnhookOtherPointerEvents();
             return;
         }
 
@@ -179,7 +164,6 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
         {
             // Debug.WriteLine("Dragging rejected");
             this.isDraggingRejected = true;
-            this.UnhookOtherPointerEvents();
             return;
         }
 
@@ -199,9 +183,9 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
 
     private void AdjustPosition(PointerEventArgs pointerEventArgs)
     {
-        if (!this.adjustPosition)
+        if ( ! this.adjustPosition)
         {
-            return;
+            return; 
         }
 
         // Debug.WriteLine("AdjustPosition");
@@ -216,9 +200,9 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
         View view = this.View;
         double x = this.viewStartPosition.X + deltaX;
         double y = this.viewStartPosition.Y + deltaY;
-        view.SetValue(Canvas.LeftProperty, x);
-        view.SetValue(Canvas.TopProperty, y);
-        this.viewEndPosition = new Point(x, y);
+        view.SetValue(Canvas.LeftProperty, x );
+        view.SetValue(Canvas.TopProperty, y );
+        this.viewEndPosition = new Point( x, y );
         //x = view.GetValue(Canvas.LeftProperty);
         //y = view.GetValue(Canvas.TopProperty);
         //Debug.WriteLine("X " + x.ToString("F2") + " Y " + y.ToString("F2"));
