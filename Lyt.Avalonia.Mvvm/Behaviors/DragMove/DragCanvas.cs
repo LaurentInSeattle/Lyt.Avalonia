@@ -2,16 +2,18 @@
 
 public sealed class DragCanvas : Canvas
 {
-    private readonly Dictionary<int, List<DragMovable>> dragMovables = [];
+    private readonly NestedDictionary<int, int, List<DragMovable>> dragMovables = [];
+    private int bucketSize; 
 
     public DragCanvas() : base()
     {
-        // this.PointerPressed += this.OnPointerPressed;
+        this.PointerPressed += this.OnPointerPressed;
         // this.PointerMoved += this.OnPointerMoved;
     }
 
-    public void InitializeBuckets()
+    public void InitializeBuckets(int bucketSize)
     {
+        this.bucketSize = bucketSize;
         if (dragMovables.Count > 0)
         {
             this.dragMovables.Clear();
@@ -22,18 +24,19 @@ public sealed class DragCanvas : Canvas
             if ((item is View view) && (view is IDragMovableView dragMovableView))
             {
                 var dragMovable = dragMovableView.DragMovable;
-                Point position = dragMovableView.GetCenterPosition;
+                Point position = dragMovableView.GetCenterLocation;
                 int x = (int)position.X;
                 int y = (int)position.Y;
                 Debug.WriteLine("Canvas: Position at: " + x.ToString() + " - " + y.ToString());
-                int bucketId = (x / 128) + ((y / 64) << 8);
-                if (!this.dragMovables.TryGetValue(bucketId, out List<DragMovable>? bucket))
+                int bucketIdX = x / this.bucketSize;
+                int bucketIdY = y / this.bucketSize;
+                if (!this.dragMovables.TryGetValue(bucketIdX, bucketIdY, out List<DragMovable>? bucket))
                 {
                     bucket = [];
-                    this.dragMovables.Add(bucketId, bucket);
+                    this.dragMovables.Add(bucketIdX, bucketIdY, bucket);
                 }
 
-                bucket.Add(dragMovable);
+                bucket?.Add(dragMovable);
             }
         }
     }
@@ -53,14 +56,27 @@ public sealed class DragCanvas : Canvas
         int y = (int)position.Y;
         Debug.WriteLine("Canvas: Pressed at: " + x.ToString() + " - " + y.ToString());
 
-        int bucketId = (x / 128) + ((y / 64) << 8);
-        if (this.dragMovables.TryGetValue(bucketId, out List<DragMovable>? bucket))
+        int bucketIdX = x / this.bucketSize;
+        int bucketIdY = y / this.bucketSize;
+        if (this.dragMovables.TryGetValue(bucketIdX, bucketIdY, out List<DragMovable>? bucket))
         {
-            if (bucket is not null && bucket.Count == 1)
+            if (bucket is not null)
             {
-                var dragMovable = bucket[0];
-                var view = dragMovable.View;
-                // view.IsVisible = false;
+                if (bucket.Count == 0)
+                {
+                    Debug.WriteLine("Empty bucket");
+                }
+                else if (bucket.Count == 1)
+                {
+                    var dragMovable = bucket[0];
+                    dragMovable.OnPointerPressed(sender, pointerPressedEventArgs);
+                }
+                else
+                {
+                    // TODO:
+                    // If there are multiple items in the bucket,
+                    // we need to check which one is actually under the pointer.
+                }
             }
         }
     }

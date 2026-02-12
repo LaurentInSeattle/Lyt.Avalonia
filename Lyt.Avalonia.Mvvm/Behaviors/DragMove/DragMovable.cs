@@ -16,7 +16,7 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
     private const double MinimalDragDistance = 1.5; // pixels
 
     private readonly DragCanvas dragCanvas = canvas;
-    private readonly bool adjustPosition = adjustPosition; 
+    private readonly bool adjustPosition = adjustPosition;
 
     private bool isPointerPressed;
     private bool isDragging;
@@ -32,19 +32,19 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
         var view = this.Guard();
 
         // MAYBE: Disable later
-        this.HookPointerPressedEvent();
+        // this.HookPointerPressedEvent();
         int viewZindex = view.GetValue<int>(Canvas.ZIndexProperty);
         if (viewZindex > ZIndex)
         {
             ZIndex = viewZindex;
-        } 
+        }
     }
 
     protected override void OnDetaching()
     {
-        this.UnhookPointerPressedEvent(); 
+        this.UnhookPointerPressedEvent();
         this.UnhookOtherPointerEvents();
-    } 
+    }
 
     public View View => this.GuardAssociatedObject();
 
@@ -74,7 +74,7 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
 
     private void UnhookPointerPressedEvent()
         => this.View.PointerPressed -= this.OnPointerPressed;
-    
+
     private void HookOtherPointerEvents()
     {
         View view = this.View;
@@ -89,9 +89,9 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
         view.PointerMoved -= this.OnPointerMoved;
     }
 
-    private void OnPointerPressed(object? sender, PointerPressedEventArgs pointerPressedEventArgs)
+    public void OnPointerPressed(object? sender, PointerPressedEventArgs pointerPressedEventArgs)
     {
-        // Debug.WriteLine("Pressed");
+        Debug.WriteLine("Pressed");
         View view = this.View;
         this.isPointerPressed = true;
         this.pointerPressedPoint = pointerPressedEventArgs.GetCurrentPoint(view);
@@ -147,11 +147,11 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
                 // It's a Click 
                 bool isRightClick = args.InitialPressMouseButton == MouseButton.Right;
                 this.DragMovableViewModel.OnClicked(isRightClick);
-            } 
+            }
         }
 
         this.isDragging = false;
-        this.isDraggingRejected = false; 
+        this.isDraggingRejected = false;
         this.UnhookOtherPointerEvents();
     }
 
@@ -160,6 +160,7 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
         // Debug.WriteLine("Try Begin Drag");
         if (this.isDragging)
         {
+            this.UnhookOtherPointerEvents();
             return;
         }
 
@@ -176,6 +177,7 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
         {
             // Debug.WriteLine("Dragging rejected");
             this.isDraggingRejected = true;
+            this.UnhookOtherPointerEvents();
             return;
         }
 
@@ -195,9 +197,9 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
 
     private void AdjustPosition(PointerEventArgs pointerEventArgs)
     {
-        if ( ! this.adjustPosition)
+        if (!this.adjustPosition)
         {
-            return; 
+            return;
         }
 
         // Debug.WriteLine("AdjustPosition");
@@ -212,9 +214,9 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
         View view = this.View;
         double x = this.viewStartPosition.X + deltaX;
         double y = this.viewStartPosition.Y + deltaY;
-        view.SetValue(Canvas.LeftProperty, x );
-        view.SetValue(Canvas.TopProperty, y );
-        this.viewEndPosition = new Point( x, y );
+        view.SetValue(Canvas.LeftProperty, x);
+        view.SetValue(Canvas.TopProperty, y);
+        this.viewEndPosition = new Point(x, y);
         //x = view.GetValue(Canvas.LeftProperty);
         //y = view.GetValue(Canvas.TopProperty);
         //Debug.WriteLine("X " + x.ToString("F2") + " Y " + y.ToString("F2"));

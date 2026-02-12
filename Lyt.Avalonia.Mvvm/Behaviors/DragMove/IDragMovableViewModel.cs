@@ -5,7 +5,7 @@ public interface IDragMovableView
 {
     DragMovable DragMovable { get; }
 
-    Point GetCenterPosition { get; }
+    Point GetCenterLocation { get; }
 }
 
 /// <summary> Interface contract for view models that have a view that can be moved </summary>
