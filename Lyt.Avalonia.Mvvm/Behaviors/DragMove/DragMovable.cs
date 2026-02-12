@@ -13,7 +13,7 @@ public sealed class DragMovable(Canvas canvas, bool adjustPosition = true) : Beh
     static DragMovable() => ZIndex = int.MinValue;
 
     /// <summary> Minimal drag distance triggering the dragging operation.</summary>
-    private const double MinimalDragDistance = 2.0; // pixels
+    private const double MinimalDragDistance = 1.8; // pixels
 
     private readonly Canvas dragCanvas = canvas;
     private readonly bool adjustPosition = adjustPosition; 
