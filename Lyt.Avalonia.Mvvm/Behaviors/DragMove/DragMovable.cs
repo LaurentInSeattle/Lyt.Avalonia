@@ -78,6 +78,7 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
     private void HookOtherPointerEvents()
     {
         View view = this.View;
+        view.IsHitTestVisible = true;
         view.PointerReleased += this.OnPointerReleased;
         view.PointerMoved += this.OnPointerMoved;
     }
@@ -85,6 +86,7 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
     private void UnhookOtherPointerEvents()
     {
         View view = this.View;
+        view.IsHitTestVisible = false;
         view.PointerReleased -= this.OnPointerReleased;
         view.PointerMoved -= this.OnPointerMoved;
     }
@@ -100,7 +102,7 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
 
     private void OnPointerMoved(object? sender, PointerEventArgs pointerEventArgs)
     {
-        // Debug.WriteLine("Moved");
+        Debug.WriteLine("Moved");
         if (!this.isPointerPressed)
         {
             this.isPointerPressed = false;
@@ -109,20 +111,20 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
 
         if (this.isDragging)
         {
-            // Debug.WriteLine("Dragging...");
+            Debug.WriteLine("Dragging...");
             this.AdjustPosition(pointerEventArgs);
             this.DragMovableViewModel.OnMove(this.viewStartPosition, this.viewEndPosition);
             return;
         }
         else
         {
-            // Debug.WriteLine("Moving...");
+            Debug.WriteLine("Moving...");
             View view = this.View;
             Point currentPosition = pointerEventArgs.GetPosition(view);
             double distance = Point.Distance(currentPosition, pointerPressedPoint.Position);
             if (distance <= MinimalDragDistance)
             {
-                // Debug.WriteLine("Too close.");
+                Debug.WriteLine("Too close.");
                 return;
             }
 
@@ -133,7 +135,7 @@ public sealed class DragMovable(DragCanvas canvas, bool adjustPosition = true) :
 
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs args)
     {
-        // Debug.WriteLine("Released");
+        Debug.WriteLine("Released");
         this.isPointerPressed = false;
         if (this.isDragging)
         {

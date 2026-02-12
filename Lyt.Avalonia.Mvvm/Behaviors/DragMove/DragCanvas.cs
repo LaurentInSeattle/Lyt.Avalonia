@@ -7,6 +7,7 @@ public sealed class DragCanvas : Canvas
 
     public DragCanvas() : base()
     {
+        this.Background = Brushes.Transparent;
         this.PointerPressed += this.OnPointerPressed;
         // this.PointerMoved += this.OnPointerMoved;
     }
