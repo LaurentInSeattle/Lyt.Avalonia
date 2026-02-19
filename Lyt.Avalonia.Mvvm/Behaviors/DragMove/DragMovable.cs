@@ -85,10 +85,13 @@ public sealed class DragMovable(Canvas canvas, bool adjustPosition = true) : Beh
         View view = this.View;
         this.isPointerPressed = true;
         this.pointerPressedPoint = pointerPressedEventArgs.GetCurrentPoint(view);
+        pointerPressedEventArgs.Handled = true;
     }
 
     private void OnPointerMoved(object? sender, PointerEventArgs pointerEventArgs)
     {
+        pointerEventArgs.Handled = true;
+
         //Debug.WriteLine("Moved");
         if (!this.isPointerPressed)
         {
@@ -122,6 +125,8 @@ public sealed class DragMovable(Canvas canvas, bool adjustPosition = true) : Beh
 
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs args)
     {
+        args.Handled = true;
+
         // Debug.WriteLine("Released");
         this.isPointerPressed = false;
         if (this.isDragging)
