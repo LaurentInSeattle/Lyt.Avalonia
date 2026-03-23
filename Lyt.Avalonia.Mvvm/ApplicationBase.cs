@@ -121,12 +121,9 @@ public class ApplicationBase(
 
         if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
         {
-            this.desktop = lifetime;
-
-            if (this.desktop is null)
-            {
+            this.desktop = 
+                lifetime ?? 
                 throw new InvalidOperationException("Desktop should not be null.");
-            }
 
             // Enforce single instance if requested 
             if (this.isSingleInstanceRequested && this.IsAlreadyRunning())
@@ -183,7 +180,8 @@ public class ApplicationBase(
 
         // Line below is needed to remove Avalonia data validation.
         // Without this line you will get duplicate validations from both Avalonia and CT
-        BindingPlugins.DataValidators.RemoveAt(0);
+        // 
+        // BindingPlugins.DataValidators.RemoveAt(0);
 
         if (this.desktop is not null)
         {

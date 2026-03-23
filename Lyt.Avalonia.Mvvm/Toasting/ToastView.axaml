@@ -1,23 +1,28 @@
 ﻿<UserControl 
-    x:Class="Lyt.Avalonia.Mvvm.Toasting.ToastView"
+	x:Class="Lyt.Avalonia.Mvvm.Toasting.ToastView"
+	xmlns:vm="clr-namespace:Lyt.Avalonia.Mvvm.Toasting"
+	x:DataType="vm:ToastViewModel" 
+
 	xmlns="https://github.com/avaloniaui"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="450" d:DesignWidth="800"
-    mc:Ignorable="d"
+	d:DesignHeight="450" d:DesignWidth="800"
+	mc:Ignorable="d"
 	xmlns:glyphs="clr-namespace:Lyt.Avalonia.Controls.Glyphs;assembly=Lyt.Avalonia.Controls"
-    Background="Transparent"
+	Background="Transparent"
 	MaxWidth="820"
 	HorizontalAlignment="Right"
 	VerticalAlignment="Bottom"
 	Margin="12"
 	ZIndex="9999999"
-    >
-    <Grid
+
+
+	>
+	<Grid
 		x:Name="OuterGrid"
 		Margin ="8"
-	    HorizontalAlignment="Stretch"
+		HorizontalAlignment="Stretch"
 		Height="64"
 		Opacity="1"
 		>
@@ -32,10 +37,10 @@
 			<ColumnDefinition Width="*"/>
 			<ColumnDefinition Width="72"/>
 		</Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+		</Grid.RowDefinitions>
 		<Border
 			x:Name="outerBorder"
 			Grid.ColumnSpan="999" Grid.RowSpan="999"
@@ -91,6 +96,6 @@
 			GlyphStrokeThickness="0"
 			GlyphAngle="0"
 			Command="{Binding OnDismiss}"
-    		/>
+			/>
 	</Grid>
 </UserControl>

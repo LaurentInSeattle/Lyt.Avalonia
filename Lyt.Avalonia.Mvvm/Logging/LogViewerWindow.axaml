@@ -18,7 +18,7 @@
 		</Grid.RowDefinitions>
 		<ListBox
 			x:Name="itemsControl"
-			ItemsSource="{Binding ObservableLogEntries}"
+			ItemsSource="{ReflectionBinding ObservableLogEntries}"
 			Background = "Transparent"
             Classes="ListBox"
 			>
@@ -32,8 +32,8 @@
 				<DataTemplate>
 					<TextBlock						
 						Margin ="4 2 0 2"
-						Foreground="{Binding Brush}"
-						Text="{Binding Message}"
+						Foreground="{ReflectionBinding Brush}"
+						Text="{ReflectionBinding Message}"
 						FontSize="13"
 						TextWrapping="Wrap"
 						/>
