@@ -10,14 +10,13 @@
 	d:DesignHeight="450" d:DesignWidth="800"
 	mc:Ignorable="d"
 	xmlns:glyphs="clr-namespace:Lyt.Avalonia.Controls.Glyphs;assembly=Lyt.Avalonia.Controls"
+
 	Background="Transparent"
 	MaxWidth="820"
 	HorizontalAlignment="Right"
 	VerticalAlignment="Bottom"
 	Margin="12"
 	ZIndex="9999999"
-
-
 	>
 	<Grid
 		x:Name="OuterGrid"
@@ -44,7 +43,7 @@
 		<Border
 			x:Name="outerBorder"
 			Grid.ColumnSpan="999" Grid.RowSpan="999"
-			Height="64" MaxHeight=""
+			Height="64" MaxHeight="1024"
 			Background="Transparent"
 			BorderBrush="{StaticResource LightAqua_1_040}"
 			BorderThickness="1"
