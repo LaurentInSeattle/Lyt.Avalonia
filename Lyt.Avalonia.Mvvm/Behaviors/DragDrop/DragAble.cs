@@ -17,6 +17,7 @@ public sealed class DragAble(Canvas canvas, bool inProcess = true) : BehaviorBas
 
     private bool isPointerPressed;
     private bool isDragging;
+    private PointerPressedEventArgs? pointerPressedEventArgs; 
     private PointerPoint pointerPressedPoint;
     private UserControl? ghostView;
     private IDragAbleViewModel? draggableBindable;
@@ -92,6 +93,7 @@ public sealed class DragAble(Canvas canvas, bool inProcess = true) : BehaviorBas
         // Debug.WriteLine("Pressed");
         View view = this.View;
         this.isPointerPressed = true;
+        this.pointerPressedEventArgs = pointerPressedEventArgs;
         this.pointerPressedPoint = pointerPressedEventArgs.GetCurrentPoint(view);
         this.StartTimer();
     }
@@ -204,11 +206,13 @@ public sealed class DragAble(Canvas canvas, bool inProcess = true) : BehaviorBas
         // Debug.WriteLine($"DragAndDrop result: {result}");
         #endregion OLD API 
 
-        if (this.inProcess)
+        if (this.inProcess && this.pointerPressedEventArgs is not null)
         {
             var dndData = new InProcessDataTransfer(this.DraggableBindable);
-            var result = 
-                await global::Avalonia.Input.DragDrop.DoDragDropAsync(pointerEventArgs, dndData, DragDropEffects.Move);
+            // var result = 
+            var _ =
+                await global::Avalonia.Input.DragDrop.DoDragDropAsync(
+                    this.pointerPressedEventArgs, dndData, DragDropEffects.Move);
             // Debug.WriteLine($"DragAndDrop result: {result}");
         }
         else
@@ -217,7 +221,7 @@ public sealed class DragAble(Canvas canvas, bool inProcess = true) : BehaviorBas
         }
 
 
-            canvas.Children.Remove(this.ghostView);
+        canvas.Children.Remove(this.ghostView);
         this.ghostView.DataContext = null;
 
         // Debug.WriteLine("Nullifying ghost view");
