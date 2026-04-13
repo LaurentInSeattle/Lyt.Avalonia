@@ -4,6 +4,24 @@ using static Lyt.Avalonia.Controls.Utilities;
 
 public static class MiscUtilities
 {
+    /// <summary> Saves the specified visual as an image to the given file path. </summary>
+    /// <param name="visual">The visual to save as an image.</param>
+    /// <param name="filePath">The file path where the image will be saved.</param>
+    public static void SaveAsImage(this Visual visual, string filePath)
+    {
+        // Define the size based on the control's bounds
+        var pixelSize = new PixelSize((int)visual.Bounds.Width, (int)visual.Bounds.Height);
+
+        // Create the render target
+        using var renderTarget = new RenderTargetBitmap(pixelSize, new Vector(96, 96));
+
+        // Render the visual to the bitmap
+        renderTarget.Render(visual);
+
+        // Save to the specified file path
+        renderTarget.Save(filePath);
+    }
+
     /// <summary> Find first parent of type T in VisualTree. </summary>
     public static TControl? FindParentControl<TControl>(this StyledElement control)
         where TControl : StyledElement
