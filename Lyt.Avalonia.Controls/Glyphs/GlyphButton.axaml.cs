@@ -757,6 +757,7 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
         }
 
         bool activated = false; 
+        
         // Give precedence to the Click handler if present 
         if (this.Click != null)
         {
@@ -768,7 +769,8 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
             this.Click.Invoke(this, rea);
             activated = true;
         }
-        else if (this.Command != null)
+        
+        if (this.Command != null)
         {
             // Pass along the button Tag if there is one for continuous and count down behaviours,
             // then the Button Tag if any, for keyboards and numeric pads 
