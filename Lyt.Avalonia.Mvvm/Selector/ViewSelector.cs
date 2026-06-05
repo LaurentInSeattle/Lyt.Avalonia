@@ -1,7 +1,5 @@
 ﻿namespace Lyt.Avalonia.Mvvm.Selector;
 
-using Lyt.Mvvm;
-
 public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewSelectMessage>
     where TViewEnum : Enum
 {
@@ -17,13 +15,15 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
 
     private ViewModel? activePrimaryViewModel;
     private ViewModel? activeSecondaryViewModel;
+    private ViewModel? activeTernaryViewModel;
 
     public ViewSelector(
         Panel primaryContainer,
         Panel? secondaryContainer,
         SelectionGroup? selector,
         IEnumerable<SelectableView<TViewEnum>> selectableViews,
-        Action<TViewEnum>? onViewSelected)
+        Action<TViewEnum>? onViewSelected, 
+        Panel? ternaryContainer = null)
     {
         viewSelector = this;
         this.selector = selector;
@@ -44,6 +44,14 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
             {
                 secondaryControl.IsVisible = false;
                 secondaryContainer.Children.Add(secondaryControl);
+            }
+
+            if (ternaryContainer is not null &&
+                selectableView.TernaryViewModel is not null &&
+                selectableView.TernaryViewModel.ViewBase is Control ternaryControl)
+            {
+                ternaryControl.IsVisible = false;
+                ternaryContainer.Children.Add(ternaryControl);
             }
         }
 
@@ -94,6 +102,8 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
     public ViewModel? CurrentPrimaryViewModel => this.activePrimaryViewModel;
 
     public ViewModel? CurrentSecondaryViewModel => this.activeSecondaryViewModel;
+    
+    public ViewModel? CurrentTernaryViewModel => this.activeTernaryViewModel;
 
     public void Receive(ViewSelectMessage viewSelectMessage)
     {
@@ -142,15 +152,19 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
         // Deactivate current View models if present 
         HideAndDeactivate(this.activePrimaryViewModel);
         HideAndDeactivate(this.activeSecondaryViewModel);
+        HideAndDeactivate(this.activeTernaryViewModel);
 
         // Activate, show and flag as active the new view models
         ViewModel newPrimaryViewModel = this.PrimaryViewModelFrom(viewEnum);
         ViewModel? secondaryNewViewModel = this.SecondaryViewModelFrom(viewEnum);
+        ViewModel? ternaryNewViewModel = this.TernaryViewModelFrom(viewEnum);
         object? activationParameters = viewSelectMessage.ActivationParameter; 
         ActivateAndShow(newPrimaryViewModel, activationParameters);
         ActivateAndShow(secondaryNewViewModel, activationParameters);
+        ActivateAndShow(ternaryNewViewModel, activationParameters);
         this.activePrimaryViewModel = newPrimaryViewModel;
         this.activeSecondaryViewModel = secondaryNewViewModel;
+        this.activeTernaryViewModel = ternaryNewViewModel;
 
         // Reflect in the navigation toolbar the programmatic change 
         if (this.selector is not null)
@@ -198,6 +212,17 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
              select selectable).FirstOrDefault();
         return selectableView is not null ?
             selectableView.SecondaryViewModel :
+            throw new ArgumentException("No such view", nameof(viewEnum));
+    }
+
+    private ViewModel? TernaryViewModelFrom(TViewEnum viewEnum)
+    {
+        var selectableView =
+            (from SelectableView<TViewEnum> selectable in this.selectableViews
+             where selectable.ViewEnum.Equals(viewEnum)
+             select selectable).FirstOrDefault();
+        return selectableView is not null ?
+            selectableView.TernaryViewModel :
             throw new ArgumentException("No such view", nameof(viewEnum));
     }
 
