@@ -22,7 +22,7 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
         Panel? secondaryContainer,
         SelectionGroup? selector,
         IEnumerable<SelectableView<TViewEnum>> selectableViews,
-        Action<TViewEnum>? onViewSelected, 
+        Action<TViewEnum>? onViewSelected,
         Panel? ternaryContainer = null)
     {
         viewSelector = this;
@@ -58,9 +58,16 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
         this.Subscribe<ViewSelectMessage>();
     }
 
-    public static void Select(
-        TViewEnum viewEnum,
-        object? activationParameter = null)
+    public void SelectView(TViewEnum viewEnum, object? activationParameter = null)
+    {
+        var selectableView = this.SelectableViewFrom(viewEnum);
+        if (selectableView.IsEnabled)
+        {
+            new ViewSelectMessage((int)(object)viewEnum, activationParameter).Publish();
+        }
+    }
+
+    public static void Select(TViewEnum viewEnum, object? activationParameter = null)
     {
         var selectableView = viewSelector.SelectableViewFrom(viewEnum);
         if (selectableView.IsEnabled)
@@ -79,7 +86,7 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
             if (control is not null)
             {
                 control.IsEnabled = false;
-                control.Opacity= 0.4;
+                control.Opacity = 0.4;
             }
         }
     }
@@ -102,12 +109,20 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
     public ViewModel? CurrentPrimaryViewModel => this.activePrimaryViewModel;
 
     public ViewModel? CurrentSecondaryViewModel => this.activeSecondaryViewModel;
-    
+
     public ViewModel? CurrentTernaryViewModel => this.activeTernaryViewModel;
 
     public void Receive(ViewSelectMessage viewSelectMessage)
     {
         var viewEnum = (TViewEnum)(object)viewSelectMessage.ViewEnum;
+        var selectableView =
+            (from SelectableView<TViewEnum> selectable in this.selectableViews
+             where selectable.ViewEnum.Equals(viewEnum)
+             select selectable).FirstOrDefault();
+        if (selectableView is null || !selectableView.IsEnabled)
+        {
+            return;
+        }
 
         static void HideAndDeactivate(ViewModel? viewModel)
         {
@@ -158,7 +173,7 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
         ViewModel newPrimaryViewModel = this.PrimaryViewModelFrom(viewEnum);
         ViewModel? secondaryNewViewModel = this.SecondaryViewModelFrom(viewEnum);
         ViewModel? ternaryNewViewModel = this.TernaryViewModelFrom(viewEnum);
-        object? activationParameters = viewSelectMessage.ActivationParameter; 
+        object? activationParameters = viewSelectMessage.ActivationParameter;
         ActivateAndShow(newPrimaryViewModel, activationParameters);
         ActivateAndShow(secondaryNewViewModel, activationParameters);
         ActivateAndShow(ternaryNewViewModel, activationParameters);
