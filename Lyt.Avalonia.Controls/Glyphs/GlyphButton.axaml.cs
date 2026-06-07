@@ -63,6 +63,7 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
         => (this.xamlContent.Content is not null) &&
             (this.Layout == ButtonLayout.IconOnly ||
             this.Layout == ButtonLayout.IconTextRightSide ||
+            this.Layout == ButtonLayout.IconTextLeftSide ||
             this.Layout == ButtonLayout.IconTextBelow||
             this.Layout == ButtonLayout.IconTextBelowNoBackground);
 
@@ -70,12 +71,14 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
         => (this.icon.Content is not null) &&
             (this.Layout == ButtonLayout.IconOnly ||
             this.Layout == ButtonLayout.IconTextRightSide ||
+            this.Layout == ButtonLayout.IconTextLeftSide ||
             this.Layout == ButtonLayout.IconTextBelowNoBackground ||
             this.Layout == ButtonLayout.IconTextBelow);
 
     private bool HasText
         => (this.textBlock is not null) &&
             (this.Layout == ButtonLayout.IconTextRightSide ||
+            this.Layout == ButtonLayout.IconTextLeftSide ||
             this.Layout == ButtonLayout.IconTextBelow ||
             this.Layout == ButtonLayout.IconTextBelowNoBackground||
             this.Layout == ButtonLayout.TextOnly);
@@ -123,6 +126,7 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
                 this.textBlock.SetValue(Grid.ColumnSpanProperty, 1);
                 this.textBlock.HorizontalAlignment = HorizontalAlignment.Center;
                 this.textBlock.Margin = new Thickness(0, 0, 0, 0);
+                this.border.SetValue(Grid.ColumnSpanProperty, 2);
                 this.mainGrid.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Auto);
                 break;
 
@@ -134,6 +138,7 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
                 this.textBlock.SetValue(Grid.ColumnSpanProperty, 1);
                 this.textBlock.HorizontalAlignment = HorizontalAlignment.Center;
                 this.textBlock.Margin = new Thickness(0, 2, 0, 0);
+                this.border.SetValue(Grid.ColumnSpanProperty, 2);
                 this.mainGrid.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Auto);
                 this.rectangleBackground.SetValue(Grid.RowSpanProperty, 1);
                 double margin = this.BackgroundMargin;
@@ -151,9 +156,26 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
                 this.textBlock.IsVisible = true; //Visibility.Visible;
                 this.border.SetValue(Grid.RowProperty, 0);
                 this.border.SetValue(Grid.ColumnProperty, 1);
+                this.border.SetValue(Grid.ColumnSpanProperty, 1);
                 this.textBlock.HorizontalAlignment = HorizontalAlignment.Center;
                 this.textBlock.SetValue(HorizontalContentAlignmentProperty, HorizontalAlignment.Center);
-                this.textBlock.Margin = new Thickness(4, 0, 0, 0);
+                this.textBlock.Margin = new Thickness(2, 0, 0, 0);
+                break;
+
+            case ButtonLayout.IconTextLeftSide:
+                this.mainGrid.ColumnDefinitions[0].Width = new GridLength(1, GridUnitType.Star);
+                this.mainGrid.ColumnDefinitions[1].Width = new GridLength(1, GridUnitType.Auto);
+                this.mainGrid.RowDefinitions[1].Height = new GridLength(0, GridUnitType.Pixel);
+                this.viewBox.SetValue(Grid.ColumnProperty, 1);
+                this.icon.IsVisible = true; //Visibility.Visible;
+                this.icon.Margin = new Thickness(6);
+                this.textBlock.IsVisible = true; //Visibility.Visible;
+                this.border.SetValue(Grid.RowProperty, 0);
+                this.border.SetValue(Grid.ColumnProperty, 0);
+                this.border.SetValue(Grid.ColumnSpanProperty, 1);
+                this.textBlock.HorizontalAlignment = HorizontalAlignment.Center;
+                this.textBlock.SetValue(HorizontalContentAlignmentProperty, HorizontalAlignment.Center);
+                this.textBlock.Margin = new Thickness(0, 0, 2, 0);
                 break;
 
             case ButtonLayout.TextOnly:
@@ -162,6 +184,7 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
                 this.icon.IsVisible = false; //Visibility.Hidden;
                 this.border.SetValue(Grid.RowProperty, 0);
                 this.border.SetValue(Grid.ColumnProperty, 0);
+                this.border.SetValue(Grid.ColumnSpanProperty, 2);
                 this.textBlock.SetValue(HorizontalAlignmentProperty, HorizontalAlignment.Center);
                 this.textBlock.SetValue(HorizontalContentAlignmentProperty, HorizontalAlignment.Center);
                 this.textBlock.SetValue(MarginProperty, new Thickness(4, 0 , 4 , 0));

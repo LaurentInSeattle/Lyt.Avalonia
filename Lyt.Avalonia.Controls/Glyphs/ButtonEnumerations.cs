@@ -44,6 +44,7 @@ public enum ButtonLayout
     IconTextBelow,
     IconTextBelowNoBackground,
     IconTextRightSide,
+    IconTextLeftSide,
     TextOnly,
 }
 
