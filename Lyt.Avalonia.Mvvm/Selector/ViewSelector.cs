@@ -58,6 +58,8 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
         this.Subscribe<ViewSelectMessage>();
     }
 
+    public IEnumerable<SelectableView<TViewEnum>> SelectableViews => this.selectableViews;
+
     public void SelectView(TViewEnum viewEnum, object? activationParameter = null)
     {
         var selectableView = this.SelectableViewFrom(viewEnum);
