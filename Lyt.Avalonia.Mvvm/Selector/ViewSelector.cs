@@ -76,6 +76,21 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
         }
     }
 
+    public void DisableView(TViewEnum viewEnum)
+    {
+        var selectableView = this.SelectableViewFrom(viewEnum);
+        if (selectableView.IsEnabled)
+        {
+            selectableView.IsEnabled = false;
+            var control = selectableView.Button;
+            if (control is not null)
+            {
+                control.IsEnabled = false;
+                control.Opacity = 0.4;
+            }
+        }
+    }
+
     public static void Disable(TViewEnum viewEnum)
     {
         var selectableView = viewSelector.SelectableViewFrom(viewEnum);
@@ -87,6 +102,21 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
             {
                 control.IsEnabled = false;
                 control.Opacity = 0.4;
+            }
+        }
+    }
+
+    public void EnableView(TViewEnum viewEnum)
+    {
+        var selectableView = this.SelectableViewFrom(viewEnum);
+        if (!selectableView.IsEnabled)
+        {
+            selectableView.IsEnabled = true;
+            var control = selectableView.Button;
+            if (control is not null)
+            {
+                control.IsEnabled = true;
+                control.Opacity = 1;
             }
         }
     }
@@ -205,7 +235,7 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
              select selectable).FirstOrDefault();
         return selectableView is not null ?
             selectableView :
-            throw new ArgumentException("No such view", nameof(viewEnum));
+            throw new ArgumentException("No such view: " + viewEnum.ToString(), nameof(viewEnum));
     }
 
     private ViewModel PrimaryViewModelFrom(TViewEnum viewEnum)
@@ -216,7 +246,7 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
              select selectable.PrimaryViewModel).FirstOrDefault();
         return viewModel is not null ?
             viewModel :
-            throw new ArgumentException("No such view", nameof(viewEnum));
+            throw new ArgumentException("No such view: " + viewEnum.ToString(), nameof(viewEnum));
     }
 
     private ViewModel? SecondaryViewModelFrom(TViewEnum viewEnum)
@@ -227,7 +257,7 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
              select selectable).FirstOrDefault();
         return selectableView is not null ?
             selectableView.SecondaryViewModel :
-            throw new ArgumentException("No such view", nameof(viewEnum));
+            throw new ArgumentException("No such view: " + viewEnum.ToString(), nameof(viewEnum));
     }
 
     private ViewModel? TernaryViewModelFrom(TViewEnum viewEnum)
@@ -238,7 +268,7 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
              select selectable).FirstOrDefault();
         return selectableView is not null ?
             selectableView.TernaryViewModel :
-            throw new ArgumentException("No such view", nameof(viewEnum));
+            throw new ArgumentException("No such view: " + viewEnum.ToString(), nameof(viewEnum));
     }
 
     private Control? ControlFrom(TViewEnum viewEnum)
@@ -249,7 +279,7 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
              select selectable).FirstOrDefault();
         return selectableView is not null ?
             selectableView.Button :
-            throw new ArgumentException("No such view", nameof(viewEnum));
+            throw new ArgumentException("No such view: " + viewEnum.ToString(), nameof(viewEnum));
     }
 
     private Control? ControlFrom(ViewModel viewModel)
