@@ -221,7 +221,10 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
                 selectorControl.GetType().Implements<ICanSelect>())
             {
                 var canSelect = selectorControl as ICanSelect;
-                this.selector.Select(canSelect!);
+                if (canSelect is not null)
+                {
+                    this.selector.Select(canSelect);
+                } 
             }
         }
 

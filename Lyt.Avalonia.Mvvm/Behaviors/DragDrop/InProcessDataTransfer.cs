@@ -4,7 +4,8 @@ public sealed class InProcessDataTransfer(object inProcessData) : IDataTransfer
 {
     private object? inProcessData = inProcessData;
 
-    public object InProcessData => this.inProcessData!;
+    public object InProcessData 
+        => this.inProcessData is null ? throw new Exception("Missing InProcessData") : this.inProcessData;
 
     IReadOnlyList<DataFormat> IDataTransfer.Formats => [];
     

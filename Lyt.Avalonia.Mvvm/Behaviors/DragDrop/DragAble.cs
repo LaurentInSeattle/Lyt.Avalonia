@@ -237,8 +237,13 @@ public sealed class DragAble(Canvas canvas, bool inProcess = true) : BehaviorBas
     {
         // Debug.WriteLine("AdjustGhostPosition from point");
 
+        if (this.ghostView is null)
+        {
+            return;
+        }
+
         Point newPosition = new(position.X + 4, position.Y + 4);
-        this.ghostView!.SetValue(Canvas.LeftProperty, newPosition.X);
+        this.ghostView.SetValue(Canvas.LeftProperty, newPosition.X);
         this.ghostView.SetValue(Canvas.TopProperty, newPosition.Y);
 
         // Debug.WriteLine("GhostView Position: " + position.ToString());

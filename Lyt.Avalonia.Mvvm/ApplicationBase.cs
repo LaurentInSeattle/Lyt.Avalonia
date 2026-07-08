@@ -58,16 +58,16 @@ public class ApplicationBase(
         => new(typeof(TInterface), typeof(TImplementation));
 
     public static T GetRequiredService<T>() where T : notnull
-        => ApplicationBase.AppHost!.Services.GetRequiredService<T>();
+        => ApplicationBase.AppHost.Services.GetRequiredService<T>();
 
     public static object GetRequiredService(Type type)
-        => ApplicationBase.AppHost!.Services.GetRequiredService(type);
+        => ApplicationBase.AppHost.Services.GetRequiredService(type);
 
     public static T? GetOptionalService<T>() where T : notnull
-        => ApplicationBase.AppHost!.Services.GetService<T>();
+        => ApplicationBase.AppHost.Services.GetService<T>();
 
     public static object? GetOptionalService(Type type)
-        => ApplicationBase.AppHost!.Services.GetService(type);
+        => ApplicationBase.AppHost.Services.GetService(type);
 
     public static TModel GetModel<TModel>() where TModel : notnull
     {
@@ -87,10 +87,11 @@ public class ApplicationBase(
         List<IModel> models = [];
         foreach (Type type in this.validatedModelTypes)
         {
-            object model = ApplicationBase.AppHost!.Services.GetRequiredService(type);
+            object model = ApplicationBase.AppHost.Services.GetRequiredService(type);
             bool isModel = typeof(IModel).IsAssignableFrom(model.GetType());
             if (isModel)
             {
+                // ! Verified by isModel 
                 models.Add((model as IModel)!);
             }
         }
@@ -106,7 +107,7 @@ public class ApplicationBase(
         //startupWindow.Closing += (_, _) => { this.logViewer?.Close(); };
         IApplicationModel applicationModel = ApplicationBase.GetRequiredService<IApplicationModel>();
         await applicationModel.Shutdown();
-        await ApplicationBase.AppHost!.StopAsync();
+        await ApplicationBase.AppHost.StopAsync();
         await this.OnShutdownComplete();
 
         this.ForceShutdown();
@@ -243,7 +244,10 @@ public class ApplicationBase(
                         }
                         else
                         {
-                            Debug.WriteLine(modelType.FullName!.ToString() + " is not a IModel");
+                            if (modelType.FullName is not null)
+                            {
+                                Debug.WriteLine(modelType.FullName.ToString() + " is not a IModel");
+                            }
                         }
                     }
 
@@ -354,7 +358,7 @@ public class ApplicationBase(
         // This ensures that the Application Model and all listed models are constructed.
         foreach (Type type in this.validatedModelTypes)
         {
-            object model = ApplicationBase.AppHost!.Services.GetRequiredService(type);
+            object model = ApplicationBase.AppHost.Services.GetRequiredService(type);
             if (model is not IModel)
             {
                 throw new ApplicationException("Failed to warmup model: " + type.FullName);
