@@ -43,6 +43,8 @@ public sealed partial class ShellViewModel : ViewModel<ShellView>, IRecipient<Mo
         // throw new NotImplementedException("wtf");
     }
 
+#pragma warning disable NX0001
+
     [RelayCommand]
     public void OnSvg()
     {
