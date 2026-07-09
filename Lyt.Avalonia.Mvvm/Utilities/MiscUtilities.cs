@@ -19,7 +19,23 @@ public static class MiscUtilities
         renderTarget.Render(visual);
 
         // Save to the specified file path
-        renderTarget.Save(filePath);
+        BitmapEncoderOptions encoderOptions; 
+        string extension = Path.GetExtension(filePath).ToLowerInvariant();
+        if (extension.EndsWith("png"))
+        {
+            encoderOptions = new PngBitmapEncoderOptions() { CompressionLevel = System.IO.Compression.CompressionLevel.Optimal };
+        }
+        else if (extension.EndsWith("jpg") || extension.EndsWith("jpeg"))
+        {
+            encoderOptions = new JpegBitmapEncoderOptions() { Quality = 100 };
+        }
+        else
+        {
+            // Consider changing file extension and saving as PNG 
+            throw new NotSupportedException("File format is not supported");
+        } 
+
+        renderTarget.Save(filePath, encoderOptions );        
     }
 
     /// <summary> Find first parent of type T in VisualTree. </summary>

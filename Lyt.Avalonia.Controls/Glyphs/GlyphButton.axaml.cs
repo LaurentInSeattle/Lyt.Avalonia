@@ -442,6 +442,7 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
         if (this.eventingRectangle.IsPointerOver)
         {
             this.Enter();
+            args.Handled = true;
         }
     }
 
@@ -450,6 +451,7 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
         if (this.IsSelected)
         {
             this.UpdateVisualState();
+            args.Handled = true;
             return;
         }
 
@@ -458,6 +460,7 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
             if (!this.eventingRectangle.IsPointerInside(args))
             {
                 this.Leave();
+                args.Handled = true;
             }
         }
         else
@@ -465,6 +468,7 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
             if (!this.eventingRectangle.IsPointerOver)
             {
                 this.Leave();
+                args.Handled = true;
             }
         }
     }
@@ -479,6 +483,7 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
         if (this.eventingRectangle.IsPointerInside(args))
         {
             this.Down();
+            args.Handled = true;
         }
     }
 
@@ -497,6 +502,8 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
         {
             this.Leave();
         }
+
+        args.Handled = true;
     }
 
     private void OnPointerMoved(object? sender, PointerEventArgs args)
@@ -509,12 +516,13 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
         if (!this.eventingRectangle.IsPointerInside(args))
         {
             this.Leave();
+            args.Handled = true;
         }
     }
 
     private void Enter()
     {
-        // Debug.WriteLine("Enter");
+        Debug.WriteLine(" Enter: " + this.Text);
         this.isOver = true;
         this.UpdateVisualState();
     }
