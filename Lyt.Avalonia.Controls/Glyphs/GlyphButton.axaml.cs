@@ -522,7 +522,7 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
 
     private void Enter()
     {
-        Debug.WriteLine(" Enter: " + this.Text);
+        // Debug.WriteLine(" Enter: " + this.Text);
         this.isOver = true;
         this.UpdateVisualState();
     }
