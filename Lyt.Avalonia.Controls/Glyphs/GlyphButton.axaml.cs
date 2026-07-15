@@ -235,7 +235,7 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
 
     private bool IsHot => !this.isPressed && this.isOver && !this.isDisabled; 
 
-    private void UpdateVisualState()
+    public void UpdateVisualState()
     {
         if (this.isPressed && !this.isDisabled)
         {

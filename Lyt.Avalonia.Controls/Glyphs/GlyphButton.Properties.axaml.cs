@@ -99,7 +99,7 @@ public partial class GlyphButton
     /// <summary> IsDisabled Styled Property </summary>
     public static readonly StyledProperty<bool> IsDisabledProperty =
         AvaloniaProperty.Register<GlyphButton, bool>(
-            nameof(IsDisabled), 
+            nameof(IsDisabled),
             defaultValue: false,
             inherits: false,
             defaultBindingMode: BindingMode.OneWay,
@@ -147,6 +147,12 @@ public partial class GlyphButton
         if (sender is GlyphButton glyphButton)
         {
             glyphButton.isSelected = newIsSelected;
+            if (!newIsSelected)
+            {
+                glyphButton.isOver = false;
+                glyphButton.isPressed = false;
+            }
+
             glyphButton.UpdateVisualState();
         }
 
@@ -179,7 +185,7 @@ public partial class GlyphButton
             newGroup.Register(glyphButton);
         }
 
-        return newGroup; 
+        return newGroup;
     }
 
     /// <summary> XamlContent Styled Property </summary>
@@ -280,14 +286,14 @@ public partial class GlyphButton
     /// <summary> Coerces the GlyphSource value. </summary>
     private static string CoerceGlyphSource(AvaloniaObject sender, string newText)
     {
-        if ( sender is GlyphButton glyphButton)
+        if (sender is GlyphButton glyphButton)
         {
             glyphButton.icon.Source = newText;
             glyphButton.icon.UpdateImage();
         }
 
         return newText;
-    } 
+    }
 
     /// <summary> GlyphAngle Styled Property </summary>
     public static readonly StyledProperty<double> GlyphAngleProperty =
@@ -384,7 +390,7 @@ public partial class GlyphButton
         }
 
         return newText;
-    } 
+    }
 
     /// <summary> Typography Styled Property </summary>
     public static readonly StyledProperty<ControlTheme> TypographyProperty =
