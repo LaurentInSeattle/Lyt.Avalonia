@@ -23,6 +23,13 @@ public partial class SvgIcon : UserControl
         {
             if (Utilities.TryFindResource<DrawingImage>(newSource, out this.drawingImage))
             {
+                // ! Try 
+                if ( this.drawingImage!.Drawing is DrawingGroup drawingGroup)
+                {
+                    var clone = CloneDrawingGroup(drawingGroup);
+                    this.CreateDrawingImage(clone);
+                }
+
                 this.imageUpdateRequired = true;
             }
             else if (Utilities.TryFindResource<GeometryDrawing>(newSource, out GeometryDrawing? geometryDrawing))
@@ -51,6 +58,61 @@ public partial class SvgIcon : UserControl
                 this.UpdateImage();
             }
         }
+    }
+
+    private static DrawingGroup CloneDrawingGroup(DrawingGroup source)
+    {
+        var clone = new DrawingGroup
+        {
+            ClipGeometry = source.ClipGeometry?.Clone(), // Geometry natively overrides .Clone()
+            Opacity = source.Opacity,
+            OpacityMask = source.OpacityMask, // Note: Brushes are generally immutable/shared, clone if modified
+            Transform = source.Transform // Reuses or replaces transform reference
+        };
+
+        // Recurse down children vector layers
+        if (source.Children != null)
+        {
+            foreach (var child in source.Children)
+            {
+                clone.Children.Add(CloneTree(child));
+            }
+        }
+
+        return clone;
+    }
+
+    private static Drawing CloneTree(Drawing drawing)
+    {
+        return drawing switch
+        {
+            DrawingGroup drawingGroup => CloneDrawingGroup(drawingGroup),
+            GeometryDrawing geometryDrawing => CloneGeometryDrawing(geometryDrawing),
+            _ => throw new NotSupportedException($"Drawing type {drawing.GetType()} is not supported for manual deep cloning.")
+        };
+    }
+
+    private static GeometryDrawing CloneGeometryDrawing(GeometryDrawing source)
+    {
+        return new GeometryDrawing
+        {
+            Geometry = source.Geometry?.Clone(), // Native geometric clone
+            Brush = source.Brush,                 // Shares brush resources safely
+            Pen = source.Pen != null ? ClonePen(source.Pen) : null
+        };
+    }
+
+    private static Pen ClonePen(IPen source)
+    {
+        return new Pen
+        {
+            Brush = source.Brush,
+            Thickness = source.Thickness,
+            DashStyle = source.DashStyle,
+            LineCap = source.LineCap,
+            LineJoin = source.LineJoin,
+            MiterLimit = source.MiterLimit
+        };
     }
 
     public void UpdateImage()
@@ -194,6 +256,13 @@ public partial class SvgIcon : UserControl
         {
             if (Utilities.TryFindResource<DrawingImage>(newSource, out svgIcon.drawingImage))                
             {
+                // ! Try 
+                if (svgIcon.drawingImage!.Drawing is DrawingGroup drawingGroup)
+                {
+                    var clone = CloneDrawingGroup(drawingGroup);
+                    svgIcon.CreateDrawingImage(clone);
+                }
+
                 svgIcon.imageUpdateRequired = true;
             }
             else if (Utilities.TryFindResource<GeometryDrawing>(newSource, out GeometryDrawing? geometryDrawing))
