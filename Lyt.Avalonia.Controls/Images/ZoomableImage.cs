@@ -12,24 +12,25 @@
 using Avalonia.Controls.Metadata;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 
-using Key = Avalonia.Input.Key; 
+using Key = Avalonia.Input.Key;
 using Bitmap = Avalonia.Media.Imaging.Bitmap;
 using Color = Avalonia.Media.Color;
 using Pen = Avalonia.Media.Pen;
 using Point = Avalonia.Point;
 using Size = Avalonia.Size;
 
-namespace Lyt.Avalonia.Controls.Zoom;
+namespace Lyt.Avalonia.Controls.Images;
 
 [TemplatePart("PART_MainGrid", typeof(Grid))]
 [TemplatePart("PART_ContentPresenter", typeof(ScrollContentPresenter))] // ViewPort
 [TemplatePart("PART_HorizontalScrollBar", typeof(ScrollBar))]
 [TemplatePart("PART_VerticalScrollBar", typeof(ScrollBar))]
 [TemplatePart("PART_ScrollBarsSeparator", typeof(Panel))]
-public class AdvancedImageBox : TemplatedControl, IScrollable
+public partial class ZoomableImage : TemplatedControl, IScrollable
 {
     /// <summary> Multicast event for property change notifications. </summary>
     private PropertyChangedEventHandler? propertyChanged;
@@ -57,13 +58,9 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
         return true;
     }
 
-    protected virtual void OnPropertyChanged(PropertyChangedEventArgs e)
-    {
-    }
+    protected virtual void OnPropertyChanged(PropertyChangedEventArgs e)  { }
 
-    /// <summary>
-    ///     Notifies listeners that a property value has changed.
-    /// </summary>
+    /// <summary> Notifies listeners that a property value has changed. </summary>
     /// <param name="propertyName">
     ///     Name of the property used to notify listeners.  This
     ///     value is optional and can be provided automatically when invoked from compilers
@@ -74,382 +71,6 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
         var e = new PropertyChangedEventArgs(propertyName);
         this.OnPropertyChanged(e);
         this.propertyChanged?.Invoke(this, e);
-    }
-
-
-    /// <summary>
-    /// Represents available levels of zoom in an <see cref="AdvancedImageBox"/> control
-    /// </summary>
-    public class ZoomLevelCollection : IList<int>
-    {
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ZoomLevelCollection"/> class.
-        /// </summary>
-        public ZoomLevelCollection() => this.List = new SortedList<int, int>();
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ZoomLevelCollection"/> class.
-        /// </summary>
-        /// <param name="collection">The default values to populate the collection with.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown if the <c>collection</c> parameter is null</exception>
-        public ZoomLevelCollection(IEnumerable<int> collection)
-            : this()
-        {
-            if (collection == null)
-            {
-                throw new ArgumentNullException(nameof(collection));
-            }
-
-            this.AddRange(collection);
-        }
-
-
-
-        /// <summary>
-        /// Returns the default zoom levels
-        /// </summary>
-        public static ZoomLevelCollection Default =>
-            new([
-                7, 10, 15, 20, 25, 30, 50, 70, 100, 150, 200, 300, 400, 500, 600, 700, 800, 1200, 1600, 3200, 6400
-            ]);
-
-
-
-        /// <summary>
-        /// Gets the number of elements contained in the <see cref="ZoomLevelCollection" />.
-        /// </summary>
-        /// <returns>
-        /// The number of elements contained in the <see cref="ZoomLevelCollection" />.
-        /// </returns>
-        public int Count => this.List.Count;
-
-        /// <summary>
-        /// Gets a value indicating whether the <see cref="T:System.Collections.Generic.ICollection`1" /> is read-only.
-        /// </summary>
-        /// <value><c>true</c> if this instance is read only; otherwise, <c>false</c>.</value>
-        /// <returns>true if the <see cref="T:System.Collections.Generic.ICollection`1" /> is read-only; otherwise, false.
-        /// </returns>
-        public bool IsReadOnly => false;
-
-        /// <summary>
-        /// Gets or sets the zoom level at the specified index.
-        /// </summary>
-        /// <param name="index">The index.</param>
-        public int this[int index]
-        {
-            get => this.List.Values[index];
-            set
-            {
-                this.List.RemoveAt(index);
-                this.Add(value);
-            }
-        }
-
-
-
-        /// <summary>
-        /// Gets or sets the backing list.
-        /// </summary>
-        protected SortedList<int, int> List { get; set; }
-
-
-
-        /// <summary>
-        /// Adds an item to the <see cref="T:System.Collections.Generic.ICollection`1" />.
-        /// </summary>
-        /// <param name="item">The object to add to the <see cref="T:System.Collections.Generic.ICollection`1" />.</param>
-        public void Add(int item)
-        {
-            this.List.Add(item, item);
-        }
-
-        /// <summary>
-        /// Adds a range of items to the <see cref="ZoomLevelCollection"/>.
-        /// </summary>
-        /// <param name="collection">The items to add to the collection.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown if the <c>collection</c> parameter is null.</exception>
-        public void AddRange(IEnumerable<int> collection)
-        {
-            if (collection == null)
-            {
-                throw new ArgumentNullException(nameof(collection));
-            }
-
-            foreach (int value in collection)
-            {
-                this.Add(value);
-            }
-        }
-
-        /// <summary>
-        /// Removes all items from the <see cref="T:System.Collections.Generic.ICollection`1" />.
-        /// </summary>
-        public void Clear()
-        {
-            this.List.Clear();
-        }
-
-        /// <summary>
-        /// Determines whether the <see cref="T:System.Collections.Generic.ICollection`1" /> contains a specific value.
-        /// </summary>
-        /// <param name="item">The object to locate in the <see cref="T:System.Collections.Generic.ICollection`1" />.</param>
-        /// <returns>true if <paramref name="item" /> is found in the <see cref="T:System.Collections.Generic.ICollection`1" />; otherwise, false.</returns>
-        public bool Contains(int item)
-        {
-            return this.List.ContainsKey(item);
-        }
-
-        /// <summary>
-        /// Copies a range of elements this collection into a destination <see cref="Array"/>.
-        /// </summary>
-        /// <param name="array">The <see cref="Array"/> that receives the data.</param>
-        /// <param name="arrayIndex">A 64-bit integer that represents the index in the <see cref="Array"/> at which storing begins.</param>
-        public void CopyTo(int[] array, int arrayIndex)
-        {
-            for (int i = 0; i < this.Count; i++)
-            {
-                array[arrayIndex + i] = this.List.Values[i];
-            }
-        }
-
-        /// <summary>
-        /// Finds the index of a zoom level matching or nearest to the specified value.
-        /// </summary>
-        /// <param name="zoomLevel">The zoom level.</param>
-        public int FindNearest(int zoomLevel)
-        {
-            if (this.Count == 0)
-            {
-                return zoomLevel;
-            }
-
-            int nearestValue = this.List.Values[0];
-            int nearestDifference = Math.Abs(nearestValue - zoomLevel);
-            for (int i = 1; i < this.Count; i++)
-            {
-                int value = this.List.Values[i];
-                int difference = Math.Abs(value - zoomLevel);
-                if (difference < nearestDifference)
-                {
-                    nearestValue = value;
-                    nearestDifference = difference;
-                }
-            }
-            return nearestValue;
-        }
-
-        /// <summary>
-        /// Returns an enumerator that iterates through the collection.
-        /// </summary>
-        /// <returns>A <see cref="T:System.Collections.Generic.IEnumerator`1" /> that can be used to iterate through the collection.</returns>
-        public IEnumerator<int> GetEnumerator()
-        {
-            return this.List.Values.GetEnumerator();
-        }
-
-        /// <summary>
-        /// Determines the index of a specific item in the <see cref="T:System.Collections.Generic.IList`1" />.
-        /// </summary>
-        /// <param name="item">The object to locate in the <see cref="T:System.Collections.Generic.IList`1" />.</param>
-        /// <returns>The index of <paramref name="item" /> if found in the list; otherwise, -1.</returns>
-        public int IndexOf(int item)
-        {
-            return this.List.IndexOfKey(item);
-        }
-
-        /// <summary>
-        /// Not implemented.
-        /// </summary>
-        /// <param name="index">The index.</param>
-        /// <param name="item">The item.</param>
-        /// <exception cref="System.NotImplementedException">Not implemented</exception>
-        public void Insert(int index, int item)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Returns the next increased zoom level for the given current zoom.
-        /// </summary>
-        /// <param name="zoomLevel">The current zoom level.</param>
-        /// <param name="constrainZoomLevel">When positive, constrain maximum zoom to this value</param>
-        /// <returns>The next matching increased zoom level for the given current zoom if applicable, otherwise the nearest zoom.</returns>
-        public int NextZoom(int zoomLevel, int constrainZoomLevel = 0)
-        {
-            var index = this.IndexOf(this.FindNearest(zoomLevel));
-            if (index < this.Count - 1)
-            {
-                index++;
-            }
-
-            return constrainZoomLevel > 0 && this[index] >= constrainZoomLevel ? constrainZoomLevel : this[index];
-        }
-
-        /// <summary>
-        /// Returns the next decreased zoom level for the given current zoom.
-        /// </summary>
-        /// <param name="zoomLevel">The current zoom level.</param>
-        /// <param name="constrainZoomLevel">When positive, constrain minimum zoom to this value</param>
-        /// <returns>The next matching decreased zoom level for the given current zoom if applicable, otherwise the nearest zoom.</returns>
-        public int PreviousZoom(int zoomLevel, int constrainZoomLevel = 0)
-        {
-            var index = this.IndexOf(this.FindNearest(zoomLevel));
-            if (index > 0)
-            {
-                index--;
-            }
-
-            return constrainZoomLevel > 0 && this[index] <= constrainZoomLevel ? constrainZoomLevel : this[index];
-        }
-
-        /// <summary>
-        /// Removes the first occurrence of a specific object from the <see cref="T:System.Collections.Generic.ICollection`1" />.
-        /// </summary>
-        /// <param name="item">The object to remove from the <see cref="T:System.Collections.Generic.ICollection`1" />.</param>
-        /// <returns>true if <paramref name="item" /> was successfully removed from the <see cref="T:System.Collections.Generic.ICollection`1" />; otherwise, false. This method also returns false if <paramref name="item" /> is not found in the original <see cref="T:System.Collections.Generic.ICollection`1" />.</returns>
-        public bool Remove(int item)
-        {
-            return this.List.Remove(item);
-        }
-
-        /// <summary>
-        /// Removes the element at the specified index of the <see cref="ZoomLevelCollection"/>.
-        /// </summary>
-        /// <param name="index">The zero-based index of the element to remove.</param>
-        public void RemoveAt(int index)
-        {
-            this.List.RemoveAt(index);
-        }
-
-        /// <summary>
-        /// Copies the elements of the <see cref="ZoomLevelCollection"/> to a new array.
-        /// </summary>
-        /// <returns>An array containing copies of the elements of the <see cref="ZoomLevelCollection"/>.</returns>
-        public int[] ToArray()
-        {
-            var results = new int[this.Count];
-            this.CopyTo(results, 0);
-
-            return results;
-        }
-
-
-
-        /// <summary>
-        /// Returns an enumerator that iterates through a collection.
-        /// </summary>
-        /// <returns>An <see cref="ZoomLevelCollection" /> object that can be used to iterate through the collection.</returns>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
-
-    }
-
-
-
-    /// <summary>
-    /// Determines the sizing mode of an image hosted in an <see cref="AdvancedImageBox" /> control.
-    /// </summary>
-    public enum SizeModes
-    {
-        /// <summary>
-        /// The image is displayed according to current zoom and scroll properties.
-        /// </summary>
-        Normal,
-
-        /// <summary>
-        /// The image is stretched to fill the client area of the control.
-        /// </summary>
-        Stretch,
-
-        /// <summary>
-        /// The image is stretched to fill as much of the client area of the control as possible, whilst retaining the same aspect ratio for the width and height.
-        /// </summary>
-        Fit
-    }
-
-    [Flags]
-    public enum MouseButtons
-    {
-        None = 0,
-        LeftButton = 1,
-        MiddleButton = 2,
-        RightButton = 4
-    }
-
-    public enum MouseWheelZoomBehaviours
-    {
-        /// <summary>
-        /// No action is performed when using the mouse wheel.
-        /// </summary>
-        None,
-
-        /// <summary>
-        /// Zoom in and out in a native way using the mouse wheel delta.
-        /// </summary>
-        ZoomNative,
-
-        /// <summary>
-        /// Zoom in and out in a native way using the mouse wheel delta, but change to tick levels when holding ALT key.
-        /// </summary>
-        ZoomNativeAltLevels,
-
-        /// <summary>
-        /// Zoom in and out using tick levels defined in the <see cref="AdvancedImageBox.ZoomLevels"/> collection.
-        /// </summary>
-        ZoomLevels,
-
-        /// <summary>
-        /// Zoom in and out using tick levels defined in the <see cref="AdvancedImageBox.ZoomLevels"/> collection, but change to native when holding ALT key.
-        /// </summary>
-        ZoomLevelsAltNative,
-    }
-
-    /// <summary>
-    /// Describes the zoom action occurring
-    /// </summary>
-    [Flags]
-    public enum ZoomActions
-    {
-        /// <summary>
-        /// No action.
-        /// </summary>
-        None = 0,
-
-        /// <summary>
-        /// The control is increasing the zoom.
-        /// </summary>
-        ZoomIn = 1,
-
-        /// <summary>
-        /// The control is decreasing the zoom.
-        /// </summary>
-        ZoomOut = 2,
-
-        /// <summary>
-        /// The control zoom was reset.
-        /// </summary>
-        ActualSize = 4
-    }
-
-    public enum SelectionModes
-    {
-        /// <summary>
-        ///   No selection.
-        /// </summary>
-        None,
-
-        /// <summary>
-        ///   Rectangle selection.
-        /// </summary>
-        Rectangle,
-
-        /// <summary>
-        ///   Zoom selection.
-        /// </summary>
-        Zoom
     }
 
 
@@ -540,8 +161,8 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     private Pen? _selectionBorderPen;
 
 
-    public static readonly DirectProperty<AdvancedImageBox, bool> CanRenderProperty =
-        AvaloniaProperty.RegisterDirect<AdvancedImageBox, bool>(
+    public static readonly DirectProperty<ZoomableImage, bool> CanRenderProperty =
+        AvaloniaProperty.RegisterDirect<ZoomableImage, bool>(
             nameof(CanRender),
             o => o.CanRender);
 
@@ -566,7 +187,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<byte> GridCellSizeProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, byte>(nameof(GridCellSize), 15);
+        AvaloniaProperty.Register<ZoomableImage, byte>(nameof(GridCellSize), 15);
 
     /// <summary>
     /// Gets or sets the grid cell size
@@ -578,7 +199,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<ISolidColorBrush> GridColorProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, ISolidColorBrush>(nameof(GridColor), Brushes.Gainsboro);
+        AvaloniaProperty.Register<ZoomableImage, ISolidColorBrush>(nameof(GridColor), Brushes.Gainsboro);
 
     /// <summary>
     /// Gets or sets the color used to create the checkerboard style background
@@ -590,7 +211,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<ISolidColorBrush> GridColorAlternateProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, ISolidColorBrush>(nameof(GridColorAlternate), Brushes.White);
+        AvaloniaProperty.Register<ZoomableImage, ISolidColorBrush>(nameof(GridColorAlternate), Brushes.White);
 
     /// <summary>
     /// Gets or sets the color used to create the checkerboard style background
@@ -602,7 +223,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<Bitmap?> ImageProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, Bitmap?>(nameof(Image));
+        AvaloniaProperty.Register<ZoomableImage, Bitmap?>(nameof(Image));
 
     /// <summary>
     /// Gets or sets the image to be displayed
@@ -632,8 +253,8 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     [MemberNotNullWhen(true, nameof(Image))]
     public bool IsImageLoaded => this.Image is not null;
 
-    public static readonly DirectProperty<AdvancedImageBox, Bitmap?> TrackerImageProperty =
-        AvaloniaProperty.RegisterDirect<AdvancedImageBox, Bitmap?>(
+    public static readonly DirectProperty<ZoomableImage, Bitmap?> TrackerImageProperty =
+        AvaloniaProperty.RegisterDirect<ZoomableImage, Bitmap?>(
             nameof(TrackerImage),
             o => o.TrackerImage,
             (o, v) => o.TrackerImage = v);
@@ -661,7 +282,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     public bool HaveTrackerImage => this._trackerImage is not null;
 
     public static readonly StyledProperty<bool> TrackerImageAutoZoomProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, bool>(nameof(TrackerImageAutoZoom), true);
+        AvaloniaProperty.Register<ZoomableImage, bool>(nameof(TrackerImageAutoZoom), true);
 
     /// <summary>
     /// Gets or sets if the tracker image will be scaled to the current zoom
@@ -709,7 +330,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<bool> ShowGridProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, bool>(nameof(ShowGrid), true);
+        AvaloniaProperty.Register<ZoomableImage, bool>(nameof(ShowGrid), true);
 
     /// <summary>
     /// Gets or sets the grid visibility when reach high zoom levels
@@ -720,8 +341,8 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
         set => this.SetValue(ShowGridProperty, value);
     }
 
-    public static readonly DirectProperty<AdvancedImageBox, Point> PointerPositionProperty =
-        AvaloniaProperty.RegisterDirect<AdvancedImageBox, Point>(
+    public static readonly DirectProperty<ZoomableImage, Point> PointerPositionProperty =
+        AvaloniaProperty.RegisterDirect<ZoomableImage, Point>(
             nameof(PointerPosition),
             o => o.PointerPosition);
 
@@ -734,8 +355,8 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
         private set => this.SetAndRaise(PointerPositionProperty, ref this._pointerPosition, value);
     }
 
-    public static readonly DirectProperty<AdvancedImageBox, bool> IsPanningProperty =
-        AvaloniaProperty.RegisterDirect<AdvancedImageBox, bool>(
+    public static readonly DirectProperty<ZoomableImage, bool> IsPanningProperty =
+        AvaloniaProperty.RegisterDirect<ZoomableImage, bool>(
             nameof(IsPanning),
             o => o.IsPanning);
 
@@ -769,8 +390,8 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
         }
     }
 
-    public static readonly DirectProperty<AdvancedImageBox, bool> IsSelectingProperty =
-        AvaloniaProperty.RegisterDirect<AdvancedImageBox, bool>(
+    public static readonly DirectProperty<ZoomableImage, bool> IsSelectingProperty =
+        AvaloniaProperty.RegisterDirect<ZoomableImage, bool>(
             nameof(IsSelecting),
             o => o.IsSelecting);
 
@@ -804,7 +425,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<bool> AutoPanProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, bool>(nameof(AutoPan), true);
+        AvaloniaProperty.Register<ZoomableImage, bool>(nameof(AutoPan), true);
 
     /// <summary>
     /// Gets or sets if the control can pan with the mouse
@@ -816,7 +437,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<MouseButtons> PanWithMouseButtonsProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, MouseButtons>(nameof(PanWithMouseButtons), MouseButtons.LeftButton | MouseButtons.MiddleButton | MouseButtons.RightButton);
+        AvaloniaProperty.Register<ZoomableImage, MouseButtons>(nameof(PanWithMouseButtons), MouseButtons.LeftButton | MouseButtons.MiddleButton | MouseButtons.RightButton);
 
     /// <summary>
     /// Gets or sets the mouse buttons to pan the image
@@ -828,7 +449,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<int> PanOffsetProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, int>(nameof(PanOffset), 20);
+        AvaloniaProperty.Register<ZoomableImage, int>(nameof(PanOffset), 20);
 
     /// <summary>
     /// Gets or sets the pan offset to displace everytime a key is pressed
@@ -840,7 +461,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<bool> PanWithArrowsProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, bool>(nameof(PanWithArrows), true);
+        AvaloniaProperty.Register<ZoomableImage, bool>(nameof(PanWithArrows), true);
 
     /// <summary>
     /// Gets or sets if the control can pan with the keyboard arrows
@@ -853,7 +474,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
 
 
     public static readonly StyledProperty<Key?> PanLeftKeyProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, Key?>(nameof(PanLeftKey));
+        AvaloniaProperty.Register<ZoomableImage, Key?>(nameof(PanLeftKey));
 
     /// <summary>
     /// Gets or sets the key to pan left
@@ -865,7 +486,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<Key?> PanUpKeyProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, Key?>(nameof(PanUpKey));
+        AvaloniaProperty.Register<ZoomableImage, Key?>(nameof(PanUpKey));
 
     /// <summary>
     /// Gets or sets the key to pan up
@@ -877,7 +498,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<Key?> PanRightKeyProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, Key?>(nameof(PanRightKey));
+        AvaloniaProperty.Register<ZoomableImage, Key?>(nameof(PanRightKey));
 
     /// <summary>
     /// Gets or sets the key to pan right
@@ -889,7 +510,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<Key?> PanDownKeyProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, Key?>(nameof(PanDownKey));
+        AvaloniaProperty.Register<ZoomableImage, Key?>(nameof(PanDownKey));
 
     /// <summary>
     /// Gets or sets the key to pan down
@@ -901,7 +522,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<MouseButtons> SelectWithMouseButtonsProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, MouseButtons>(nameof(SelectWithMouseButtons), MouseButtons.LeftButton | MouseButtons.RightButton);
+        AvaloniaProperty.Register<ZoomableImage, MouseButtons>(nameof(SelectWithMouseButtons), MouseButtons.LeftButton | MouseButtons.RightButton);
 
     /// <summary>
     /// Gets or sets the mouse buttons to select a region on image
@@ -913,7 +534,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<bool> InvertMousePanProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, bool>(nameof(InvertMousePan), false);
+        AvaloniaProperty.Register<ZoomableImage, bool>(nameof(InvertMousePan), false);
 
     /// <summary>
     /// Gets or sets if mouse pan is inverted
@@ -925,7 +546,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<bool> AutoCenterProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, bool>(nameof(AutoCenter), true);
+        AvaloniaProperty.Register<ZoomableImage, bool>(nameof(AutoCenter), true);
 
     /// <summary>
     /// Gets or sets if image is auto centered
@@ -937,7 +558,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<SizeModes> SizeModeProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, SizeModes>(nameof(SizeMode), SizeModes.Normal);
+        AvaloniaProperty.Register<ZoomableImage, SizeModes>(nameof(SizeMode), SizeModes.Normal);
 
     /// <summary>
     /// Gets or sets the image size mode
@@ -979,7 +600,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<int> HorizontalScrollWithMouseFactorProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, int>(nameof(HorizontalScrollWithMouseFactor), 100);
+        AvaloniaProperty.Register<ZoomableImage, int>(nameof(HorizontalScrollWithMouseFactor), 100);
 
     /// <summary>
     /// Gets or sets the factor over the delta to scroll horizontally with the mouse (Left and right button on supported mice).
@@ -992,7 +613,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<int> HorizontalScrollWithMouseAlternativeFactorProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, int>(nameof(HorizontalScrollWithMouseAlternativeFactor), 50);
+        AvaloniaProperty.Register<ZoomableImage, int>(nameof(HorizontalScrollWithMouseAlternativeFactor), 50);
 
     /// <summary>
     /// Gets or sets the alternative (ALT modifier) factor over the delta to scroll horizontally with the mouse (Left and right button on supported mice).
@@ -1006,10 +627,10 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
 
 
     public static readonly StyledProperty<int> VerticalScrollWithMouseFactorProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, int>(nameof(VerticalScrollWithMouseFactor), 100);
+        AvaloniaProperty.Register<ZoomableImage, int>(nameof(VerticalScrollWithMouseFactor), 100);
 
     public static readonly StyledProperty<KeyModifiers?> VerticalScrollWithMouseWheelKeyModifierProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, KeyModifiers?>(nameof(VerticalScrollWithMouseWheelKeyModifier), KeyModifiers.Control);
+        AvaloniaProperty.Register<ZoomableImage, KeyModifiers?>(nameof(VerticalScrollWithMouseWheelKeyModifier), KeyModifiers.Control);
 
     /// <summary>
     /// Gets or sets the required <see cref="KeyModifiers"/> to enable the vertical scroll with the mouse wheel.
@@ -1032,7 +653,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<int> VerticalScrollWithMouseAlternativeFactorProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, int>(nameof(VerticalScrollWithMouseAlternativeFactor), 50);
+        AvaloniaProperty.Register<ZoomableImage, int>(nameof(VerticalScrollWithMouseAlternativeFactor), 50);
 
     /// <summary>
     /// Gets or sets the alternative (ALT modifier) factor over the delta to scroll vertically with the mouse wheel.
@@ -1045,7 +666,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<MouseWheelZoomBehaviours> ZoomWithMouseWheelBehaviourProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, MouseWheelZoomBehaviours>(nameof(ZoomWithMouseWheelBehaviour), MouseWheelZoomBehaviours.ZoomNativeAltLevels);
+        AvaloniaProperty.Register<ZoomableImage, MouseWheelZoomBehaviours>(nameof(ZoomWithMouseWheelBehaviour), MouseWheelZoomBehaviours.ZoomNativeAltLevels);
 
     /// <summary>
     /// Gets or sets the mouse wheel behaviour.
@@ -1057,7 +678,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<KeyModifiers> ZoomWithMouseWheelKeyModifierProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, KeyModifiers>(nameof(ZoomWithMouseWheelKeyModifier));
+        AvaloniaProperty.Register<ZoomableImage, KeyModifiers>(nameof(ZoomWithMouseWheelKeyModifier));
 
     /// <summary>
     /// Gets or sets the required <see cref="KeyModifiers"/> to work with any of <see cref="ZoomWithMouseWheelBehaviour"/> zoom behaviours.
@@ -1070,7 +691,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<bool> ZoomWithMouseWheelStrictKeyModifierProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, bool>(nameof(ZoomWithMouseWheelStrictKeyModifier));
+        AvaloniaProperty.Register<ZoomableImage, bool>(nameof(ZoomWithMouseWheelStrictKeyModifier));
 
     /// <summary>
     /// Gets or sets to use strict key modifier to work with <see cref="ZoomWithMouseWheelKeyModifier"/>.
@@ -1084,7 +705,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<int> ZoomWithMouseWheelDebounceMillisecondsProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, int>(nameof(ZoomWithMouseWheelDebounceMilliseconds), 20);
+        AvaloniaProperty.Register<ZoomableImage, int>(nameof(ZoomWithMouseWheelDebounceMilliseconds), 20);
 
     /// <summary>
     /// Gets or sets the debounce milliseconds to perform zoom with mouse wheel
@@ -1097,8 +718,8 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
 
     private ulong _lastZoomWithMouseWheelTimestamp;
 
-    public static readonly DirectProperty<AdvancedImageBox, ZoomLevelCollection> ZoomLevelsProperty =
-        AvaloniaProperty.RegisterDirect<AdvancedImageBox, ZoomLevelCollection>(
+    public static readonly DirectProperty<ZoomableImage, ZoomLevelCollection> ZoomLevelsProperty =
+        AvaloniaProperty.RegisterDirect<ZoomableImage, ZoomLevelCollection>(
             nameof(ZoomLevels),
             o => o.ZoomLevels,
             (o, v) => o.ZoomLevels = v);
@@ -1114,7 +735,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<int> MinZoomProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, int>(nameof(MinZoom), 10);
+        AvaloniaProperty.Register<ZoomableImage, int>(nameof(MinZoom), 10);
 
     /// <summary>
     /// Gets or sets the minimum possible zoom.
@@ -1127,7 +748,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<int> MaxZoomProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, int>(nameof(MaxZoom), 6400);
+        AvaloniaProperty.Register<ZoomableImage, int>(nameof(MaxZoom), 6400);
 
     /// <summary>
     /// Gets or sets the maximum possible zoom.
@@ -1140,7 +761,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<bool> ConstrainZoomOutToFitLevelProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, bool>(nameof(ConstrainZoomOutToFitLevel));
+        AvaloniaProperty.Register<ZoomableImage, bool>(nameof(ConstrainZoomOutToFitLevel));
 
     /// <summary>
     /// Gets or sets if the zoom out should constrain to fit image as the lowest zoom level.
@@ -1152,8 +773,8 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
 
-    public static readonly DirectProperty<AdvancedImageBox, int> OldZoomProperty =
-        AvaloniaProperty.RegisterDirect<AdvancedImageBox, int>(
+    public static readonly DirectProperty<ZoomableImage, int> OldZoomProperty =
+        AvaloniaProperty.RegisterDirect<ZoomableImage, int>(
             nameof(OldZoom),
             o => o.OldZoom);
 
@@ -1168,7 +789,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<int> ZoomProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, int>(nameof(Zoom), 100);
+        AvaloniaProperty.Register<ZoomableImage, int>(nameof(Zoom), 100);
 
     /// <summary>
     ///  Gets or sets the zoom.
@@ -1223,13 +844,13 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
                 return 100;
             }
 
-            var zoom = Math.Min(this.Bounds.Width / image.Size.Width, this.Bounds.Height / image.Size.Height) * 100.0;
+            double zoom = Math.Min(this.Bounds.Width / image.Size.Width, this.Bounds.Height / image.Size.Height) * 100.0;
             return zoom <= 0 ? 100 : (int)zoom;
         }
     }
 
     public static readonly StyledProperty<bool> AutoZoomToFitProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, bool>(nameof(AutoZoomToFit));
+        AvaloniaProperty.Register<ZoomableImage, bool>(nameof(AutoZoomToFit));
 
     /// <summary>
     /// Gets or sets if the zoom level should be auto set to fit when loading a new image.
@@ -1243,7 +864,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
 
 
     public static readonly StyledProperty<KeyGesture[]?> ZoomInKeyGesturesProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, KeyGesture[]?>(nameof(ZoomInKeyGestures),
+        AvaloniaProperty.Register<ZoomableImage, KeyGesture[]?>(nameof(ZoomInKeyGestures),
             OperatingSystem.IsMacOS()
                 ? [new KeyGesture(Key.Add, KeyModifiers.Meta), new KeyGesture(Key.OemPlus, KeyModifiers.Meta)]
                 : [new KeyGesture(Key.Add, KeyModifiers.Control), new KeyGesture(Key.OemPlus, KeyModifiers.Control)]
@@ -1259,7 +880,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<KeyGesture[]?> ZoomOutKeyGesturesProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, KeyGesture[]?>(nameof(ZoomOutKeyGestures),
+        AvaloniaProperty.Register<ZoomableImage, KeyGesture[]?>(nameof(ZoomOutKeyGestures),
             OperatingSystem.IsMacOS()
                 ? [new KeyGesture(Key.Subtract, KeyModifiers.Meta), new KeyGesture(Key.OemMinus, KeyModifiers.Meta)]
                 : [new KeyGesture(Key.Subtract, KeyModifiers.Control), new KeyGesture(Key.OemMinus, KeyModifiers.Control)]
@@ -1275,7 +896,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<KeyGesture[]?> ZoomTo100KeyGesturesProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, KeyGesture[]?>(nameof(ZoomTo100KeyGestures),
+        AvaloniaProperty.Register<ZoomableImage, KeyGesture[]?>(nameof(ZoomTo100KeyGestures),
             OperatingSystem.IsMacOS()
                 ? [new KeyGesture(Key.D0, KeyModifiers.Meta), new KeyGesture(Key.NumPad0, KeyModifiers.Meta)]
                 : [new KeyGesture(Key.D0, KeyModifiers.Control), new KeyGesture(Key.NumPad0, KeyModifiers.Control)]
@@ -1291,7 +912,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<KeyGesture[]?> ZoomToFitKeyGesturesProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, KeyGesture[]?>(nameof(ZoomToFitKeyGestures),
+        AvaloniaProperty.Register<ZoomableImage, KeyGesture[]?>(nameof(ZoomToFitKeyGestures),
             OperatingSystem.IsMacOS()
                 ? [new KeyGesture(Key.D0, KeyModifiers.Meta | KeyModifiers.Alt), new KeyGesture(Key.NumPad0, KeyModifiers.Meta | KeyModifiers.Alt)]
                 : [new KeyGesture(Key.D0, KeyModifiers.Control | KeyModifiers.Alt), new KeyGesture(Key.NumPad0, KeyModifiers.Control | KeyModifiers.Alt)]
@@ -1326,7 +947,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     public double ScaledImageHeight => this.Image?.Size.Height * this.ZoomFactor ?? 0;
 
     public static readonly StyledProperty<ISolidColorBrush> PixelGridColorProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, ISolidColorBrush>(nameof(PixelGridColor), Brushes.DimGray);
+        AvaloniaProperty.Register<ZoomableImage, ISolidColorBrush>(nameof(PixelGridColor), Brushes.DimGray);
 
     /// <summary>
     /// Gets or sets the color of the pixel grid.
@@ -1339,7 +960,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<int> PixelGridZoomThresholdProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, int>(nameof(PixelGridZoomThreshold), 5);
+        AvaloniaProperty.Register<ZoomableImage, int>(nameof(PixelGridZoomThreshold), 5);
 
     /// <summary>
     /// Gets or sets the minimum size of zoomed pixel's before the pixel grid will be drawn
@@ -1353,7 +974,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<SelectionModes> SelectionModeProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, SelectionModes>(nameof(SelectionMode), SelectionModes.None);
+        AvaloniaProperty.Register<ZoomableImage, SelectionModes>(nameof(SelectionMode), SelectionModes.None);
 
     public SelectionModes SelectionMode
     {
@@ -1362,7 +983,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<ISolidColorBrush> SelectionColorProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, ISolidColorBrush>(nameof(SelectionColor), new SolidColorBrush(new Color(127, 0, 128, 255)));
+        AvaloniaProperty.Register<ZoomableImage, ISolidColorBrush>(nameof(SelectionColor), new SolidColorBrush(new Color(127, 0, 128, 255)));
 
     public ISolidColorBrush SelectionColor
     {
@@ -1371,7 +992,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     }
 
     public static readonly StyledProperty<Rect> SelectionRegionProperty =
-        AvaloniaProperty.Register<AdvancedImageBox, Rect>(nameof(SelectionRegion));
+        AvaloniaProperty.Register<ZoomableImage, Rect>(nameof(SelectionRegion));
 
 
     public Rect SelectionRegion
@@ -1409,10 +1030,10 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
     public bool HaveSelection => this.SelectionRegion != default;
 
 
-    static AdvancedImageBox()
+    static ZoomableImage()
     {
-        FocusableProperty.OverrideDefaultValue(typeof(AdvancedImageBox), true);
-        AffectsRender<AdvancedImageBox>(
+        FocusableProperty.OverrideDefaultValue(typeof(ZoomableImage), true);
+        AffectsRender<ZoomableImage>(
             ShowGridProperty,
             GridCellSizeProperty,
             GridColorProperty,
@@ -1424,7 +1045,7 @@ public class AdvancedImageBox : TemplatedControl, IScrollable
             );
     }
 
-    public AdvancedImageBox()
+    public ZoomableImage()
     {
         RenderOptions.SetBitmapInterpolationMode(this, BitmapInterpolationMode.None);
     }
