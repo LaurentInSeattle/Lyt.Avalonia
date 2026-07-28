@@ -73,74 +73,6 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         this.propertyChanged?.Invoke(this, e);
     }
 
-
-    /// <inheritdoc />
-    public Size Extent
-    {
-        get
-        {
-            var viewPort = this.ViewPort;
-            if (viewPort is null)
-            {
-                return default;
-            }
-
-            return new(Math.Max(viewPort.Bounds.Width, this.ScaledImageWidth),
-                Math.Max(viewPort.Bounds.Height, this.ScaledImageHeight));
-        }
-    }
-
-    /// <inheritdoc />
-    public Vector Offset
-    {
-        get
-        {
-            var horizontalScrollBar = this.HorizontalScrollBar;
-            if (horizontalScrollBar is null)
-            {
-                return default;
-            }
-
-            var verticalScrollBar = this.VerticalScrollBar;
-            if (verticalScrollBar is null)
-            {
-                return default;
-            }
-
-            return new Vector(horizontalScrollBar.Value, verticalScrollBar.Value);
-        }
-        set
-        {
-            var horizontalScrollBar = this.HorizontalScrollBar;
-            if (horizontalScrollBar is null)
-            {
-                return;
-            }
-
-            var verticalScrollBar = this.VerticalScrollBar;
-            if (verticalScrollBar is null)
-            {
-                return;
-            }
-
-            horizontalScrollBar.Value = value.X;
-            verticalScrollBar.Value = value.Y;
-            this.RaisePropertyChanged();
-            this.TriggerRender();
-        }
-    }
-
-    /// <inheritdoc />
-    public Size Viewport => this.ViewPort?.Bounds.Size ?? this.Bounds.Size;
-
-    /// <inheritdoc />
-    public bool CanHorizontallyScroll => this.IsHorizontalBarVisible;
-
-    /// <inheritdoc />
-    public bool CanVerticallyScroll => this.IsVerticalBarVisible;
-
-
-
     protected internal ScrollContentPresenter? ViewPort;
     protected internal ScrollBar? HorizontalScrollBar;
     protected internal ScrollBar? VerticalScrollBar;
@@ -156,100 +88,15 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
     ZoomLevelCollection _zoomLevels = ZoomLevelCollection.Default;
     private int _oldZoom = 100;
 
-    private DrawingBrush? _gridBrush;
+    //private DrawingBrush? _gridBrush;
+    
     private Pen? _pixelGridPen;
     private Pen? _selectionBorderPen;
 
-
-    public static readonly DirectProperty<ZoomableImage, bool> CanRenderProperty =
-        AvaloniaProperty.RegisterDirect<ZoomableImage, bool>(
-            nameof(CanRender),
-            o => o.CanRender);
-
-    /// <summary>
-    /// Gets or sets if control can render the image
-    /// </summary>
-    public bool CanRender
-    {
-        get => this._canRender;
-        set
-        {
-            if (!this.SetAndRaise(CanRenderProperty, ref this._canRender, value))
-            {
-                return;
-            }
-
-            if (this._canRender)
-            {
-                this.TriggerRender();
-            }
-        }
-    }
-
-    public static readonly StyledProperty<byte> GridCellSizeProperty =
-        AvaloniaProperty.Register<ZoomableImage, byte>(nameof(GridCellSize), 15);
-
-    /// <summary>
-    /// Gets or sets the grid cell size
-    /// </summary>
-    public byte GridCellSize
-    {
-        get => this.GetValue(GridCellSizeProperty);
-        set => this.SetValue(GridCellSizeProperty, value);
-    }
-
-    public static readonly StyledProperty<ISolidColorBrush> GridColorProperty =
-        AvaloniaProperty.Register<ZoomableImage, ISolidColorBrush>(nameof(GridColor), Brushes.Gainsboro);
-
-    /// <summary>
-    /// Gets or sets the color used to create the checkerboard style background
-    /// </summary>
-    public ISolidColorBrush GridColor
-    {
-        get => this.GetValue(GridColorProperty);
-        set => this.SetValue(GridColorProperty, value);
-    }
-
-    public static readonly StyledProperty<ISolidColorBrush> GridColorAlternateProperty =
-        AvaloniaProperty.Register<ZoomableImage, ISolidColorBrush>(nameof(GridColorAlternate), Brushes.White);
-
-    /// <summary>
-    /// Gets or sets the color used to create the checkerboard style background
-    /// </summary>
-    public ISolidColorBrush GridColorAlternate
-    {
-        get => this.GetValue(GridColorAlternateProperty);
-        set => this.SetValue(GridColorAlternateProperty, value);
-    }
-
-    public static readonly StyledProperty<Bitmap?> ImageProperty =
-        AvaloniaProperty.Register<ZoomableImage, Bitmap?>(nameof(Image));
-
-    /// <summary>
-    /// Gets or sets the image to be displayed
-    /// </summary>
-    public Bitmap? Image
-    {
-        get => this.GetValue(ImageProperty);
-        set
-        {
-            if (this._imageNeedsDisposal)
-            {
-                this.Image?.Dispose();
-                this._imageNeedsDisposal = false;
-            }
-            this.SetValue(ImageProperty, value);
-        }
-    }
-
-    /// <summary>
-    /// Gets the image as a writeable bitmap
-    /// </summary>
+    /// <summary> Gets the image as a writeable bitmap </summary>
     public WriteableBitmap? ImageAsWriteableBitmap => this.Image as WriteableBitmap;
 
-    /// <summary>
-    /// Returns true if image is loaded, otherwise false.
-    /// </summary>
+    /// <summary> Returns true if image is loaded, otherwise false. </summary>
     [MemberNotNullWhen(true, nameof(Image))]
     public bool IsImageLoaded => this.Image is not null;
 
@@ -259,9 +106,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
             o => o.TrackerImage,
             (o, v) => o.TrackerImage = v);
 
-    /// <summary>
-    /// Gets or sets an image to follow the mouse pointer
-    /// </summary>
+    /// <summary> Gets or sets an image to follow the mouse pointer </summary>
     public Bitmap? TrackerImage
     {
         get => this._trackerImage;
@@ -329,26 +174,12 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         }
     }
 
-    public static readonly StyledProperty<bool> ShowGridProperty =
-        AvaloniaProperty.Register<ZoomableImage, bool>(nameof(ShowGrid), true);
-
-    /// <summary>
-    /// Gets or sets the grid visibility when reach high zoom levels
-    /// </summary>
-    public bool ShowGrid
-    {
-        get => this.GetValue(ShowGridProperty);
-        set => this.SetValue(ShowGridProperty, value);
-    }
-
     public static readonly DirectProperty<ZoomableImage, Point> PointerPositionProperty =
         AvaloniaProperty.RegisterDirect<ZoomableImage, Point>(
             nameof(PointerPosition),
             o => o.PointerPosition);
 
-    /// <summary>
-    /// Gets the current pointer position
-    /// </summary>
+    /// <summary> Gets the current pointer position </summary>
     public Point PointerPosition
     {
         get => this._pointerPosition;
@@ -360,9 +191,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
             nameof(IsPanning),
             o => o.IsPanning);
 
-    /// <summary>
-    /// Gets if control is currently panning
-    /// </summary>
+    /// <summary> Gets if control is currently panning </summary>
     public bool IsPanning
     {
         get => this._isPanning;
@@ -395,9 +224,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
             nameof(IsSelecting),
             o => o.IsSelecting);
 
-    /// <summary>
-    /// Gets if control is currently selecting a ROI
-    /// </summary>
+    /// <summary> Gets if control is currently selecting a ROI </summary>
     public bool IsSelecting
     {
         get => this._isSelecting;
@@ -412,9 +239,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         }
     }
 
-    /// <summary>
-    /// Gets the center point of the viewport
-    /// </summary>
+    /// <summary> Gets the center point of the viewport </summary>
     public Point CenterPoint
     {
         get
@@ -423,45 +248,6 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
             return new(viewport.Width / 2, viewport.Height / 2);
         }
     }
-
-    public static readonly StyledProperty<bool> AutoPanProperty =
-        AvaloniaProperty.Register<ZoomableImage, bool>(nameof(AutoPan), true);
-
-    /// <summary>
-    /// Gets or sets if the control can pan with the mouse
-    /// </summary>
-    public bool AutoPan
-    {
-        get => this.GetValue(AutoPanProperty);
-        set => this.SetValue(AutoPanProperty, value);
-    }
-
-    public static readonly StyledProperty<MouseButtons> PanWithMouseButtonsProperty =
-        AvaloniaProperty.Register<ZoomableImage, MouseButtons>(nameof(PanWithMouseButtons), MouseButtons.LeftButton | MouseButtons.MiddleButton | MouseButtons.RightButton);
-
-    /// <summary>
-    /// Gets or sets the mouse buttons to pan the image
-    /// </summary>
-    public MouseButtons PanWithMouseButtons
-    {
-        get => this.GetValue(PanWithMouseButtonsProperty);
-        set => this.SetValue(PanWithMouseButtonsProperty, value);
-    }
-
-    public static readonly StyledProperty<int> PanOffsetProperty =
-        AvaloniaProperty.Register<ZoomableImage, int>(nameof(PanOffset), 20);
-
-    /// <summary>
-    /// Gets or sets the pan offset to displace everytime a key is pressed
-    /// </summary>
-    public int PanOffset
-    {
-        get => this.GetValue(PanOffsetProperty);
-        set => this.SetValue(PanOffsetProperty, value);
-    }
-
-    public static readonly StyledProperty<bool> PanWithArrowsProperty =
-        AvaloniaProperty.Register<ZoomableImage, bool>(nameof(PanWithArrows), true);
 
     /// <summary>
     /// Gets or sets if the control can pan with the keyboard arrows
@@ -1034,10 +820,10 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
     {
         FocusableProperty.OverrideDefaultValue(typeof(ZoomableImage), true);
         AffectsRender<ZoomableImage>(
-            ShowGridProperty,
-            GridCellSizeProperty,
-            GridColorProperty,
-            GridColorAlternateProperty,
+            //ShowGridProperty,
+            //GridCellSizeProperty,
+            //GridColorProperty,
+            //GridColorAlternateProperty,
             PixelGridColorProperty,
             //ImageProperty,
             SelectionColorProperty,
@@ -1047,10 +833,8 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
 
     public ZoomableImage()
     {
-        RenderOptions.SetBitmapInterpolationMode(this, BitmapInterpolationMode.None);
+        RenderOptions.SetBitmapInterpolationMode(this, BitmapInterpolationMode.HighQuality);
     }
-
-
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
@@ -1192,17 +976,17 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
             this.UpdateViewPort();
             this.TriggerRender();
         }
-        else if (ReferenceEquals(e.Property, GridCellSizeProperty)
-                 || ReferenceEquals(e.Property, GridColorProperty)
-                 || ReferenceEquals(e.Property, GridColorAlternateProperty))
-        {
-            this.RebuildGridBrush();
-            this.TriggerRender();
-        }
-        else if (ReferenceEquals(e.Property, PixelGridColorProperty))
-        {
-            this._pixelGridPen = null;
-        }
+        //else if (ReferenceEquals(e.Property, GridCellSizeProperty)
+        //         || ReferenceEquals(e.Property, GridColorProperty)
+        //         || ReferenceEquals(e.Property, GridColorAlternateProperty))
+        //{
+        //    this.RebuildGridBrush();
+        //    this.TriggerRender();
+        //}
+        //else if (ReferenceEquals(e.Property, PixelGridColorProperty))
+        //{
+        //    this._pixelGridPen = null;
+        //}
         else if (ReferenceEquals(e.Property, SelectionColorProperty))
         {
             this._selectionBorderPen = null;
@@ -1210,10 +994,10 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
     }
 
 
-    private void RebuildGridBrush()
-    {
-        this._gridBrush = null;
-    }
+    //private void RebuildGridBrush()
+    //{
+    //    this._gridBrush = null;
+    //}
 
     private Pen EnsurePixelGridPen()
     {
@@ -1231,39 +1015,39 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         return this._selectionBorderPen = new Pen(Color.FromArgb(255, color.R, color.G, color.B).ToUInt32());
     }
 
-    private DrawingBrush EnsureGridBrush()
-    {
-        if (this._gridBrush != null)
-        {
-            return this._gridBrush;
-        }
+    //private DrawingBrush EnsureGridBrush()
+    //{
+    //    if (this._gridBrush != null)
+    //    {
+    //        return this._gridBrush;
+    //    }
 
-        var gridCellSize = Math.Max((byte)1, this.GridCellSize); // guard
+    //    var gridCellSize = Math.Max((byte)1, this.GridCellSize); // guard
 
-        // Build a 2s x 2s checkerboard tile (top-left and bottom-right = GridColor)
-        var group = new DrawingGroup
-        {
-            Children =
-            {
-                new GeometryDrawing { Brush = this.GridColor, Geometry = new RectangleGeometry(new Rect(0, 0, gridCellSize, gridCellSize)) },
-                new GeometryDrawing { Brush = this.GridColorAlternate, Geometry = new RectangleGeometry(new Rect(gridCellSize, 0, gridCellSize, gridCellSize)) },
-                new GeometryDrawing { Brush = this.GridColorAlternate, Geometry = new RectangleGeometry(new Rect(0, gridCellSize, gridCellSize, gridCellSize)) },
-                new GeometryDrawing { Brush = this.GridColor, Geometry = new RectangleGeometry(new Rect(gridCellSize, gridCellSize, gridCellSize, gridCellSize)) },
-            }
-        };
+    //    // Build a 2s x 2s checkerboard tile (top-left and bottom-right = GridColor)
+    //    var group = new DrawingGroup
+    //    {
+    //        Children =
+    //        {
+    //            new GeometryDrawing { Brush = this.GridColor, Geometry = new RectangleGeometry(new Rect(0, 0, gridCellSize, gridCellSize)) },
+    //            new GeometryDrawing { Brush = this.GridColorAlternate, Geometry = new RectangleGeometry(new Rect(gridCellSize, 0, gridCellSize, gridCellSize)) },
+    //            new GeometryDrawing { Brush = this.GridColorAlternate, Geometry = new RectangleGeometry(new Rect(0, gridCellSize, gridCellSize, gridCellSize)) },
+    //            new GeometryDrawing { Brush = this.GridColor, Geometry = new RectangleGeometry(new Rect(gridCellSize, gridCellSize, gridCellSize, gridCellSize)) },
+    //        }
+    //    };
 
-        this._gridBrush = new DrawingBrush
-        {
-            Drawing = group,
-            Stretch = Stretch.None,
-            TileMode = TileMode.Tile,
-            // DestinationRect in ABSOLUTE units defines the tile size in device-independent px
-            DestinationRect = new RelativeRect(0, 0, 2 * gridCellSize, 2 * gridCellSize, RelativeUnit.Absolute),
-            AlignmentX = AlignmentX.Left,
-            AlignmentY = AlignmentY.Top
-        };
-        return this._gridBrush;
-    }
+    //    this._gridBrush = new DrawingBrush
+    //    {
+    //        Drawing = group,
+    //        Stretch = Stretch.None,
+    //        TileMode = TileMode.Tile,
+    //        // DestinationRect in ABSOLUTE units defines the tile size in device-independent px
+    //        DestinationRect = new RelativeRect(0, 0, 2 * gridCellSize, 2 * gridCellSize, RelativeUnit.Absolute),
+    //        AlignmentX = AlignmentX.Left,
+    //        AlignmentY = AlignmentY.Top
+    //    };
+    //    return this._gridBrush;
+    //}
 
 
     public void TriggerRender(bool renderOnlyCursorTracker = false)
@@ -1293,12 +1077,12 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         }
 
         // Draw Grid
-        if (this.ShowGrid && this.GridCellSize > 0)
-        {
-            var brush = this.EnsureGridBrush();
-            // One call fills everything with the tiled checkerboard
-            context.FillRectangle(brush, new Rect(bounds.Size));
-        }
+        //if (this.ShowGrid && this.GridCellSize > 0)
+        //{
+        //    var brush = this.EnsureGridBrush();
+        //    // One call fills everything with the tiled checkerboard
+        //    context.FillRectangle(brush, new Rect(bounds.Size));
+        //}
         /*else
         {
             context.FillRectangle(Background, new Rect(0, 0, Viewport.Width, Viewport.Height));

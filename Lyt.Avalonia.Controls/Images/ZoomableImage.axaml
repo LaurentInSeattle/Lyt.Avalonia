@@ -17,8 +17,10 @@
 	<ControlTheme 
 		x:Key="{x:Type local:ZoomableImage}" TargetType="local:ZoomableImage"
 		>
+		<!-- Checkerboard background 
 		<Setter Property="GridColor" Value="{DynamicResource AdvancedImageBoxGridColor}" />
 		<Setter Property="GridColorAlternate" Value="{DynamicResource AdvancedImageBoxGridAlternateColor}" />
+		-->
 		<Setter Property="Background" Value="Transparent" />
 		<Setter Property="Padding" Value="0" />
 		<Setter Property="Template">
