@@ -1896,7 +1896,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
     /// </summary>
     public void ZoomToFit()
     {
-        this.Zoom = this.ZoomLevelToFit- 3;
+        this.Zoom = this.ZoomLevelToFit;
     }
 
     /// <summary>
