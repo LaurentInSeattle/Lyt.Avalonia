@@ -64,7 +64,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
             horizontalScrollBar.Value = value.X;
             verticalScrollBar.Value = value.Y;
             this.RaisePropertyChanged();
-            this.TriggerRender();
+            this.InvalidateVisual();
         }
     }
 
