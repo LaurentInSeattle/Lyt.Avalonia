@@ -631,7 +631,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
             }
 
             double zoom = Math.Min(this.Bounds.Width / image.Size.Width, this.Bounds.Height / image.Size.Height) * 100.0;
-            return zoom <= 0 ? 100 : (int)zoom;
+            return zoom <= 0 ? 100 : (int)zoom -1;
         }
     }
 
@@ -1323,7 +1323,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         switch (mouseWheelBehaviour)
         {
             case MouseWheelZoomBehaviours.ZoomNative:
-                this.SetZoom(this.Zoom + (int)(e.Delta.Y * 100), e.GetPosition(this.ViewPort));
+                this.SetZoom(this.Zoom + (int)(e.Delta.Y * 2), e.GetPosition(this.ViewPort));
                 break;
             case MouseWheelZoomBehaviours.ZoomNativeAltLevels:
                 if ((e.KeyModifiers & KeyModifiers.Alt) == 0)
@@ -1364,7 +1364,15 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
             return;
         }
 
+
         var pointer = e.GetCurrentPoint(this);
+
+        if ( pointer.Properties.IsRightButtonPressed)
+        {
+            this.ZoomToFit();
+            e.Handled = true;
+            return; 
+        }
 
         if (this.SelectionMode != SelectionModes.None)
         {
@@ -1888,7 +1896,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
     /// </summary>
     public void ZoomToFit()
     {
-        this.Zoom = this.ZoomLevelToFit;
+        this.Zoom = this.ZoomLevelToFit- 3;
     }
 
     /// <summary>

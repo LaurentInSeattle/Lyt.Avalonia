@@ -14,7 +14,9 @@ public class ZoomLevelCollection : IList<int>
     /// <summary> Returns the default zoom levels </summary>
     public static ZoomLevelCollection Default =>
         new([
-            7, 10, 15, 20, 25, 30, 50, 70, 100, 150, 200, 300, 400, 500, 600, 700, 800, 1200, 1600, 3200, 6400
+            7, 10, 12, 15, 17, 20, 22, 25, 26, 28, 30, 35, 40, 50, 
+            60, 70, 80, 100, 125, 150, 200, 300, 400, 500, 
+            600, 700, 800, 1200, 1600, 3200, 6400
         ]);
 
     /// <summary> Returns the next increased zoom level for the given current zoom. </summary>

@@ -26,12 +26,12 @@
 		<Setter Property="Template">
 			<ControlTemplate>
 				<Grid Name="PART_MainGrid"
-					  RowDefinitions="*,Auto" ColumnDefinitions="*,Auto">
+					  RowDefinitions="*,Auto" 
+					  ColumnDefinitions="*,Auto">
 
 					<ScrollContentPresenter 
 						Name="PART_ContentPresenter"
 						Grid.Row="0" Grid.Column="0"
-						Margin="2"
 						Background="{TemplateBinding Background}"
 						ScrollViewer.IsScrollInertiaEnabled="True"
 						>
@@ -44,7 +44,6 @@
 
 					<ScrollBar Name="PART_VerticalScrollBar"
 							   Grid.Row="0" Grid.Column="1"
-							   Margin="4 0 0 0"
 							   Orientation="Vertical"
 							   ViewportSize="{Binding Bounds.Height, ElementName=PART_ContentPresenter}"
 							   Minimum="0"
@@ -54,25 +53,13 @@
 
 					<ScrollBar Name="PART_HorizontalScrollBar"
 							   Grid.Row="1" Grid.Column="0"
-							   Margin="0 4 0 0"
 							   Orientation="Horizontal"
 							   ViewportSize="{Binding Bounds.Width, ElementName=PART_ContentPresenter}"
 							   Minimum="0"
 							   Maximum="0"
 							   AllowAutoHide="{TemplateBinding ScrollViewer.AllowAutoHide}"
-							   Visibility="Auto"/>
-
-					<Panel x:Name="PART_ScrollBarsSeparator"
-						   Grid.Row="1"
-						   Grid.Column="1"
-						   Background="{TemplateBinding Background}"
-						   Opacity="0">
-						<Panel.Transitions>
-							<Transitions>
-								<DoubleTransition Property="Opacity" Duration="0:0:0.1" />
-							</Transitions>
-						</Panel.Transitions>
-					</Panel>
+							   Visibility="Auto"
+							   />
 
 				</Grid>
 			</ControlTemplate>
