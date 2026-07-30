@@ -1,10 +1,4 @@
 ﻿using Avalonia.Controls.Metadata;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
-
-
-using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
 
 using Bitmap = Avalonia.Media.Imaging.Bitmap;
 using Color = Avalonia.Media.Color;
@@ -235,31 +229,27 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
 
     private ulong _lastZoomWithMouseWheelTimestamp;
 
-    public static readonly DirectProperty<ZoomableImage, ZoomLevelCollection> ZoomLevelsProperty =
-        AvaloniaProperty.RegisterDirect<ZoomableImage, ZoomLevelCollection>(
-            nameof(ZoomLevels),
-            o => o.ZoomLevels,
-            (o, v) => o.ZoomLevels = v);
+    //public static readonly DirectProperty<ZoomableImage, ZoomLevelCollection> ZoomLevelsProperty =
+    //    AvaloniaProperty.RegisterDirect<ZoomableImage, ZoomLevelCollection>(
+    //        nameof(ZoomLevels),
+    //        o => o.ZoomLevels,
+    //        (o, v) => o.ZoomLevels = v);
 
-    public static readonly StyledProperty<int> MinZoomProperty =
-        AvaloniaProperty.Register<ZoomableImage, int>(nameof(MinZoom), 10);
+    public static readonly StyledProperty<double> MinZoomProperty =
+        AvaloniaProperty.Register<ZoomableImage, double>(nameof(MinZoom), 10.0);
 
     /// <summary> Gets or sets the minimum possible zoom. </summary>
-    /// <value>The zoom.</value>
-    public int MinZoom
+    public double MinZoom
     {
         get => this.GetValue(MinZoomProperty);
         set => this.SetValue(MinZoomProperty, value);
     }
 
-    public static readonly StyledProperty<int> MaxZoomProperty =
-        AvaloniaProperty.Register<ZoomableImage, int>(nameof(MaxZoom), 6400);
+    public static readonly StyledProperty<double> MaxZoomProperty =
+        AvaloniaProperty.Register<ZoomableImage, double>(nameof(MaxZoom), 6400.0);
 
-    /// <summary>
-    /// Gets or sets the maximum possible zoom.
-    /// </summary>
-    /// <value>The zoom.</value>
-    public int MaxZoom
+    /// <summary> Gets or sets the maximum possible zoom. </summary>
+    public double MaxZoom
     {
         get => this.GetValue(MaxZoomProperty);
         set => this.SetValue(MaxZoomProperty, value);
@@ -268,70 +258,103 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
     public static readonly StyledProperty<bool> ConstrainZoomOutToFitLevelProperty =
         AvaloniaProperty.Register<ZoomableImage, bool>(nameof(ConstrainZoomOutToFitLevel));
 
-    /// <summary>
-    /// Gets or sets if the zoom out should constrain to fit image as the lowest zoom level.
-    /// </summary>
+    /// <summary> Gets or sets if the zoom out should constrain to fit image as the lowest zoom level. </summary>
     public bool ConstrainZoomOutToFitLevel
     {
         get => this.GetValue(ConstrainZoomOutToFitLevelProperty);
         set => this.SetValue(ConstrainZoomOutToFitLevelProperty, value);
     }
 
+    public static readonly StyledProperty<double> ZoomProperty =
+        AvaloniaProperty.Register<ZoomableImage, double>(nameof(Zoom), 100.0);
 
-    public static readonly DirectProperty<ZoomableImage, int> OldZoomProperty =
-        AvaloniaProperty.RegisterDirect<ZoomableImage, int>(
-            nameof(OldZoom),
-            o => o.OldZoom);
-
-    /// <summary>
-    /// Gets the previous zoom value
-    /// </summary>
-    /// <value>The zoom.</value>
-    public int OldZoom
-    {
-        get => this._oldZoom;
-        private set => this.SetAndRaise(OldZoomProperty, ref this._oldZoom, value);
-    }
-
-    public static readonly StyledProperty<int> ZoomProperty =
-        AvaloniaProperty.Register<ZoomableImage, int>(nameof(Zoom), 100);
-
-    /// <summary>
-    ///  Gets or sets the zoom.
-    /// </summary>
-    /// <value>The zoom.</value>
-    public int Zoom
+    /// <summary> Gets or sets the zoom. </summary>
+    public double Zoom
     {
         get => this.GetValue(ZoomProperty);
         set
         {
-            int minZoom = this.MinZoom;
+            double minZoom = this.MinZoom;
             if (this.ConstrainZoomOutToFitLevel)
             {
                 minZoom = Math.Max(this.ZoomLevelToFit, minZoom);
             }
 
-            int newZoom = Math.Clamp(value, minZoom, this.MaxZoom);
-
-            int previousZoom = this.Zoom;
-            if (previousZoom == newZoom)
+            double newZoom = Math.Clamp(value, minZoom, this.MaxZoom);
+            if (Math.Abs(this.Zoom - newZoom) < 0.001) 
             {
                 return;
             }
 
-            this.OldZoom = previousZoom;
             this.SetValue(ZoomProperty, newZoom);
         }
     }
 
-    public static readonly DirectProperty<ZoomableImage, Point> PointerPositionProperty =
-        AvaloniaProperty.RegisterDirect<ZoomableImage, Point>(nameof(PointerPosition), o => o.PointerPosition);
+    public static readonly StyledProperty<bool> AutoZoomToFitProperty =
+        AvaloniaProperty.Register<ZoomableImage, bool>(nameof(AutoZoomToFit));
 
-    /// <summary> Gets the current pointer position </summary>
-    public Point PointerPosition
+    /// <summary> Gets or sets if the zoom level should be auto set to fit when loading a new image. </summary>
+    /// <remarks>Requires <see cref="SizeMode"/> to be <see cref="SizeModes.Normal"/>.</remarks>
+    public bool AutoZoomToFit
     {
-        get => this._pointerPosition;
-        private set => this.SetAndRaise(PointerPositionProperty, ref this._pointerPosition, value);
+        get => this.GetValue(AutoZoomToFitProperty);
+        set => this.SetValue(AutoZoomToFitProperty, value);
+    }
+
+    public static readonly StyledProperty<KeyGesture[]?> ZoomInKeyGesturesProperty =
+        AvaloniaProperty.Register<ZoomableImage, KeyGesture[]?>(nameof(ZoomInKeyGestures),
+            OperatingSystem.IsMacOS()
+                ? [new KeyGesture(Key.Add, KeyModifiers.Meta), new KeyGesture(Key.OemPlus, KeyModifiers.Meta)]
+                : [new KeyGesture(Key.Add, KeyModifiers.Control), new KeyGesture(Key.OemPlus, KeyModifiers.Control)]
+            );
+
+    /// <summary> Gets or sets the hot key to zoom in </summary>
+    public KeyGesture[]? ZoomInKeyGestures
+    {
+        get => this.GetValue(ZoomInKeyGesturesProperty);
+        set => this.SetValue(ZoomInKeyGesturesProperty, value);
+    }
+
+    public static readonly StyledProperty<KeyGesture[]?> ZoomOutKeyGesturesProperty =
+        AvaloniaProperty.Register<ZoomableImage, KeyGesture[]?>(nameof(ZoomOutKeyGestures),
+            OperatingSystem.IsMacOS()
+                ? [new KeyGesture(Key.Subtract, KeyModifiers.Meta), new KeyGesture(Key.OemMinus, KeyModifiers.Meta)]
+                : [new KeyGesture(Key.Subtract, KeyModifiers.Control), new KeyGesture(Key.OemMinus, KeyModifiers.Control)]
+            );
+
+    /// <summary> Gets or sets the hot key to zoom out </summary>
+    public KeyGesture[]? ZoomOutKeyGestures
+    {
+        get => this.GetValue(ZoomOutKeyGesturesProperty);
+        set => this.SetValue(ZoomOutKeyGesturesProperty, value);
+    }
+
+    public static readonly StyledProperty<KeyGesture[]?> ZoomTo100KeyGesturesProperty =
+        AvaloniaProperty.Register<ZoomableImage, KeyGesture[]?>(nameof(ZoomTo100KeyGestures),
+            OperatingSystem.IsMacOS()
+                ? [new KeyGesture(Key.D0, KeyModifiers.Meta), new KeyGesture(Key.NumPad0, KeyModifiers.Meta)]
+                : [new KeyGesture(Key.D0, KeyModifiers.Control), new KeyGesture(Key.NumPad0, KeyModifiers.Control)]
+            );
+
+    /// <summary> Gets or sets the hot key to zoom to 100% </summary>
+    public KeyGesture[]? ZoomTo100KeyGestures
+    {
+        get => this.GetValue(ZoomTo100KeyGesturesProperty);
+        set => this.SetValue(ZoomTo100KeyGesturesProperty, value);
+    }
+
+    public static readonly StyledProperty<KeyGesture[]?> ZoomToFitKeyGesturesProperty =
+        AvaloniaProperty.Register<ZoomableImage, KeyGesture[]?>(nameof(ZoomToFitKeyGestures),
+            OperatingSystem.IsMacOS()
+                ? [new KeyGesture(Key.D0, KeyModifiers.Meta | KeyModifiers.Alt), new KeyGesture(Key.NumPad0, KeyModifiers.Meta | KeyModifiers.Alt)]
+                : [new KeyGesture(Key.D0, KeyModifiers.Control | KeyModifiers.Alt), new KeyGesture(Key.NumPad0, KeyModifiers.Control | KeyModifiers.Alt)]
+        );
+
+    /// <summary> Gets or sets the hot key to zoom to fit </summary>
+    public KeyGesture[]? ZoomToFitKeyGestures
+    {
+        get => this.GetValue(ZoomToFitKeyGesturesProperty);
+        set => this.SetValue(ZoomToFitKeyGesturesProperty, value);
     }
 
     public static readonly DirectProperty<ZoomableImage, bool> IsPanningProperty =
@@ -367,6 +390,53 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         }
     }
 
+    /// <summary> Gets or sets if the control can pan with the keyboard arrows </summary>
+    public bool PanWithArrows
+    {
+        get => this.GetValue(PanWithArrowsProperty);
+        set => this.SetValue(PanWithArrowsProperty, value);
+    }
+
+    public static readonly StyledProperty<Key?> PanLeftKeyProperty =
+        AvaloniaProperty.Register<ZoomableImage, Key?>(nameof(PanLeftKey));
+
+    /// <summary> Gets or sets the key to pan left </summary>
+    public Key? PanLeftKey
+    {
+        get => this.GetValue(PanLeftKeyProperty);
+        set => this.SetValue(PanLeftKeyProperty, value);
+    }
+
+    public static readonly StyledProperty<Key?> PanUpKeyProperty =
+        AvaloniaProperty.Register<ZoomableImage, Key?>(nameof(PanUpKey));
+
+    /// <summary> Gets or sets the key to pan up </summary>
+    public Key? PanUpKey
+    {
+        get => this.GetValue(PanUpKeyProperty);
+        set => this.SetValue(PanUpKeyProperty, value);
+    }
+
+    public static readonly StyledProperty<Key?> PanRightKeyProperty =
+        AvaloniaProperty.Register<ZoomableImage, Key?>(nameof(PanRightKey));
+
+    /// <summary> Gets or sets the key to pan right </summary>
+    public Key? PanRightKey
+    {
+        get => this.GetValue(PanRightKeyProperty);
+        set => this.SetValue(PanRightKeyProperty, value);
+    }
+
+    public static readonly StyledProperty<Key?> PanDownKeyProperty =
+        AvaloniaProperty.Register<ZoomableImage, Key?>(nameof(PanDownKey));
+
+    /// <summary> Gets or sets the key to pan down </summary>
+    public Key? PanDownKey
+    {
+        get => this.GetValue(PanDownKeyProperty);
+        set => this.SetValue(PanDownKeyProperty, value);
+    }
+
     public static readonly DirectProperty<ZoomableImage, bool> IsSelectingProperty =
         AvaloniaProperty.RegisterDirect<ZoomableImage, bool>(
             nameof(IsSelecting),
@@ -387,4 +457,55 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         }
     }
 
+    public static readonly StyledProperty<ISolidColorBrush> PixelGridColorProperty =
+        AvaloniaProperty.Register<ZoomableImage, ISolidColorBrush>(nameof(PixelGridColor), Brushes.DimGray);
+
+    /// <summary> Gets or sets the color of the pixel grid. </summary>
+    public ISolidColorBrush PixelGridColor
+    {
+        get => this.GetValue(PixelGridColorProperty);
+        set => this.SetValue(PixelGridColorProperty, value);
+    }
+
+    public static readonly StyledProperty<int> PixelGridZoomThresholdProperty =
+        AvaloniaProperty.Register<ZoomableImage, int>(nameof(PixelGridZoomThreshold), 5);
+
+    /// <summary> Gets or sets the minimum size of zoomed pixel's before the pixel grid will be drawn </summary>
+    public int PixelGridZoomThreshold
+    {
+        get => this.GetValue(PixelGridZoomThresholdProperty);
+        set => this.SetValue(PixelGridZoomThresholdProperty, value);
+    }
+
+    public static readonly StyledProperty<SelectionModes> SelectionModeProperty =
+        AvaloniaProperty.Register<ZoomableImage, SelectionModes>(nameof(SelectionMode), SelectionModes.None);
+
+    public SelectionModes SelectionMode
+    {
+        get => this.GetValue(SelectionModeProperty);
+        set => this.SetValue(SelectionModeProperty, value);
+    }
+
+    public static readonly StyledProperty<ISolidColorBrush> SelectionColorProperty =
+        AvaloniaProperty.Register<ZoomableImage, ISolidColorBrush>(nameof(SelectionColor), new SolidColorBrush(new Color(127, 0, 128, 255)));
+
+    public ISolidColorBrush SelectionColor
+    {
+        get => this.GetValue(SelectionColorProperty);
+        set => this.SetValue(SelectionColorProperty, value);
+    }
+
+    public static readonly StyledProperty<Rect> SelectionRegionProperty =
+        AvaloniaProperty.Register<ZoomableImage, Rect>(nameof(SelectionRegion));
+
+    public Rect SelectionRegion
+    {
+        get => this.GetValue(SelectionRegionProperty);
+        set
+        {
+            this.SetValue(SelectionRegionProperty, value);
+            // this.RaisePropertyChanged(nameof(this.HasSelection));
+            this.InvalidateVisual();
+        }
+    }
 }

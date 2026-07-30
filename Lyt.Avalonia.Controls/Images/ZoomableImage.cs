@@ -29,47 +29,6 @@ namespace Lyt.Avalonia.Controls.Images;
 [TemplatePart("PART_ScrollBarsSeparator", typeof(Panel))]
 public partial class ZoomableImage : TemplatedControl, IScrollable
 {
-    /// <summary> Multicast event for property change notifications. </summary>
-    private PropertyChangedEventHandler? propertyChanged;
-
-    public new event PropertyChangedEventHandler? PropertyChanged
-    {
-        add { this.propertyChanged -= value; this.propertyChanged += value; }
-        remove => this.propertyChanged -= value;
-    }
-
-    protected bool RaiseAndSetIfChanged<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value))
-        {
-            return false;
-        }
-
-        field = value;
-        if (!string.IsNullOrWhiteSpace(propertyName))
-        {
-            this.RaisePropertyChanged(propertyName);
-            return false;
-        }
-
-        return true;
-    }
-
-    protected virtual void OnPropertyChanged(PropertyChangedEventArgs e) { }
-
-    /// <summary> Notifies listeners that a property value has changed. </summary>
-    /// <param name="propertyName">
-    ///     Name of the property used to notify listeners.  This
-    ///     value is optional and can be provided automatically when invoked from compilers
-    ///     that support <see cref="CallerMemberNameAttribute" />.
-    /// </param>
-    protected void RaisePropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        var e = new PropertyChangedEventArgs(propertyName);
-        this.OnPropertyChanged(e);
-        this.propertyChanged?.Invoke(this, e);
-    }
-
     protected internal ScrollContentPresenter? ViewPort;
     protected internal ScrollBar? HorizontalScrollBar;
     protected internal ScrollBar? VerticalScrollBar;
@@ -78,17 +37,25 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
     private Vector _startScrollPosition;
     private bool _isPanning;
     private bool _isSelecting;
-    private Point _pointerPosition;
-    private ZoomLevelCollection _zoomLevels = ZoomLevelCollection.Default;
-    private int _oldZoom = 100;
-
     private Pen? _pixelGridPen;
     private Pen? _selectionBorderPen;
+
+    static ZoomableImage()
+    {
+        FocusableProperty.OverrideDefaultValue(typeof(ZoomableImage), true);
+        AffectsRender<ZoomableImage>(
+            PixelGridColorProperty,
+            SelectionColorProperty,
+            SelectionRegionProperty
+            );
+    }
+
+    public ZoomableImage() => RenderOptions.SetBitmapInterpolationMode(this, BitmapInterpolationMode.HighQuality);
 
     /// <summary> Returns true if image is loaded, otherwise false. </summary>
     public bool IsImageLoaded => this.Image is not null;
 
-    public bool IsHorizontalBarVisible
+    private bool IsHorizontalBarVisible
     {
         get
         {
@@ -101,11 +68,11 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         }
     }
 
-    public bool IsVerticalBarVisible
+    private bool IsVerticalBarVisible
     {
         get
         {
-            if ((this.Image is null)  ||(this.SizeMode != SizeModes.Normal))
+            if ((this.Image is null) || (this.SizeMode != SizeModes.Normal))
             {
                 return false;
             }
@@ -115,71 +82,13 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
     }
 
     /// <summary> Gets the center point of the viewport </summary>
-    public Point CenterPoint
+    private Point CenterPoint
     {
         get
         {
             var viewport = this.GetImageViewPort();
             return new(viewport.Width / 2, viewport.Height / 2);
         }
-    }
-
-    /// <summary>
-    /// Gets or sets if the control can pan with the keyboard arrows
-    /// </summary>
-    public bool PanWithArrows
-    {
-        get => this.GetValue(PanWithArrowsProperty);
-        set => this.SetValue(PanWithArrowsProperty, value);
-    }
-
-
-    public static readonly StyledProperty<Key?> PanLeftKeyProperty =
-        AvaloniaProperty.Register<ZoomableImage, Key?>(nameof(PanLeftKey));
-
-    /// <summary>
-    /// Gets or sets the key to pan left
-    /// </summary>
-    public Key? PanLeftKey
-    {
-        get => this.GetValue(PanLeftKeyProperty);
-        set => this.SetValue(PanLeftKeyProperty, value);
-    }
-
-    public static readonly StyledProperty<Key?> PanUpKeyProperty =
-        AvaloniaProperty.Register<ZoomableImage, Key?>(nameof(PanUpKey));
-
-    /// <summary>
-    /// Gets or sets the key to pan up
-    /// </summary>
-    public Key? PanUpKey
-    {
-        get => this.GetValue(PanUpKeyProperty);
-        set => this.SetValue(PanUpKeyProperty, value);
-    }
-
-    public static readonly StyledProperty<Key?> PanRightKeyProperty =
-        AvaloniaProperty.Register<ZoomableImage, Key?>(nameof(PanRightKey));
-
-    /// <summary>
-    /// Gets or sets the key to pan right
-    /// </summary>
-    public Key? PanRightKey
-    {
-        get => this.GetValue(PanRightKeyProperty);
-        set => this.SetValue(PanRightKeyProperty, value);
-    }
-
-    public static readonly StyledProperty<Key?> PanDownKeyProperty =
-        AvaloniaProperty.Register<ZoomableImage, Key?>(nameof(PanDownKey));
-
-    /// <summary>
-    /// Gets or sets the key to pan down
-    /// </summary>
-    public Key? PanDownKey
-    {
-        get => this.GetValue(PanDownKeyProperty);
-        set => this.SetValue(PanDownKeyProperty, value);
     }
 
     private void SizeModeChanged()
@@ -212,22 +121,11 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         }
     }
 
-    /// <summary> Gets or sets the zoom levels. </summary>
-    /// <value>The zoom levels.</value>
-    public ZoomLevelCollection ZoomLevels
-    {
-        get => this._zoomLevels;
-        set => this.SetAndRaise(ZoomLevelsProperty, ref this._zoomLevels, value);
-    }
-
-    /// <summary> Returns True if zoomed in or out,  False if no zoom applied. </summary>
-    public bool IsActualSize => this.Zoom == 100;
-
     /// <summary> Gets the zoom factor, the zoom divided by 100.0 </summary>
     public double ZoomFactor => this.Zoom / 100.0;
 
     /// <summary> Gets the integer zoom to fit level which shows all the image </summary>
-    public int ZoomLevelToFit
+    public double ZoomLevelToFit
     {
         get
         {
@@ -238,213 +136,20 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
             }
 
             double zoom = Math.Min(this.Bounds.Width / image.Size.Width, this.Bounds.Height / image.Size.Height) * 100.0;
-
-            // This stupid hack prevents the  horizontal scroll bar to show up 
-            int intZoom = (int)(zoom - 1); // Math.Floor(zoom);
-            return zoom <= 0 ? 100 : intZoom;
+            return zoom <= 0.1 ? 100.0 : zoom;
         }
     }
 
-    public static readonly StyledProperty<bool> AutoZoomToFitProperty =
-        AvaloniaProperty.Register<ZoomableImage, bool>(nameof(AutoZoomToFit));
-
-    /// <summary>
-    /// Gets or sets if the zoom level should be auto set to fit when loading a new image.
-    /// </summary>
-    /// <remarks>Requires <see cref="SizeMode"/> to be <see cref="SizeModes.Normal"/>.</remarks>
-    public bool AutoZoomToFit
-    {
-        get => this.GetValue(AutoZoomToFitProperty);
-        set => this.SetValue(AutoZoomToFitProperty, value);
-    }
-
-
-    public static readonly StyledProperty<KeyGesture[]?> ZoomInKeyGesturesProperty =
-        AvaloniaProperty.Register<ZoomableImage, KeyGesture[]?>(nameof(ZoomInKeyGestures),
-            OperatingSystem.IsMacOS()
-                ? [new KeyGesture(Key.Add, KeyModifiers.Meta), new KeyGesture(Key.OemPlus, KeyModifiers.Meta)]
-                : [new KeyGesture(Key.Add, KeyModifiers.Control), new KeyGesture(Key.OemPlus, KeyModifiers.Control)]
-            );
-
-    /// <summary>
-    /// Gets or sets the hot key to zoom in
-    /// </summary>
-    public KeyGesture[]? ZoomInKeyGestures
-    {
-        get => this.GetValue(ZoomInKeyGesturesProperty);
-        set => this.SetValue(ZoomInKeyGesturesProperty, value);
-    }
-
-    public static readonly StyledProperty<KeyGesture[]?> ZoomOutKeyGesturesProperty =
-        AvaloniaProperty.Register<ZoomableImage, KeyGesture[]?>(nameof(ZoomOutKeyGestures),
-            OperatingSystem.IsMacOS()
-                ? [new KeyGesture(Key.Subtract, KeyModifiers.Meta), new KeyGesture(Key.OemMinus, KeyModifiers.Meta)]
-                : [new KeyGesture(Key.Subtract, KeyModifiers.Control), new KeyGesture(Key.OemMinus, KeyModifiers.Control)]
-            );
-
-    /// <summary>
-    /// Gets or sets the hot key to zoom out
-    /// </summary>
-    public KeyGesture[]? ZoomOutKeyGestures
-    {
-        get => this.GetValue(ZoomOutKeyGesturesProperty);
-        set => this.SetValue(ZoomOutKeyGesturesProperty, value);
-    }
-
-    public static readonly StyledProperty<KeyGesture[]?> ZoomTo100KeyGesturesProperty =
-        AvaloniaProperty.Register<ZoomableImage, KeyGesture[]?>(nameof(ZoomTo100KeyGestures),
-            OperatingSystem.IsMacOS()
-                ? [new KeyGesture(Key.D0, KeyModifiers.Meta), new KeyGesture(Key.NumPad0, KeyModifiers.Meta)]
-                : [new KeyGesture(Key.D0, KeyModifiers.Control), new KeyGesture(Key.NumPad0, KeyModifiers.Control)]
-            );
-
-    /// <summary>
-    /// Gets or sets the hot key to zoom to 100%
-    /// </summary>
-    public KeyGesture[]? ZoomTo100KeyGestures
-    {
-        get => this.GetValue(ZoomTo100KeyGesturesProperty);
-        set => this.SetValue(ZoomTo100KeyGesturesProperty, value);
-    }
-
-    public static readonly StyledProperty<KeyGesture[]?> ZoomToFitKeyGesturesProperty =
-        AvaloniaProperty.Register<ZoomableImage, KeyGesture[]?>(nameof(ZoomToFitKeyGestures),
-            OperatingSystem.IsMacOS()
-                ? [new KeyGesture(Key.D0, KeyModifiers.Meta | KeyModifiers.Alt), new KeyGesture(Key.NumPad0, KeyModifiers.Meta | KeyModifiers.Alt)]
-                : [new KeyGesture(Key.D0, KeyModifiers.Control | KeyModifiers.Alt), new KeyGesture(Key.NumPad0, KeyModifiers.Control | KeyModifiers.Alt)]
-        );
-
-    /// <summary>
-    /// Gets or sets the hot key to zoom to fit
-    /// </summary>
-    public KeyGesture[]? ZoomToFitKeyGestures
-    {
-        get => this.GetValue(ZoomToFitKeyGesturesProperty);
-        set => this.SetValue(ZoomToFitKeyGesturesProperty, value);
-    }
-
-
-    /// <summary>
-    /// Gets the size of the scaled image.
-    /// </summary>
-    /// <value>The size of the scaled image.</value>
+    /// <summary> Gets the size of the scaled image. </summary>
     public Size ScaledImageSize => new(this.ScaledImageWidth, this.ScaledImageHeight);
 
-    /// <summary>
-    /// Gets the width of the scaled image.
-    /// </summary>
-    /// <value>The width of the scaled image.</value>
+    /// <summary> Gets the width of the scaled image. </summary>
     public double ScaledImageWidth => this.Image?.Size.Width * this.ZoomFactor ?? 0;
 
-    /// <summary>
-    /// Gets the height of the scaled image.
-    /// </summary>
-    /// <value>The height of the scaled image.</value>
+    /// <summary> Gets the height of the scaled image. </summary>
     public double ScaledImageHeight => this.Image?.Size.Height * this.ZoomFactor ?? 0;
 
-    public static readonly StyledProperty<ISolidColorBrush> PixelGridColorProperty =
-        AvaloniaProperty.Register<ZoomableImage, ISolidColorBrush>(nameof(PixelGridColor), Brushes.DimGray);
-
-    /// <summary>
-    /// Gets or sets the color of the pixel grid.
-    /// </summary>
-    /// <value>The color of the pixel grid.</value>
-    public ISolidColorBrush PixelGridColor
-    {
-        get => this.GetValue(PixelGridColorProperty);
-        set => this.SetValue(PixelGridColorProperty, value);
-    }
-
-    public static readonly StyledProperty<int> PixelGridZoomThresholdProperty =
-        AvaloniaProperty.Register<ZoomableImage, int>(nameof(PixelGridZoomThreshold), 5);
-
-    /// <summary>
-    /// Gets or sets the minimum size of zoomed pixel's before the pixel grid will be drawn
-    /// </summary>
-    /// <value>The pixel grid threshold.</value>
-
-    public int PixelGridZoomThreshold
-    {
-        get => this.GetValue(PixelGridZoomThresholdProperty);
-        set => this.SetValue(PixelGridZoomThresholdProperty, value);
-    }
-
-    public static readonly StyledProperty<SelectionModes> SelectionModeProperty =
-        AvaloniaProperty.Register<ZoomableImage, SelectionModes>(nameof(SelectionMode), SelectionModes.None);
-
-    public SelectionModes SelectionMode
-    {
-        get => this.GetValue(SelectionModeProperty);
-        set => this.SetValue(SelectionModeProperty, value);
-    }
-
-    public static readonly StyledProperty<ISolidColorBrush> SelectionColorProperty =
-        AvaloniaProperty.Register<ZoomableImage, ISolidColorBrush>(nameof(SelectionColor), new SolidColorBrush(new Color(127, 0, 128, 255)));
-
-    public ISolidColorBrush SelectionColor
-    {
-        get => this.GetValue(SelectionColorProperty);
-        set => this.SetValue(SelectionColorProperty, value);
-    }
-
-    public static readonly StyledProperty<Rect> SelectionRegionProperty =
-        AvaloniaProperty.Register<ZoomableImage, Rect>(nameof(SelectionRegion));
-
-
-    public Rect SelectionRegion
-    {
-        get => this.GetValue(SelectionRegionProperty);
-        set
-        {
-            this.SetValue(SelectionRegionProperty, value);
-            //if (!RaiseAndSetIfChanged(ref _selectionRegion, value)) return;
-            this.RaisePropertyChanged(nameof(this.HaveSelection));
-            this.RaisePropertyChanged(nameof(this.SelectionRegionNet));
-            this.RaisePropertyChanged(nameof(this.SelectionRegionPixel));
-            this.InvalidateVisual();
-        }
-    }
-
-    public System.Drawing.Rectangle SelectionRegionNet
-    {
-        get
-        {
-            var rect = this.SelectionRegion;
-            return new((int)Math.Ceiling(rect.X), (int)Math.Ceiling(rect.Y), (int)rect.Width, (int)rect.Height);
-        }
-    }
-
-    public PixelRect SelectionRegionPixel
-    {
-        get
-        {
-            var rect = this.SelectionRegion;
-            return new((int)Math.Ceiling(rect.X), (int)Math.Ceiling(rect.Y), (int)rect.Width, (int)rect.Height);
-        }
-    }
-
-    public bool HaveSelection => this.SelectionRegion != default;
-
-
-    static ZoomableImage()
-    {
-        FocusableProperty.OverrideDefaultValue(typeof(ZoomableImage), true);
-        AffectsRender<ZoomableImage>(
-            //ShowGridProperty,
-            //GridCellSizeProperty,
-            //GridColorProperty,
-            //GridColorAlternateProperty,
-            PixelGridColorProperty,
-            //ImageProperty,
-            SelectionColorProperty,
-            SelectionRegionProperty
-            );
-    }
-
-    public ZoomableImage()
-    {
-        RenderOptions.SetBitmapInterpolationMode(this, BitmapInterpolationMode.HighQuality);
-    }
+    public bool HasSelection => this.SelectionRegion != default;
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
@@ -484,7 +189,6 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         this.ViewPort.PointerExited += this.ViewPortOnPointerExited;
         this.ViewPort.PointerMoved += this.ViewPortOnPointerMoved;
         this.ViewPort.PointerWheelChanged += this.ViewPortOnPointerWheelChanged;
-
         this.HorizontalScrollBar.Scroll += this.ScrollBarOnScroll;
         this.VerticalScrollBar.Scroll += this.ScrollBarOnScroll;
     }
@@ -502,7 +206,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
             }
             else if (this.ConstrainZoomOutToFitLevel)
             {
-                int zoomLevelToFit = this.ZoomLevelToFit;
+                double zoomLevelToFit = this.ZoomLevelToFit;
                 if (this.Zoom < zoomLevelToFit)
                 {
                     this.Zoom = zoomLevelToFit;
@@ -543,7 +247,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
                 }
                 else if (this.ConstrainZoomOutToFitLevel)
                 {
-                    int zoomLevelToFit = this.ZoomLevelToFit;
+                    double zoomLevelToFit = this.ZoomLevelToFit;
                     if (this.Zoom < zoomLevelToFit)
                     {
                         this.Zoom = zoomLevelToFit;
@@ -551,32 +255,16 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
                 }
             }
 
-            this.RaisePropertyChanged(nameof(this.IsImageLoaded));
-            this.RaisePropertyChanged(nameof(this.ScaledImageWidth));
-            this.RaisePropertyChanged(nameof(this.ScaledImageHeight));
-            this.RaisePropertyChanged(nameof(this.ScaledImageSize));
-            this.RaisePropertyChanged(nameof(this.Extent));
-            this.RaisePropertyChanged(nameof(this.ZoomLevelToFit));
             this.InvalidateVisual();
         }
         else if (ReferenceEquals(e.Property, SizeModeProperty))
         {
             this.SizeModeChanged();
-            this.RaisePropertyChanged(nameof(this.IsHorizontalBarVisible));
-            this.RaisePropertyChanged(nameof(this.IsVerticalBarVisible));
             this.InvalidateVisual();
         }
         else if (ReferenceEquals(e.Property, ZoomProperty))
         {
             this.UpdateViewPort();
-            this.RaisePropertyChanged(nameof(this.IsHorizontalBarVisible));
-            this.RaisePropertyChanged(nameof(this.IsVerticalBarVisible));
-            this.RaisePropertyChanged(nameof(this.IsActualSize));
-            this.RaisePropertyChanged(nameof(this.ZoomFactor));
-            this.RaisePropertyChanged(nameof(this.ScaledImageWidth));
-            this.RaisePropertyChanged(nameof(this.ScaledImageHeight));
-            this.RaisePropertyChanged(nameof(this.ScaledImageSize));
-            this.RaisePropertyChanged(nameof(this.Extent));
             this.InvalidateVisual();
         }
         else if (ReferenceEquals(e.Property, PaddingProperty))
@@ -702,36 +390,11 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
             changed = true;
         }
 
-        /*if (changed)
-        {
-            var newContainer = new ContentControl
-            {
-                Width = width,
-                Height = height
-            };
-            FillContainer.Content = SizedContainer = newContainer;
-            Debug.WriteLine($"Updated ViewPort: {DateTime.Now.Ticks}");
-            //TriggerRender();
-        }*/
-
         return changed;
     }
 
 
     private void ScrollBarOnScroll(object? sender, ScrollEventArgs e) => this.InvalidateVisual();
-
-    /*protected override void OnScrollChanged(ScrollChangedEventArgs e)
-    {
-        Debug.WriteLine($"ViewportDelta: {e.ViewportDelta} | OffsetDelta: {e.OffsetDelta} | ExtentDelta: {e.ExtentDelta}");
-        if (!e.ViewportDelta.IsDefault)
-        {
-            UpdateViewPort();
-        }
-
-        TriggerRender();
-
-        base.OnScrollChanged(e);
-    }*/
 
     private void ViewPortOnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
@@ -806,6 +469,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         // TODO ?
         // The MouseWheel event can contain multiple "spins" of the wheel so we need to adjust accordingly
 
+        // TODO => Fix this ugly hack 
         double mouseWheelSensitivityCorrection = Math.Sqrt(Math.Sqrt(this.Zoom));
         if (this.Zoom > 800)
         {
@@ -815,9 +479,9 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         {
             mouseWheelSensitivityCorrection *= 7.0;
         }
-        else if ( this.Zoom > 200)
+        else if (this.Zoom > 200)
         {
-            mouseWheelSensitivityCorrection *= 5.0; 
+            mouseWheelSensitivityCorrection *= 5.0;
         }
         else if (this.Zoom > 100)
         {
@@ -825,16 +489,16 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         }
 
         double mouseWheelSensitivity = 2.0 + mouseWheelSensitivityCorrection;
-        Point relativePoint = e.GetPosition(this.ViewPort); 
+        Point relativePoint = e.GetPosition(this.ViewPort);
         switch (mouseWheelBehaviour)
         {
             case MouseWheelZoomBehaviours.ZoomNative:
-                this.SetZoom(this.Zoom + (int)(e.Delta.Y * mouseWheelSensitivity), true, relativePoint);
+                this.SetZoom(this.Zoom + (e.Delta.Y * mouseWheelSensitivity), true, relativePoint);
                 break;
             case MouseWheelZoomBehaviours.ZoomNativeAltLevels:
                 if ((e.KeyModifiers & KeyModifiers.Alt) == 0)
                 {
-                    this.SetZoom(this.Zoom + (int)(e.Delta.Y * mouseWheelSensitivity), true, relativePoint);
+                    this.SetZoom(this.Zoom + (e.Delta.Y * mouseWheelSensitivity), true, relativePoint);
                 }
                 else
                 {
@@ -853,7 +517,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
                 }
                 else
                 {
-                    this.SetZoom(this.Zoom + (int)(e.Delta.Y * mouseWheelSensitivity), true, relativePoint);
+                    this.SetZoom(this.Zoom + (e.Delta.Y * mouseWheelSensitivity), true, relativePoint);
                 }
                 break;
         }
@@ -934,7 +598,6 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
 
     private void ViewPortOnPointerExited(object? sender, PointerEventArgs e)
     {
-        this.PointerPosition = new Point(-1, -1);
         this.InvalidateVisual();
         e.Handled = true;
     }
@@ -953,38 +616,37 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
             return;
         }
 
-        var pointer = e.GetCurrentPoint(viewPort);
-        this.PointerPosition = pointer.Position;
-
         if (!this._isPanning && !this._isSelecting)
         {
             this.InvalidateVisual();
             return;
         }
 
+        var pointer = e.GetCurrentPoint(viewPort);
+        var pointerPosition = pointer.Position;
+        double px = pointerPosition.X;
+        double py = pointerPosition.Y;
         if (this._isPanning)
         {
             double x;
             double y;
-
-            if (!this.InvertMousePan)
+            if (this.InvertMousePan)
             {
-                x = this._startScrollPosition.X + (this._startMousePosition.X - this._pointerPosition.X);
-                y = this._startScrollPosition.Y + (this._startMousePosition.Y - this._pointerPosition.Y);
+                x = this._startScrollPosition.X - (this._startMousePosition.X - px);
+                y = this._startScrollPosition.Y - (this._startMousePosition.Y - py);
             }
             else
             {
-                x = (this._startScrollPosition.X - (this._startMousePosition.X - this._pointerPosition.X));
-                y = (this._startScrollPosition.Y - (this._startMousePosition.Y - this._pointerPosition.Y));
+                x = this._startScrollPosition.X + (this._startMousePosition.X - px);
+                y = this._startScrollPosition.Y + (this._startMousePosition.Y - py);
             }
 
             this.Offset = new Vector(x, y);
         }
         else if (this._isSelecting)
         {
-            var viewPortPoint = new Point(
-                Math.Min(this._pointerPosition.X, viewPort.Bounds.Right),
-                Math.Min(this._pointerPosition.Y, viewPort.Bounds.Bottom));
+            var bounds = viewPort.Bounds;
+            var viewPortPoint = new Point(Math.Min(px, bounds.Right), Math.Min(py, bounds.Bottom));
 
             double x;
             double y;
@@ -992,7 +654,6 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
             double h;
 
             var imageOffset = this.GetImageViewPort().Position;
-
             if (viewPortPoint.X < this._startMousePosition.X)
             {
                 x = viewPortPoint.X;
@@ -1182,56 +843,50 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         }
     }
 
-
     /// <summary> Resets the <see cref="SizeModes"/> property whilsts retaining the original <see cref="Zoom"/>. </summary>
     protected void RestoreSizeMode()
     {
         if (this.SizeMode != SizeModes.Normal)
         {
-            int previousZoom = this.Zoom;
+            double previousZoom = this.Zoom;
             this.SizeMode = SizeModes.Normal;
             this.Zoom = previousZoom; // Stop the zoom getting reset to 100% before calculating the new zoom
         }
     }
 
+    const double zoomMultiplier = 1.11;
+
     /// <summary> Returns an appropriate zoom level based on the specified action, relative to the current zoom level. </summary>
     /// <param name="action">The action to determine the zoom level.</param>
     /// <exception cref="System.ArgumentOutOfRangeException">Thrown if an unsupported action is specified.</exception>
-    public int GetZoomLevel(ZoomActions action)
-    {
-        int result = action switch
+    public double GetZoomLevel(ZoomActions action)
+        => action switch
         {
             ZoomActions.None => this.Zoom,
-            ZoomActions.ZoomIn => this._zoomLevels.NextZoom(this.Zoom),
-            ZoomActions.ZoomOut => this._zoomLevels.PreviousZoom(this.Zoom),
+            ZoomActions.ZoomIn => this.Zoom * zoomMultiplier,
+            ZoomActions.ZoomOut => this.Zoom / zoomMultiplier,
             ZoomActions.ActualSize => 100,
             _ => throw new ArgumentOutOfRangeException(nameof(action), action, null),
         };
-        return result;
-    }
 
     /// <summary> Performs the specified zoom action. </summary>
     /// <param name="action"></param>
     /// <param name="preservePosition"><c>true</c> if the current scrolling position should be preserved relative to the new zoom level, <c>false</c> to reset.</param>
     /// <param name="relativePoint">Preserve position at given relative point. If null, <see cref="CenterPoint"/>> will be used.</param>
-    public void PerformZoom(ZoomActions action, bool preservePosition = true, Point? relativePoint = null) 
+    public void PerformZoom(ZoomActions action, bool preservePosition = true, Point? relativePoint = null)
         => this.SetZoom(this.GetZoomLevel(action), preservePosition, relativePoint);
 
-    /// <summary>
-    /// Sets the zoom level to the specified value.
-    /// </summary>
+    /// <summary> Sets the zoom level to the specified value. </summary>
     /// <param name="zoom"></param>
     /// <param name="preservePosition"><c>true</c> if the current scrolling position should be preserved relative to the new zoom level, <c>false</c> to reset.</param>
     /// <param name="relativePoint">Preserve position at given relative point. If null, <see cref="CenterPoint"/>> will be used.</param>
-    public void SetZoom(int zoom, bool preservePosition = true, Point? relativePoint = null)
+    public void SetZoom(double zoom, bool preservePosition = true, Point? relativePoint = null)
     {
         relativePoint ??= this.CenterPoint;
-        int currentZoom = this.Zoom;
+        double currentZoom = this.Zoom;
         Point currentPixel = this.PointToImage(relativePoint.Value);
-
         this.RestoreSizeMode();
         this.Zoom = zoom;
-
         if (preservePosition && this.Zoom != currentZoom)
         {
             this.ScrollTo(currentPixel, relativePoint.Value);
@@ -1278,7 +933,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
     /// <summary> Zooms to current selection region </summary>
     public void ZoomToSelectionRegion(double margin = 0)
     {
-        if (!this.HaveSelection)
+        if (!this.HasSelection)
         {
             return;
         }
@@ -1596,22 +1251,20 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
 
     public WriteableBitmap? GetSelectedBitmap()
     {
-        var image = this.Image as WriteableBitmap;
-        if (image is null || !this.HaveSelection)
+        if (this.Image is not WriteableBitmap image || !this.HasSelection)
         {
             return null;
         }
 
-        var selection = this.SelectionRegionPixel;
-
+        Rect selection = this.SelectionRegion;
         using var srcBuffer = image.Lock();
 
         // Clamp selection to actual image bounds to prevent buffer overread in unsafe copy.
         // Math.Ceiling on X/Y in SelectionRegionPixel can push Right/Bottom one pixel past the image edge.
-        int clampedX = Math.Max(0, selection.X);
-        int clampedY = Math.Max(0, selection.Y);
-        int clampedWidth = Math.Min(selection.Right, srcBuffer.Size.Width) - clampedX;
-        int clampedHeight = Math.Min(selection.Bottom, srcBuffer.Size.Height) - clampedY;
+        int clampedX = Math.Max(0, (int)selection.X);
+        int clampedY = Math.Max(0, (int)selection.Y);
+        int clampedWidth = Math.Min((int)selection.Right, srcBuffer.Size.Width) - clampedX;
+        int clampedHeight = Math.Min((int)selection.Bottom, srcBuffer.Size.Height) - clampedY;
         if (clampedWidth <= 0 || clampedHeight <= 0)
         {
             return null;
@@ -1627,7 +1280,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
 
             for (int y = clampedSelection.Y; y < clampedSelection.Bottom; y++)
             {
-                Buffer.MemoryCopy(ySrc.ToPointer(), yDst.ToPointer(), dstBuffer.RowBytes,dstBuffer.RowBytes);
+                Buffer.MemoryCopy(ySrc.ToPointer(), yDst.ToPointer(), dstBuffer.RowBytes, dstBuffer.RowBytes);
                 ySrc += srcBuffer.RowBytes;
                 yDst += dstBuffer.RowBytes;
             }
