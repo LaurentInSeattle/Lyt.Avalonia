@@ -46,7 +46,8 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         AffectsRender<ZoomableImage>(
             PixelGridColorProperty,
             SelectionColorProperty,
-            SelectionRegionProperty
+            SelectionRegionProperty, 
+            ZoomProperty
             );
     }
 
@@ -854,6 +855,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         }
     }
 
+    // TODO: Create a property for this one 
     const double zoomMultiplier = 1.11;
 
     /// <summary> Returns an appropriate zoom level based on the specified action, relative to the current zoom level. </summary>
@@ -865,7 +867,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
             ZoomActions.None => this.Zoom,
             ZoomActions.ZoomIn => this.Zoom * zoomMultiplier,
             ZoomActions.ZoomOut => this.Zoom / zoomMultiplier,
-            ZoomActions.ActualSize => 100,
+            ZoomActions.ActualSize => 100.0,
             _ => throw new ArgumentOutOfRangeException(nameof(action), action, null),
         };
 
