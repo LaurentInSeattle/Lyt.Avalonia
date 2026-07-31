@@ -1,22 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
+	<PropertyGroup>
 	<TargetFramework>net10.0</TargetFramework>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<Nullable>enable</Nullable>
 	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+	</PropertyGroup>
 
-  <ItemGroup>
+	<ItemGroup>
 	<PackageReference Include="Avalonia" Version="12.1.1" />
 	<PackageReference Include="Nullable.Extended.Analyzer" Version="1.15.6581">
-	  <PrivateAssets>all</PrivateAssets>
-	  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		<PrivateAssets>all</PrivateAssets>
+		<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	</PackageReference>
-  </ItemGroup>
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Lyt.Framework\Lyt.Framework.Interfaces\Lyt.Framework.Interfaces.csproj" />
-  </ItemGroup>
-	
+	<ItemGroup>
+		<ProjectReference Include="..\..\Lyt.Framework\Lyt.Framework.Interfaces\Lyt.Framework.Interfaces.csproj" />
+	</ItemGroup>
+
 </Project>
