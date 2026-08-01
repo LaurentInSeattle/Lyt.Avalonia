@@ -42,11 +42,12 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
 
     static ZoomableImage()
     {
-        FocusableProperty.OverrideDefaultValue(typeof(ZoomableImage), true);
-        AffectsRender<ZoomableImage>(
+        InputElement.FocusableProperty.OverrideDefaultValue<ZoomableImage>(true);
+        Visual.AffectsRender<ZoomableImage>(
             PixelGridColorProperty,
             SelectionColorProperty,
             SelectionRegionProperty, 
+            ImageProperty,
             ZoomProperty
             );
     }
@@ -240,6 +241,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
             {
                 this.SelectNone();
             }
+
             else
             {
                 if (this.AutoZoomToFit)
@@ -904,7 +906,11 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
     public void ZoomOut(bool preservePosition = true) => this.PerformZoom(ZoomActions.ZoomOut, preservePosition);
 
     /// <summary> Zooms to the maximum size for displaying the entire image within the bounds of the control. </summary>
-    public void ZoomToFit() => this.Zoom = this.ZoomLevelToFit;
+    public void ZoomToFit()
+    {
+        this.Zoom = this.ZoomLevelToFit;
+        this.InvalidateVisual(); 
+    } 
 
     /// <summary> Adjusts the view port to fit the given region </summary>
     /// <param name="rectangle">The rectangle to fit the view port to.</param>
