@@ -214,6 +214,8 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
                     this.Zoom = zoomLevelToFit;
                 }
             }
+
+            this.InvalidateVisual();
         }
     }
 
@@ -314,8 +316,8 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         var imageViewPort = this.GetImageViewPort();
         context.DrawImage(image, this.GetSourceImageRegion(), imageViewPort);
 
-        double zoomFactor = this.ZoomFactor;
         // Draw pixel grid
+        double zoomFactor = this.ZoomFactor;
         if (this.SizeMode == SizeModes.Normal && zoomFactor > this.PixelGridZoomThreshold)
         {
             double offsetX = this.Offset.X % zoomFactor;
