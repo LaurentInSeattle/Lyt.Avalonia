@@ -59,7 +59,7 @@
 							<Setter Property="Margin" Value="4" />
 							<Setter Property="Fill" Value="{DynamicResource RatingControlUnselectedBrush}" />
 							<Setter Property="Stroke" Value="{DynamicResource RatingControlUnselectedStrokeBrush}" />
-							<Setter Property="StrokeThickness" Value="2" />
+							<Setter Property="StrokeThickness" Value="1.5" />
 							<Setter Property="Stretch" Value="Uniform" />
 						</Style>
 
