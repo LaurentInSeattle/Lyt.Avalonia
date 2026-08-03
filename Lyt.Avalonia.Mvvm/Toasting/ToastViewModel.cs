@@ -1,31 +1,24 @@
 ﻿namespace Lyt.Avalonia.Mvvm.Toasting;
 
-public sealed partial class ToastViewModel : ViewModel<ToastView> 
+public sealed partial class ToastViewModel(IToaster toaster) : ViewModel<ToastView> 
 {
     private const int NoDelay = 0;
     private const int MinDelay = 1_000;
     private const int MaxDelay = 60_000;
 
-    private readonly IToaster toaster;
+    private readonly IToaster toaster = toaster;
 
     [ObservableProperty]
-    private SolidColorBrush colorLevel;
+    public partial SolidColorBrush ColorLevel { get; set; } = InformationLevel.Info.ToBrush();
 
     [ObservableProperty]
-    private StreamGeometry iconGeometry;
+    public partial StreamGeometry IconGeometry { get; set; } = InformationLevel.Info.ToIconGeometry();
 
     [ObservableProperty]
-    private string? title;
+    public partial string? Title { get; set; }
 
     [ObservableProperty]
-    private string? message;
-
-    public ToastViewModel(IToaster toaster)
-    {
-        this.toaster = toaster;
-        this.IconGeometry = InformationLevel.Info.ToIconGeometry();
-        this.ColorLevel = InformationLevel.Info.ToBrush();
-    }
+    public partial string? Message { get; set; }
 
     private DispatcherTimer? dismissTimer;
 
@@ -90,10 +83,7 @@ public sealed partial class ToastViewModel : ViewModel<ToastView>
 
     private void StopTimer()
     {
-        if (this.dismissTimer != null)
-        {
-            this.dismissTimer.Stop();
-            this.dismissTimer = null;
-        }
+        this.dismissTimer?.Stop();
+        this.dismissTimer = null;
     }
 }

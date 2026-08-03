@@ -53,13 +53,7 @@ public sealed class AnimationService : IAnimationService
 
         // Save the CancellationTokenSource should we fade in soon 
         this.fadeOutAnimations ??= [];
-
-        if (this.fadeOutAnimations.ContainsKey(control))
-        {
-            // Debug.WriteLine("Fade Out entry removed");
-            this.fadeOutAnimations.Remove(control);
-        }
-
+        this.fadeOutAnimations.Remove(control);
         this.fadeOutAnimations.Add(control, cancellationTokenSource); 
     } 
 

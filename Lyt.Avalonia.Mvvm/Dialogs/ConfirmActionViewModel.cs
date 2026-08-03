@@ -6,16 +6,16 @@ public sealed partial class ConfirmActionViewModel : ViewModel<ConfirmActionView
     private readonly Action<bool> onConfirm;
 
     [ObservableProperty]
-    private string title;
+    public partial string Title { get; set; }
 
     [ObservableProperty]
-    private string message;
+    public partial string Message { get; set; }
 
     [ObservableProperty]
-    private string actionVerb;
+    public partial string ActionVerb { get; set; }
 
     [ObservableProperty]
-    private SolidColorBrush colorLevel;
+    public partial SolidColorBrush ColorLevel { get; set; }
 
     public ConfirmActionViewModel(ConfirmActionParameters parameters)
     {
@@ -34,21 +34,15 @@ public sealed partial class ConfirmActionViewModel : ViewModel<ConfirmActionView
         } 
     }
 
-    //protected override void OnViewLoaded ( )
-    //    // Need to figure out why we need to do this !!!
-    //    => this.View.Icon.Foreground = this.ColorLevel;
+    [RelayCommand]
+    public void OnAction() => this.Dismiss(confirmed: true);
 
     [RelayCommand]
-    public void OnAction()
-    {
-        this.onConfirm(true);
-        this.dialogService.Dismiss();   
-    }
+    public void OnDismiss() => this.Dismiss(confirmed: false);
 
-    [RelayCommand]
-    public void OnDismiss()
+    private void Dismiss(bool confirmed)
     {
-        this.onConfirm(false);
+        this.onConfirm(confirmed);
         this.dialogService.Dismiss();   
     }
 }

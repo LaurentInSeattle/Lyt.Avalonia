@@ -182,10 +182,10 @@ public sealed class DragAble(Canvas canvas, bool inProcess = true) : BehaviorBas
         // Debug.WriteLine("ghost view created");
 
         // Launch the DragDrop task, fire and forget 
-        this.DoDragDrop(pointerEventArgs, this.dragCanvas);
+        this.DoDragDrop(this.dragCanvas);
     }
 
-    private async void DoDragDrop(PointerEventArgs pointerEventArgs, Canvas canvas)
+    private async void DoDragDrop(Canvas canvas)
     {
         if (this.ghostView is null)
         {
@@ -195,21 +195,10 @@ public sealed class DragAble(Canvas canvas, bool inProcess = true) : BehaviorBas
 
         this.UnhookPointerEvents();
 
-        // Debug.WriteLine("Sarting DnD thread");
-        
-        #region OLD API 
-        //var dragData = new DataObject();
-        //string dragAndDropFormat = this.DraggableBindable.DragDropFormat;
-        //dragData.Set(dragAndDropFormat, this.DraggableBindable);
-        //var result =  
-        //    await global::Avalonia.Input.DragDrop.DoDragDrop(pointerEventArgs, dragData, DragDropEffects.Move);
-        // Debug.WriteLine($"DragAndDrop result: {result}");
-        #endregion OLD API 
-
+        // Debug.WriteLine("Sarting DnD thread");       
         if (this.inProcess && this.pointerPressedEventArgs is not null)
         {
             var dndData = new InProcessDataTransfer(this.DraggableBindable);
-            // var result = 
             var _ =
                 await global::Avalonia.Input.DragDrop.DoDragDropAsync(
                     this.pointerPressedEventArgs, dndData, DragDropEffects.Move);

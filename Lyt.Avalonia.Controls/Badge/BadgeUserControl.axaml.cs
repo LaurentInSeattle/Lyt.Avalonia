@@ -11,13 +11,7 @@ public partial class BadgeUserControl : UserControl
         this.Loaded += this.OnLoaded; ;
     }
 
-    private void OnLoaded(object? sender, RoutedEventArgs e)
-    {
-        if (this.contentControl is not null)
-        {
-            this.contentControl.Content = this.Content;
-        }
-    }
+    private void OnLoaded(object? sender, RoutedEventArgs e) => this.contentControl?.Content = this.Content;
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {

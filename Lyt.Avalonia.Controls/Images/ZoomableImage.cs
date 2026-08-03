@@ -157,7 +157,6 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
     {
         base.OnApplyTemplate(e);
 
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (this.ViewPort is not null)
         {
             this.ViewPort.PointerPressed -= this.ViewPortOnPointerPressed;
@@ -166,17 +165,8 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
             this.ViewPort.PointerWheelChanged -= this.ViewPortOnPointerWheelChanged;
         }
 
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (this.HorizontalScrollBar is not null)
-        {
-            this.HorizontalScrollBar.Scroll -= this.ScrollBarOnScroll;
-        }
-
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (this.VerticalScrollBar is not null)
-        {
-            this.VerticalScrollBar.Scroll -= this.ScrollBarOnScroll;
-        }
+        this.HorizontalScrollBar?.Scroll -= this.ScrollBarOnScroll;
+        this.VerticalScrollBar?.Scroll -= this.ScrollBarOnScroll;
 
         // ! Will find it by design 
         this.ViewPort = e.NameScope.Find<ScrollContentPresenter>("PART_ContentPresenter")!;

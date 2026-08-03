@@ -200,10 +200,7 @@ public sealed class DialogService(ILogger logger) : IDialogService
             }
 
             // #3 - Restore host panel visibility state 
-            if (this.modalHostPanel is not null)
-            {
-                this.modalHostPanel.IsHitTestVisible = this.modalHostPanelHitTestVisible;
-            }
+            this.modalHostPanel?.IsHitTestVisible = this.modalHostPanelHitTestVisible;
 
             // #4 - Unhook keyboard events 
             if (this.isClassHandlerRegistered)
