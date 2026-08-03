@@ -5,7 +5,7 @@ public sealed class AnimationService : IAnimationService
     // Cannot be made const to use as a default parameter.
     private static readonly IterationCount OneIteration = IterationCount.Parse("1");
 
-    private Dictionary<Control, CancellationTokenSource>? fadeOutAnimations; 
+    private Dictionary<Control, CancellationTokenSource>? fadeOutAnimations;
 
     public void FadeIn(Control control, double durationSeconds = 1.5, Action? onAnimationCompleted = null)
     {
@@ -24,7 +24,12 @@ public sealed class AnimationService : IAnimationService
             }
         }
 
-        // Debug.WriteLine("Fade IN begins");
+        Debug.WriteLine("Fade IN begins");
+
+        control.Opacity = 0.01;
+        control.IsVisible = true;
+        Task.Delay(80).Wait();
+
         this.StartAnimation(
             control, Control.OpacityProperty, 1.0, durationSeconds,
             OneIteration, PlaybackDirection.Normal, FillMode.Forward, onAnimationCompleted);
@@ -32,13 +37,18 @@ public sealed class AnimationService : IAnimationService
 
     public void FadeOut(Control control, double durationSeconds = 1.5, Action? onAnimationCompleted = null)
     {
-        // Debug.WriteLine("Fade OUT begins");
-        CancellationTokenSource cancellationTokenSource = 
+        if (!control.IsVisible)
+        {
+            return;
+        }
+
+        Debug.WriteLine("Fade OUT begins");
+        CancellationTokenSource cancellationTokenSource =
             this.StartAnimation(control, Control.OpacityProperty, 0.0, durationSeconds,
-                OneIteration, PlaybackDirection.Normal, FillMode.Forward, 
-                ()=>
+                OneIteration, PlaybackDirection.Normal, FillMode.Forward,
+                () =>
                 {
-                    // Debug.WriteLine("Fade Out Complete");
+                    Debug.WriteLine("Fade Out Complete");
                     if (this.fadeOutAnimations is not null)
                     {
                         if (this.fadeOutAnimations.TryGetValue(control, out CancellationTokenSource? cancellationTokenSource))
@@ -48,14 +58,16 @@ public sealed class AnimationService : IAnimationService
                         }
                     }
 
+                    control.IsVisible = false;
+
                     Dispatch.OnUiThread(() => { onAnimationCompleted?.Invoke(); }, DispatcherPriority.Send);
                 });
 
         // Save the CancellationTokenSource should we fade in soon 
         this.fadeOutAnimations ??= [];
         this.fadeOutAnimations.Remove(control);
-        this.fadeOutAnimations.Add(control, cancellationTokenSource); 
-    } 
+        this.fadeOutAnimations.Add(control, cancellationTokenSource);
+    }
 
     public void CancelAnimation(CancellationTokenSource cancellationTokenSource)
         => cancellationTokenSource.Cancel();

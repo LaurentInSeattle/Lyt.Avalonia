@@ -12,6 +12,8 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
     private readonly SelectionGroup? selector;
     private readonly IEnumerable<SelectableView<TViewEnum>> selectableViews;
     private readonly Action<TViewEnum>? onViewSelected;
+    private readonly IAnimationService? animationService;
+    private readonly double animationDuration; 
 
     private ViewModel? activePrimaryViewModel;
     private ViewModel? activeSecondaryViewModel;
@@ -23,12 +25,16 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
         SelectionGroup? selector,
         IEnumerable<SelectableView<TViewEnum>> selectableViews,
         Action<TViewEnum>? onViewSelected,
-        Panel? ternaryContainer = null)
+        Panel? ternaryContainer = null, 
+        IAnimationService? animationService = null,
+        double animationDuration = 0.3)
     {
         viewSelector = this;
         this.selector = selector;
         this.selectableViews = selectableViews;
         this.onViewSelected = onViewSelected;
+        this.animationService = animationService;
+        this.animationDuration = animationDuration;
 
         foreach (var selectableView in selectableViews)
         {
@@ -156,7 +162,7 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
             return;
         }
 
-        static void HideAndDeactivate(ViewModel? viewModel)
+        void HideAndDeactivate(ViewModel? viewModel)
         {
             if (viewModel is null)
             {
@@ -165,13 +171,20 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
 
             if (viewModel.ViewBase is IView view)
             {
-                view.IsVisible = false;
+                if ((this.animationService is not null) && (view is Control control))
+                {
+                    this.animationService.FadeOut(control, this.animationDuration);
+                }
+                else
+                {
+                    view.IsVisible = false;
+                }
             }
 
             viewModel.Deactivate();
         }
 
-        static void ActivateAndShow(ViewModel? viewModel, object? activationParameters)
+        void ActivateAndShow(ViewModel? viewModel, object? activationParameters)
         {
             if (viewModel is null)
             {
@@ -181,7 +194,14 @@ public sealed class ViewSelector<TViewEnum> : ObservableObject, IRecipient<ViewS
             viewModel.Activate(activationParameters);
             if (viewModel.ViewBase is IView view)
             {
-                view.IsVisible = true;
+                if ((this.animationService is not null) && (view is Control control))
+                {
+                    this.animationService.FadeIn(control, this.animationDuration);
+                }
+                else
+                {
+                    view.IsVisible = true;
+                }
             }
         }
 
