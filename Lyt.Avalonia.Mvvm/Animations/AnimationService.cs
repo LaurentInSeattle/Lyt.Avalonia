@@ -24,7 +24,7 @@ public sealed class AnimationService : IAnimationService
             }
         }
 
-        Debug.WriteLine("Fade IN begins");
+        //Debug.WriteLine("Fade IN begins");
 
         control.Opacity = 0.01;
         control.IsVisible = true;
@@ -42,13 +42,13 @@ public sealed class AnimationService : IAnimationService
             return;
         }
 
-        Debug.WriteLine("Fade OUT begins");
+        // Debug.WriteLine("Fade OUT begins");
         CancellationTokenSource cancellationTokenSource =
             this.StartAnimation(control, Control.OpacityProperty, 0.0, durationSeconds,
                 OneIteration, PlaybackDirection.Normal, FillMode.Forward,
                 () =>
                 {
-                    Debug.WriteLine("Fade Out Complete");
+                    // Debug.WriteLine("Fade Out Complete");
                     if (this.fadeOutAnimations is not null)
                     {
                         if (this.fadeOutAnimations.TryGetValue(control, out CancellationTokenSource? cancellationTokenSource))
