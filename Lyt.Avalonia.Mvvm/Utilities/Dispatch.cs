@@ -2,6 +2,8 @@
 
 public class Dispatch : IDispatch
 {
+    public void OnIdle(Action action) => Dispatch.OnUiThread(action, DispatcherPriority.ApplicationIdle);
+
     public void OnUiThread(Action action) => Dispatch.OnUiThread(action);
 
     public void OnUiThread<TArgs>(Action<TArgs> action, TArgs args) => Dispatch.OnUiThread(action, args);
