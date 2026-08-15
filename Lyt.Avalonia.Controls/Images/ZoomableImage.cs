@@ -46,7 +46,7 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
         Visual.AffectsRender<ZoomableImage>(
             PixelGridColorProperty,
             SelectionColorProperty,
-            SelectionRegionProperty, 
+            SelectionRegionProperty,
             ImageProperty,
             ZoomProperty
             );
@@ -302,47 +302,63 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
             return;
         }
 
-        // Draw image
-        var imageViewPort = this.GetImageViewPort();
-        context.DrawImage(image, this.GetSourceImageRegion(), imageViewPort);
+        // No way to check if Bitmap is disposed ? 
 
-        // Draw pixel grid
-        double zoomFactor = this.ZoomFactor;
-        if (this.SizeMode == SizeModes.Normal && zoomFactor > this.PixelGridZoomThreshold)
+        try
         {
-            double offsetX = this.Offset.X % zoomFactor;
-            double offsetY = this.Offset.Y % zoomFactor;
-            double left = imageViewPort.X;
-            double top = imageViewPort.Y;
-            double right = imageViewPort.Right;
-            double bottom = imageViewPort.Bottom;
-
-            var pixelGridPen = this.EnsurePixelGridPen();
-
-            // First vertical line position aligned to zoom steps
-            double startX = left + zoomFactor - offsetX;
-            for (double x = startX; x < right; x += zoomFactor)
+            // Draw image
+            Rect imageViewPort = this.GetImageViewPort();
+            if (imageViewPort == default)
             {
-                context.DrawLine(pixelGridPen, new Point(x, top), new Point(x, bottom));
+                return; 
+            } 
+
+            context.DrawImage(image, this.GetSourceImageRegion(), imageViewPort);
+
+            // Draw pixel grid
+            double zoomFactor = this.ZoomFactor;
+            if (this.SizeMode == SizeModes.Normal && zoomFactor > this.PixelGridZoomThreshold)
+            {
+                double offsetX = this.Offset.X % zoomFactor;
+                double offsetY = this.Offset.Y % zoomFactor;
+                double left = imageViewPort.X;
+                double top = imageViewPort.Y;
+                double right = imageViewPort.Right;
+                double bottom = imageViewPort.Bottom;
+
+                var pixelGridPen = this.EnsurePixelGridPen();
+
+                // First vertical line position aligned to zoom steps
+                double startX = left + zoomFactor - offsetX;
+                for (double x = startX; x < right; x += zoomFactor)
+                {
+                    context.DrawLine(pixelGridPen, new Point(x, top), new Point(x, bottom));
+                }
+
+                // First horizontal line position aligned to zoom steps
+                double startY = top + zoomFactor - offsetY;
+                for (double y = startY; y < bottom; y += zoomFactor)
+                {
+                    context.DrawLine(pixelGridPen, new Point(left, y), new Point(right, y));
+                }
+
+                context.DrawRectangle(pixelGridPen, imageViewPort);
             }
 
-            // First horizontal line position aligned to zoom steps
-            double startY = top + zoomFactor - offsetY;
-            for (double y = startY; y < bottom; y += zoomFactor)
+            var selectionRegion = this.SelectionRegion;
+            if (selectionRegion != default)
             {
-                context.DrawLine(pixelGridPen, new Point(left, y), new Point(right, y));
+                var rect = this.GetOffsetRectangle(selectionRegion, imageViewPort);
+                var selectionColor = this.SelectionColor;
+                context.FillRectangle(selectionColor, rect);
+                context.DrawRectangle(this.EnsureSelectionBorderPen(), rect);
             }
-
-            context.DrawRectangle(pixelGridPen, imageViewPort);
         }
-
-        var selectionRegion = this.SelectionRegion;
-        if (selectionRegion != default)
+        catch (Exception ex)
         {
-            var rect = this.GetOffsetRectangle(selectionRegion, imageViewPort);
-            var selectionColor = this.SelectionColor;
-            context.FillRectangle(selectionColor, rect);
-            context.DrawRectangle(this.EnsureSelectionBorderPen(), rect);
+            // We got so far:  System.ObjectDisposedException: Cannot access a disposed object.
+            Debug.WriteLine(ex);
+            if ( Debugger.IsAttached) {  Debugger.Break(); }
         }
     }
 
@@ -901,8 +917,8 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
     public void ZoomToFit()
     {
         this.Zoom = this.ZoomLevelToFit;
-        this.InvalidateVisual(); 
-    } 
+        this.InvalidateVisual();
+    }
 
     /// <summary> Adjusts the view port to fit the given region </summary>
     /// <param name="rectangle">The rectangle to fit the view port to.</param>
@@ -1219,7 +1235,10 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
                 break;
 
             case SizeModes.Fit:
-                double scaleFactor = Math.Min((viewPortSize.Width - padding.Left - padding.Right) / image.Size.Width, (viewPortSize.Height - padding.Top - padding.Bottom) / image.Size.Height);
+                double scaleFactor = 
+                    Math.Min(
+                        (viewPortSize.Width - padding.Left - padding.Right) / image.Size.Width, 
+                        (viewPortSize.Height - padding.Top - padding.Bottom) / image.Size.Height);
 
                 if (scaleFactor <= 0)
                 {
