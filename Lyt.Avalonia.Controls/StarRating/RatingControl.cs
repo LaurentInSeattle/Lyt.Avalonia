@@ -16,7 +16,7 @@ public class RatingControl : TemplatedControl
     public static readonly StyledProperty<bool> IsReadOnlyProperty =
         AvaloniaProperty.Register<RatingControl, bool>(
             nameof(IsReadOnly),     // Sets the name of the property
-            defaultValue: false);   // The default value of this property
+            defaultValue: true);   // The default value of this property
 
     /// <summary> Determines whether or not the rating can be changed.</summary>
     public bool IsReadOnly
