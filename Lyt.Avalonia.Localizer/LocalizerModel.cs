@@ -94,13 +94,13 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
             this.currentLanguageResource = newLanguage;
             this.currentLanguage = targetLanguage;
             this.Logger.Info("Added new language: " + targetLanguage);
-            new LanguageChangedMessage(oldLanguageKey, this.currentLanguage).Publish();
 
             var cultureInfo = new CultureInfo(this.currentLanguage);
             var currentThread = Thread.CurrentThread;
             currentThread.CurrentCulture = cultureInfo;
             currentThread.CurrentUICulture = cultureInfo;
 
+            new LanguageChangedMessage(oldLanguageKey, this.currentLanguage).Publish();
             return true;
         }
         catch (Exception ex)
