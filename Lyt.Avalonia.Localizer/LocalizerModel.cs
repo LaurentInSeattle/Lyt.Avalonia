@@ -1,5 +1,7 @@
 ﻿namespace Lyt.Avalonia.Localizer;
 
+using System.Diagnostics.CodeAnalysis;
+
 public sealed class LocalizerModel : ModelBase, ILocalizer
 {
     private readonly Application application;
@@ -56,6 +58,7 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
         return false;
     }
 
+    [RequiresUnreferencedCode("For Resource Include")]
     public bool SelectLanguage(string targetLanguage)
     {
         if (!this.configuration.Languages.Contains(targetLanguage))
@@ -89,17 +92,21 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
             string? oldLanguageKey = this.currentLanguage;
             string uriString = this.configuration.ResourceFileUriString(targetLanguage);
             var uri = new Uri(uriString);
+
+            // AOT ??? 
             var newLanguage = new ResourceInclude(uri) { Source = uri };
+            // AOT ??? 
+
             this.application.Resources.MergedDictionaries.Add(newLanguage);
             this.currentLanguageResource = newLanguage;
             this.currentLanguage = targetLanguage;
-            this.Logger.Info("Added new language: " + targetLanguage);
 
             var cultureInfo = new CultureInfo(this.currentLanguage);
             var currentThread = Thread.CurrentThread;
             currentThread.CurrentCulture = cultureInfo;
             currentThread.CurrentUICulture = cultureInfo;
 
+            this.Logger.Info("Added new language: " + targetLanguage);
             new LanguageChangedMessage(oldLanguageKey, this.currentLanguage).Publish();
             return true;
         }
