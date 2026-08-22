@@ -1,5 +1,8 @@
 ﻿namespace Lyt.Avalonia.Mvvm;
 
+using System.Diagnostics.CodeAnalysis;
+
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
 public class View : UserControl, IView, ISupportBehaviors
 {
     public List<object> Behaviors { get; private set; } = [];
