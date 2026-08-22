@@ -1,12 +1,11 @@
 ﻿namespace Lyt.Avalonia.Mvvm;
 
-using System.Diagnostics.CodeAnalysis;
-
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
 public class View : UserControl, IView, ISupportBehaviors
 {
     public List<object> Behaviors { get; private set; } = [];
 
+    [RequiresUnreferencedCode("For resource include in SelectLanguage")]
     public View()
     {
         var methodInfo = this.GetType().GetMethod("InitializeComponent");
@@ -19,6 +18,7 @@ public class View : UserControl, IView, ISupportBehaviors
         this.Loaded += this.OnLoaded;
     }
 
+    [RequiresUnreferencedCode("For resource include in SelectLanguage")]
     protected virtual void OnLoaded(object? sender, RoutedEventArgs e)
     {
         if (this.DataContext is ViewModel viewModel)

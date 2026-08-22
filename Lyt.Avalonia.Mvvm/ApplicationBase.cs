@@ -6,11 +6,18 @@ public class ApplicationBase(
     string organizationKey,
     string applicationKey,
     string uriString,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] 
     Type mainWindowType,
+
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
     Type applicationModelType,
+
     List<Type> modelTypes,
+
     List<Type> singletonTypes,
+
     List<Tuple<Type, Type>> servicesInterfaceAndType,
+
     bool singleInstanceRequested = false,
     Uri? splashImageUri = null, 
     Window? appSplashWindow =null) : Application, IApplicationBase
@@ -39,12 +46,19 @@ public class ApplicationBase(
 #pragma warning disable IDE0052 // Remove unread private members
     // We may need this one later 
     private readonly string uriString = uriString;
-#pragma warning restore IDE0052 
+
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
     private readonly Type mainWindowType = mainWindowType;
+
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
     private readonly Type applicationModelType = applicationModelType;
+
     private readonly List<Type> modelTypes = modelTypes;
+
     private readonly List<Type> singletonTypes = singletonTypes;
+
     private readonly List<Tuple<Type, Type>> servicesInterfaceAndType = servicesInterfaceAndType;
+
     private readonly List<Type> validatedModelTypes = [];
     private readonly bool isSingleInstanceRequested = singleInstanceRequested;
     private readonly Uri? splashImageUri = splashImageUri;
@@ -220,119 +234,119 @@ public class ApplicationBase(
     private void InitializeHosting()
     {
         ApplicationBase.AppHost = Host.CreateDefaultBuilder()
-                .ConfigureServices((_0, services) =>
-                {
-                    // Register the app
-                    _ = services.AddSingleton<IApplicationBase>(this);
-
-                    // Always Main Window 
-                    _ = services.AddSingleton(typeof(Window), this.mainWindowType);
-
-                    // The Application Model, also  a singleton, no need here to also add it without the inferface  
-                    _ = services.AddSingleton(typeof(IApplicationModel), this.applicationModelType);
-
-                    // Models 
-                    foreach (Type modelType in this.modelTypes)
-                    {
-                        bool isModel = typeof(IModel).IsAssignableFrom(modelType);
-                        if (isModel)
-                        {
-                            // Models can be retrieved all via the interface or retrieved only one by providing specific type,
-                            // just like singletons below
-                            _ = services.AddSingleton(modelType);
-                            this.validatedModelTypes.Add(modelType);
-                        }
-                        else
-                        {
-                            if (modelType.FullName is not null)
-                            {
-                                Debug.WriteLine(modelType.FullName.ToString() + " is not a IModel");
-                            }
-                        }
-                    }
-
-                    // Singletons, they do not need an interface. 
-                    foreach (var singletonType in this.singletonTypes)
-                    {
-                        _ = services.AddSingleton(singletonType);
-                    }
-
-                    // Services, all must comply to a specific interface 
-                    foreach (var serviceType in this.servicesInterfaceAndType)
-                    {
-                        try
-                        {
-                            var interfaceType = serviceType.Item1;
-                            var implementationType = serviceType.Item2;
-                            _ = services.AddSingleton(interfaceType, implementationType);
-                        }
-                        catch (Exception )
-                        {
-                            if (Design.IsDesignMode)
-                            {
-                                // Silently swallow to please the XAML editor / designer 
-                            }
-                            else
-                            {
-                                throw;
-                            } 
-                        } 
-                    }
-
-                }).Build();
-    }
-
-    protected static Tuple<Type, Type> OsSpecificService<TInterface>(string implementationName)
-    {
-        // Only Windows and MacOS for now 
-        try
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
+            .ConfigureServices((_0, services) =>
             {
-                // OSPlatform.Linux is NOT supported, at least for now, no way to test it here
-                throw new ArgumentException("Unsupported platform: " + RuntimeInformation.OSDescription);
-            }
+                // Register the app
+                _ = services.AddSingleton<IApplicationBase>(this);
 
-            var maybeAssembly = Assembly.GetEntryAssembly();
-            if (maybeAssembly is Assembly assembly)
-            {
-                var typeInfos = assembly.DefinedTypes;
-                TypeInfo? maybeTypeInfo =
-                    (from typeInfo in typeInfos 
-                     where typeInfo.Name == implementationName 
-                     select typeInfo)
-                    .FirstOrDefault();
-                if (maybeTypeInfo is not null && maybeTypeInfo.AsType() is Type type)
+                // Always Main Window 
+                _ = services.AddSingleton(typeof(Window), this.mainWindowType);
+
+                // The Application Model, also  a singleton, no need here to also add it without the inferface  
+                _ = services.AddSingleton(typeof(IApplicationModel), this.applicationModelType);
+
+                // Models 
+                foreach (Type modelType in this.modelTypes)
                 {
-                    if (type.Implements<TInterface>())
+                    bool isModel = typeof(IModel).IsAssignableFrom(modelType);
+                    if (isModel)
                     {
-                        object? instance = Activator.CreateInstance(type);
-                        if (instance is TInterface service)
+                        // Models can be retrieved all via the interface or retrieved only one by providing specific type,
+                        // just like singletons below
+                        _ = services.AddSingleton(modelType);
+                        this.validatedModelTypes.Add(modelType);
+                    }
+                    else
+                    {
+                        if (modelType.FullName is not null)
                         {
-                            return new Tuple<Type, Type>(typeof(TInterface), instance.GetType());
+                            Debug.WriteLine(modelType.FullName.ToString() + " is not a IModel");
                         }
                     }
                 }
-            }
 
-            if (Design.IsDesignMode)
-            {
-                // To please the XAML editor/compiler
-                return new Tuple<Type, Type>(typeof(TInterface), typeof(TInterface));
-            }
-            else
-            { 
-                throw new ArgumentException(
-                    "Failed to create instance of service " + implementationName + " for " + RuntimeInformation.OSDescription);
-            } 
+                // Singletons, they do not need an interface. 
+                foreach (Type singletonType in this.singletonTypes)
+                {
+                    _ = services.AddSingleton(singletonType);
+                }
 
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex.ToString());
-            throw;
-        }
+                // Services, all must comply to a specific interface 
+                foreach (var serviceType in this.servicesInterfaceAndType)
+                {
+                    try
+                    {
+                        var interfaceType = serviceType.Item1;
+                        var implementationType = serviceType.Item2;
+                        _ = services.AddSingleton(interfaceType, implementationType);
+                    }
+                    catch (Exception )
+                    {
+                        if (Design.IsDesignMode)
+                        {
+                            // Silently swallow to please the XAML editor / designer 
+                        }
+                        else
+                        {
+                            throw;
+                        } 
+                    } 
+                }
+
+            }).Build();
     }
+
+    //protected static Tuple<Type, Type> OsSpecificService<TInterface>(string implementationName)
+    //{
+    //    // Only Windows and MacOS for now 
+    //    try
+    //    {
+    //        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
+    //        {
+    //            // OSPlatform.Linux is NOT supported, at least for now, no way to test it here
+    //            throw new ArgumentException("Unsupported platform: " + RuntimeInformation.OSDescription);
+    //        }
+
+    //        var maybeAssembly = Assembly.GetEntryAssembly();
+    //        if (maybeAssembly is Assembly assembly)
+    //        {
+    //            var typeInfos = assembly.DefinedTypes;
+    //            TypeInfo? maybeTypeInfo =
+    //                (from typeInfo in typeInfos 
+    //                 where typeInfo.Name == implementationName 
+    //                 select typeInfo)
+    //                .FirstOrDefault();
+    //            if (maybeTypeInfo is not null && maybeTypeInfo.AsType() is Type type)
+    //            {
+    //                if (type.Implements<TInterface>())
+    //                {
+    //                    object? instance = Activator.CreateInstance(type);
+    //                    if (instance is TInterface service)
+    //                    {
+    //                        return new Tuple<Type, Type>(typeof(TInterface), instance.GetType());
+    //                    }
+    //                }
+    //            }
+    //        }
+
+    //        if (Design.IsDesignMode)
+    //        {
+    //            // To please the XAML editor/compiler
+    //            return new Tuple<Type, Type>(typeof(TInterface), typeof(TInterface));
+    //        }
+    //        else
+    //        { 
+    //            throw new ArgumentException(
+    //                "Failed to create instance of service " + implementationName + " for " + RuntimeInformation.OSDescription);
+    //        } 
+
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Debug.WriteLine(ex.ToString());
+    //        throw;
+    //    }
+    //}
 
     private async Task Startup()
     {
