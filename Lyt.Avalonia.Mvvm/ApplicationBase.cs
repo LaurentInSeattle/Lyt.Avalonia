@@ -33,12 +33,14 @@ public class ApplicationBase : Application, IApplicationBase
     private IClassicDesktopStyleApplicationLifetime? desktop;
 
     private readonly Func<IHost>? initializeHosting;
+    private readonly Func<List<Type>> getModelTypes;
 
     public ApplicationBase(
         string organizationKey,
         string applicationKey,
         string uriString,
         Func<IHost> initializeHosting,
+        Func<List<Type>> getModelTypes,
         bool singleInstanceRequested = false,
         Uri? splashImageUri = null,
         Window? appSplashWindow = null)
@@ -47,6 +49,7 @@ public class ApplicationBase : Application, IApplicationBase
         this.applicationKey = applicationKey;
         this.uriString = uriString;
         this.initializeHosting = initializeHosting;
+        this.getModelTypes = getModelTypes;
         this.isSingleInstanceRequested = singleInstanceRequested;
         this.splashImageUri = splashImageUri;
         this.appSplashWindow = appSplashWindow;
@@ -69,6 +72,24 @@ public class ApplicationBase : Application, IApplicationBase
     public static object? GetOptionalService(Type type)
         => ApplicationBase.AppHost.Services.GetService(type);
 
+    public List<IModel> GetModels()
+    {
+        List<IModel> models = [];
+        foreach (var modelType in this.getModelTypes())
+        {
+            object? model = ApplicationBase.GetRequiredService(modelType);
+            if (model is not IModel iModel)
+            {
+                continue;
+            }
+
+            models.Add(iModel); 
+            this.Logger.Info(" Found Model: " + model.ToString());
+        }
+
+        return models; 
+    }
+
     public static TModel GetModel<TModel>() where TModel : notnull
     {
         TModel? model = ApplicationBase.GetRequiredService<TModel>() ??
@@ -81,23 +102,6 @@ public class ApplicationBase : Application, IApplicationBase
 
         return model;
     }
-
-    public IEnumerable<IModel> GetModels()
-    {
-        List<IModel> models = new List<IModel>();
-        var list = ApplicationBase.AppHost.Services.GetServices<IModel>();
-        foreach (object model in list)
-        {
-            if ( model is IModel iModel)
-            {
-                models.Add(iModel);
-            }
-        } 
-
-        return models; 
-    }
-        //=> ApplicationBase.AppHost.Services 
-        //Services.GetServices<IModel>();
 
     public async Task Shutdown()
     {
@@ -224,58 +228,6 @@ public class ApplicationBase : Application, IApplicationBase
         }
     }
 
-    //protected static Tuple<Type, Type> OsSpecificService<TInterface>(string implementationName)
-    //{
-    //    // Only Windows and MacOS for now 
-    //    try
-    //    {
-    //        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
-    //        {
-    //            // OSPlatform.Linux is NOT supported, at least for now, no way to test it here
-    //            throw new ArgumentException("Unsupported platform: " + RuntimeInformation.OSDescription);
-    //        }
-
-    //        var maybeAssembly = Assembly.GetEntryAssembly();
-    //        if (maybeAssembly is Assembly assembly)
-    //        {
-    //            var typeInfos = assembly.DefinedTypes;
-    //            TypeInfo? maybeTypeInfo =
-    //                (from typeInfo in typeInfos 
-    //                 where typeInfo.Name == implementationName 
-    //                 select typeInfo)
-    //                .FirstOrDefault();
-    //            if (maybeTypeInfo is not null && maybeTypeInfo.AsType() is Type type)
-    //            {
-    //                if (type.Implements<TInterface>())
-    //                {
-    //                    object? instance = Activator.CreateInstance(type);
-    //                    if (instance is TInterface service)
-    //                    {
-    //                        return new Tuple<Type, Type>(typeof(TInterface), instance.GetType());
-    //                    }
-    //                }
-    //            }
-    //        }
-
-    //        if (Design.IsDesignMode)
-    //        {
-    //            // To please the XAML editor/compiler
-    //            return new Tuple<Type, Type>(typeof(TInterface), typeof(TInterface));
-    //        }
-    //        else
-    //        { 
-    //            throw new ArgumentException(
-    //                "Failed to create instance of service " + implementationName + " for " + RuntimeInformation.OSDescription);
-    //        } 
-
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        Debug.WriteLine(ex.ToString());
-    //        throw;
-    //    }
-    //}
-
     private async Task Startup()
     {
         await ApplicationBase.AppHost.StartAsync();
@@ -285,7 +237,7 @@ public class ApplicationBase : Application, IApplicationBase
         var logger = ApplicationBase.GetRequiredService<ILogger>();
         this.Logger = logger;
 
-        if (Debugger.IsAttached && this.Logger is LogViewerWindow logViewer)
+        if (/* Debugger.IsAttached && */ this.Logger is LogViewerWindow logViewer)
         {
             try
             {
@@ -298,14 +250,15 @@ public class ApplicationBase : Application, IApplicationBase
 
         // Warming up the models: 
         // This ensures that the Application Model and all listed models are constructed.
-        foreach (IModel service in this.GetModels())
+        foreach (var modelType in this.getModelTypes())
         {
-            if (service is not IModel)
+            var model = ApplicationBase.GetRequiredService(modelType); 
+            if (model  is not IModel)
             {
-                throw new ApplicationException("Failed to warmup model: " + service.ToString());
+                throw new ApplicationException("Failed to warmup model: " + model.ToString());
             }
 
-            this.Logger.Info(" Model: " + service.ToString());            
+            this.Logger.Info(" Found Model: " + model.ToString());            
         }
 
         IApplicationModel applicationModel = ApplicationBase.GetRequiredService<IApplicationModel>();

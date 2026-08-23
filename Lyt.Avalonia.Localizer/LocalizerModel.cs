@@ -96,7 +96,7 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
             // AOT ??? 
             var newLanguage = new ResourceInclude(uri) { Source = uri };
             // AOT ??? 
-
+                
             this.application.Resources.MergedDictionaries.Add(newLanguage);
             this.currentLanguageResource = newLanguage;
             this.currentLanguage = targetLanguage;
