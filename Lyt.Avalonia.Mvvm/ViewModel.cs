@@ -157,7 +157,6 @@ public class ViewModel : ObservableObject, ISupportBehaviors, IBindable
     protected virtual void OnDataBinding() { }
 
     /// <summary> Invoked when this view model's control is loaded. </summary>
-    //[RequiresUnreferencedCode("For resource include in SelectLanguage")]
     public virtual void OnViewLoaded() { }
 
     public bool IsActivated { get; private set; }

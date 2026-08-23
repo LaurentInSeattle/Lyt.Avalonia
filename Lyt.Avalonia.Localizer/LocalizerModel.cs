@@ -1,7 +1,5 @@
 ﻿namespace Lyt.Avalonia.Localizer;
 
-using System.Text;
-
 public sealed class LocalizerModel : ModelBase, ILocalizer
 {
     private readonly Application application;
@@ -10,7 +8,7 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
     private LocalizerConfiguration configuration;
 
     private string? currentLanguage;
-    private ResourceInclude? currentLanguageResource;
+    private ResourceDictionary? currentLanguageResource;
 
     public LocalizerModel(
         IApplicationBase application, 
@@ -57,7 +55,6 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
         return false;
     }
 
-    [RequiresUnreferencedCode("For Resource Include")]
     public bool SelectLanguage(string targetLanguage)
     {
         if (!this.configuration.Languages.Contains(targetLanguage))
@@ -90,13 +87,7 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
 
             string? oldLanguageKey = this.currentLanguage;
 
-            //string uriString = this.configuration.ResourceFileUriString(targetLanguage);
-            //var uri = new Uri(uriString);
-
-            //// AOT ??? 
-            //var newLanguage = new ResourceInclude(uri) { Source = uri };
-            //// AOT ??? 
-
+            // ! There is an assembly - or else there are no translations 
             ResourcesUtilities.SetExecutingAssembly(this.configuration.Assembly!);
 
             string resourcePath = this.configuration.ResourcePathString(); 
@@ -116,13 +107,21 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
                 return false; 
             }
 
-            byte[] byteArray = Encoding.UTF8.GetBytes(xamlString);
-            using var stream = new MemoryStream(byteArray);
-            var dictionary = (ResourceDictionary)
-                AvaloniaRuntimeXamlLoader.Load(stream);
+            var tuple = AxamlParserWriter.ParseResourceFile(xamlString);
+            if (!tuple.Item1)
+            {
+                this.Logger.Warning("Failed to parse Resource for: " + targetLanguage);
+                return false;
+            }
 
-            //this.application.Resources.MergedDictionaries.Add(newLanguage);
-            //this.currentLanguageResource = newLanguage;
+            var newLanguage = new ResourceDictionary();
+            foreach (var kvp in tuple.Item2) 
+            {
+                newLanguage.Add( kvp.Key, kvp.Value);
+            }
+
+            this.application.Resources.MergedDictionaries.Add(newLanguage);
+            this.currentLanguageResource = newLanguage;
             this.currentLanguage = targetLanguage;
 
             var cultureInfo = new CultureInfo(this.currentLanguage);
