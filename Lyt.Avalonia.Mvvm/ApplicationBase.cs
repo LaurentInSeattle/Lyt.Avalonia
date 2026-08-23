@@ -1,26 +1,10 @@
 ﻿namespace Lyt.Avalonia.Mvvm;
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+#pragma warning disable CS8618 
+// Non-nullable field must contain a non-null value when exiting constructor.
+// Consider declaring as nullable.
 
-public class ApplicationBase(
-    string organizationKey,
-    string applicationKey,
-    string uriString,
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] 
-    Type mainWindowType,
-
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-    Type applicationModelType,
-
-    List<Type> modelTypes,
-
-    List<Type> singletonTypes,
-
-    List<Tuple<Type, Type>> servicesInterfaceAndType,
-
-    bool singleInstanceRequested = false,
-    Uri? splashImageUri = null, 
-    Window? appSplashWindow =null) : Application, IApplicationBase
+public class ApplicationBase : Application, IApplicationBase
 {
     public static Window MainWindow { get; private set; }
 
@@ -36,35 +20,37 @@ public class ApplicationBase(
     // LATER, maybe, using Fluent theme for now
     // public StyleManager StyleManager { get; private set; }
 
-#pragma warning restore CS8618
-
     // To enforce single instance 
     private static FileStream? LockFile;
 
-    private readonly string organizationKey = organizationKey;
-    private readonly string applicationKey = applicationKey;
-#pragma warning disable IDE0052 // Remove unread private members
-    // We may need this one later 
-    private readonly string uriString = uriString;
-
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-    private readonly Type mainWindowType = mainWindowType;
-
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-    private readonly Type applicationModelType = applicationModelType;
-
-    private readonly List<Type> modelTypes = modelTypes;
-
-    private readonly List<Type> singletonTypes = singletonTypes;
-
-    private readonly List<Tuple<Type, Type>> servicesInterfaceAndType = servicesInterfaceAndType;
-
-    private readonly List<Type> validatedModelTypes = [];
-    private readonly bool isSingleInstanceRequested = singleInstanceRequested;
-    private readonly Uri? splashImageUri = splashImageUri;
-    private readonly Window? appSplashWindow = appSplashWindow; 
+    private readonly string organizationKey;
+    private readonly string applicationKey;
+    private readonly string uriString;
+    private readonly bool isSingleInstanceRequested;
+    private readonly Uri? splashImageUri;
+    private readonly Window? appSplashWindow;
 
     private IClassicDesktopStyleApplicationLifetime? desktop;
+
+    private readonly Func<IHost>? initializeHosting;
+
+    public ApplicationBase(
+        string organizationKey,
+        string applicationKey,
+        string uriString,
+        Func<IHost> initializeHosting,
+        bool singleInstanceRequested = false,
+        Uri? splashImageUri = null,
+        Window? appSplashWindow = null)
+    {
+        this.organizationKey = organizationKey;
+        this.applicationKey = applicationKey;
+        this.uriString = uriString;
+        this.initializeHosting = initializeHosting;
+        this.isSingleInstanceRequested = singleInstanceRequested;
+        this.splashImageUri = splashImageUri;
+        this.appSplashWindow = appSplashWindow;
+    }
 
     public static Tuple<Type, Type> Service<TInterface, TImplementation>()
         where TInterface : class
@@ -96,22 +82,7 @@ public class ApplicationBase(
         return model;
     }
 
-    public IEnumerable<IModel> GetModels()
-    {
-        List<IModel> models = [];
-        foreach (Type type in this.validatedModelTypes)
-        {
-            object model = ApplicationBase.AppHost.Services.GetRequiredService(type);
-            bool isModel = typeof(IModel).IsAssignableFrom(model.GetType());
-            if (isModel)
-            {
-                // ! Verified by isModel 
-                models.Add((model as IModel)!);
-            }
-        }
-
-        return models;
-    }
+    public IEnumerable<IModel> GetModels() => ApplicationBase.AppHost.Services.GetServices<IModel>();
 
     public async Task Shutdown()
     {
@@ -136,8 +107,8 @@ public class ApplicationBase(
 
         if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
         {
-            this.desktop = 
-                lifetime ?? 
+            this.desktop =
+                lifetime ??
                 throw new InvalidOperationException("Desktop should not be null.");
 
             // Enforce single instance if requested 
@@ -147,11 +118,11 @@ public class ApplicationBase(
                 return;
             }
 
-            if ((this.splashImageUri is not null)&& (this.appSplashWindow is not null))
+            if ((this.splashImageUri is not null) && (this.appSplashWindow is not null))
             {
                 throw new InvalidOperationException("Cannot have two splash windows.");
             }
-            
+
             if (this.splashImageUri is not null)
             {
                 // Show default splash window
@@ -185,7 +156,14 @@ public class ApplicationBase(
 
     private async void InitializeApplication()
     {
-        this.InitializeHosting();
+        if (this.initializeHosting is Func<IHost> hostingCallback)
+        {
+            ApplicationBase.AppHost = hostingCallback();
+        }
+        else
+        {
+            throw new Exception("Invalid Configuration");
+        }
 
         if (Design.IsDesignMode)
         {
@@ -229,71 +207,6 @@ public class ApplicationBase(
             // Still in designer mode ? 
             throw new InvalidOperationException("Desktop should not be null.");
         }
-    }
-
-    private void InitializeHosting()
-    {
-        ApplicationBase.AppHost = Host.CreateDefaultBuilder()
-            .ConfigureServices((_0, services) =>
-            {
-                // Register the app
-                _ = services.AddSingleton<IApplicationBase>(this);
-
-                // Always Main Window 
-                _ = services.AddSingleton(typeof(Window), this.mainWindowType);
-
-                // The Application Model, also  a singleton, no need here to also add it without the inferface  
-                _ = services.AddSingleton(typeof(IApplicationModel), this.applicationModelType);
-
-                // Models 
-                foreach (Type modelType in this.modelTypes)
-                {
-                    bool isModel = typeof(IModel).IsAssignableFrom(modelType);
-                    if (isModel)
-                    {
-                        // Models can be retrieved all via the interface or retrieved only one by providing specific type,
-                        // just like singletons below
-                        _ = services.AddSingleton(modelType);
-                        this.validatedModelTypes.Add(modelType);
-                    }
-                    else
-                    {
-                        if (modelType.FullName is not null)
-                        {
-                            Debug.WriteLine(modelType.FullName.ToString() + " is not a IModel");
-                        }
-                    }
-                }
-
-                // Singletons, they do not need an interface. 
-                foreach (Type singletonType in this.singletonTypes)
-                {
-                    _ = services.AddSingleton(singletonType);
-                }
-
-                // Services, all must comply to a specific interface 
-                foreach (var serviceType in this.servicesInterfaceAndType)
-                {
-                    try
-                    {
-                        var interfaceType = serviceType.Item1;
-                        var implementationType = serviceType.Item2;
-                        _ = services.AddSingleton(interfaceType, implementationType);
-                    }
-                    catch (Exception )
-                    {
-                        if (Design.IsDesignMode)
-                        {
-                            // Silently swallow to please the XAML editor / designer 
-                        }
-                        else
-                        {
-                            throw;
-                        } 
-                    } 
-                }
-
-            }).Build();
     }
 
     //protected static Tuple<Type, Type> OsSpecificService<TInterface>(string implementationName)
