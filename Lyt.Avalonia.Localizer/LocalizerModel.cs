@@ -53,8 +53,7 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
         // Returns nothing :(   Possible bug ? 
         // Stupid Avalonia AssetLoader is filtering out all axaml files... 
         string uriString = this.configuration.ResourceFolderUriString();
-        /* var assets */
-        _ = AssetLoader.GetAssets(new Uri(uriString), null).ToList();
+        var assets = AssetLoader.GetAssets(new Uri(uriString), null).ToList();
         return false;
     }
 
