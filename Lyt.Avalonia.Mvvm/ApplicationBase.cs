@@ -82,7 +82,22 @@ public class ApplicationBase : Application, IApplicationBase
         return model;
     }
 
-    public IEnumerable<IModel> GetModels() => ApplicationBase.AppHost.Services.GetServices<IModel>();
+    public IEnumerable<IModel> GetModels()
+    {
+        List<IModel> models = new List<IModel>();
+        var list = ApplicationBase.AppHost.Services.GetServices<IModel>();
+        foreach (object model in list)
+        {
+            if ( model is IModel iModel)
+            {
+                models.Add(iModel);
+            }
+        } 
+
+        return models; 
+    }
+        //=> ApplicationBase.AppHost.Services 
+        //Services.GetServices<IModel>();
 
     public async Task Shutdown()
     {
@@ -283,13 +298,14 @@ public class ApplicationBase : Application, IApplicationBase
 
         // Warming up the models: 
         // This ensures that the Application Model and all listed models are constructed.
-        foreach (Type type in this.validatedModelTypes)
+        foreach (IModel service in this.GetModels())
         {
-            object model = ApplicationBase.AppHost.Services.GetRequiredService(type);
-            if (model is not IModel)
+            if (service is not IModel)
             {
-                throw new ApplicationException("Failed to warmup model: " + type.FullName);
+                throw new ApplicationException("Failed to warmup model: " + service.ToString());
             }
+
+            this.Logger.Info(" Model: " + service.ToString());            
         }
 
         IApplicationModel applicationModel = ApplicationBase.GetRequiredService<IApplicationModel>();
