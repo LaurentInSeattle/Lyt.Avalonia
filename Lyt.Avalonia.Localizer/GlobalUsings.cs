@@ -4,6 +4,8 @@ global using System.Collections.Concurrent;
 global using System.Collections.Generic;
 global using System.ComponentModel;
 global using System.Diagnostics;
+global using System.Diagnostics.CodeAnalysis;
+
 global using System.Globalization;
 global using System.Linq;
 global using System.Reflection;
@@ -39,4 +41,5 @@ global using Lyt.Framework.Interfaces.Profiling;
 
 global using Lyt.Model;
 global using Lyt.Persistence;
+global using Lyt.Resources;
 

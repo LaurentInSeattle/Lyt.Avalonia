@@ -1,6 +1,6 @@
 ﻿namespace Lyt.Avalonia.Localizer;
 
-using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 public sealed class LocalizerModel : ModelBase, ILocalizer
 {
@@ -80,8 +80,8 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
                 .FirstOrDefault(x => x.Source?.OriginalString?.Contains(this.configuration.LanguagesSubFolder) ?? false);
             if (translations is not null)
             {
-                this.Logger.Info("Removed current language");
                 mergedDictionaries.Remove(translations);
+                this.Logger.Info("Removed current language");
             }
             else
             {
@@ -89,15 +89,40 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
             }
 
             string? oldLanguageKey = this.currentLanguage;
-            string uriString = this.configuration.ResourceFileUriString(targetLanguage);
-            var uri = new Uri(uriString);
 
-            // AOT ??? 
-            var newLanguage = new ResourceInclude(uri) { Source = uri };
-            // AOT ??? 
-                
-            this.application.Resources.MergedDictionaries.Add(newLanguage);
-            this.currentLanguageResource = newLanguage;
+            //string uriString = this.configuration.ResourceFileUriString(targetLanguage);
+            //var uri = new Uri(uriString);
+
+            //// AOT ??? 
+            //var newLanguage = new ResourceInclude(uri) { Source = uri };
+            //// AOT ??? 
+
+            ResourcesUtilities.SetExecutingAssembly(this.configuration.Assembly!);
+
+            string resourcePath = this.configuration.ResourcePathString(); 
+            if (string.IsNullOrWhiteSpace(resourcePath))
+            {
+                this.Logger.Warning("Failed to find Resource Path for: " + targetLanguage);
+                return false;
+            }
+            
+            ResourcesUtilities.SetResourcesPath(resourcePath);
+
+            string resourceFilePath = this.configuration.ResourceFileEmbeddedPathString(targetLanguage); 
+            string xamlString = ResourcesUtilities.LoadEmbeddedTextResource(resourceFilePath, out string? path);
+            if (string.IsNullOrEmpty(xamlString))
+            {
+                this.Logger.Warning("Failed to load Resource for: " + targetLanguage );
+                return false; 
+            }
+
+            byte[] byteArray = Encoding.UTF8.GetBytes(xamlString);
+            using var stream = new MemoryStream(byteArray);
+            var dictionary = (ResourceDictionary)
+                AvaloniaRuntimeXamlLoader.Load(stream);
+
+            //this.application.Resources.MergedDictionaries.Add(newLanguage);
+            //this.currentLanguageResource = newLanguage;
             this.currentLanguage = targetLanguage;
 
             var cultureInfo = new CultureInfo(this.currentLanguage);
