@@ -68,7 +68,6 @@ global using Lyt.Avalonia.Mvvm.Splash;
 global using Lyt.Avalonia.Mvvm.Utilities;
 
 global using Lyt.Collections;
-global using Lyt.Mvvm;
 global using Lyt.Utilities.Extensions;
 
 
