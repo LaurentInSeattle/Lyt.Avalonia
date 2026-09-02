@@ -11,8 +11,8 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
     private ResourceDictionary? currentLanguageResource;
 
     public LocalizerModel(
-        IApplicationBase application, 
-        ILogger logger, 
+        IApplicationBase application,
+        ILogger logger,
         FileManagerModel fileManagerModel) : base(logger)
     {
         if (application is not Application avaloniaApplication)
@@ -29,7 +29,7 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
 
     public override Task Initialize() => Task.CompletedTask;
 
-    public string? CurrentLanguage => this.currentLanguage; 
+    public string? CurrentLanguage => this.currentLanguage;
 
     public Task Configure(LocalizerConfiguration configuration)
     {
@@ -90,21 +90,21 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
             // ! There is an assembly - or else there are no translations 
             ResourcesUtilities.SetExecutingAssembly(this.configuration.Assembly!);
 
-            string resourcePath = this.configuration.ResourcePathString(); 
+            string resourcePath = this.configuration.ResourcePathString();
             if (string.IsNullOrWhiteSpace(resourcePath))
             {
                 this.Logger.Warning("Failed to find Resource Path for: " + targetLanguage);
                 return false;
             }
-            
+
             ResourcesUtilities.SetResourcesPath(resourcePath);
 
-            string resourceFilePath = this.configuration.ResourceFileEmbeddedPathString(targetLanguage); 
+            string resourceFilePath = this.configuration.ResourceFileEmbeddedPathString(targetLanguage);
             string xamlString = ResourcesUtilities.LoadEmbeddedTextResource(resourceFilePath, out string? path);
             if (string.IsNullOrEmpty(xamlString))
             {
-                this.Logger.Warning("Failed to load Resource for: " + targetLanguage );
-                return false; 
+                this.Logger.Warning("Failed to load Resource for: " + targetLanguage);
+                return false;
             }
 
             var tuple = AxamlParserWriter.ParseResourceFile(xamlString);
@@ -115,9 +115,10 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
             }
 
             var newLanguage = new ResourceDictionary();
-            foreach (var kvp in tuple.Item2) 
+            foreach (var kvp in tuple.Item2)
             {
-                newLanguage.Add( kvp.Key, kvp.Value);
+                string escaped = kvp.Value.Replace("&#xD;&#xA;", Environment.NewLine);
+                newLanguage.Add(kvp.Key, escaped);
             }
 
             this.application.Resources.MergedDictionaries.Add(newLanguage);
