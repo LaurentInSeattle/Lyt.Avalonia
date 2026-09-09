@@ -35,6 +35,7 @@ public class ApplicationBase : Application, IApplicationBase
     private readonly Func<IHost>? initializeHosting;
     private readonly Func<List<Type>> getModelTypes;
 
+#pragma warning disable IDE0290 // Use primary constructor
     public ApplicationBase(
         string organizationKey,
         string applicationKey,
@@ -54,6 +55,7 @@ public class ApplicationBase : Application, IApplicationBase
         this.splashImageUri = splashImageUri;
         this.appSplashWindow = appSplashWindow;
     }
+#pragma warning restore IDE0290 // Use primary constructor
 
     public static Tuple<Type, Type> Service<TInterface, TImplementation>()
         where TInterface : class
@@ -252,7 +254,7 @@ public class ApplicationBase : Application, IApplicationBase
         // This ensures that the Application Model and all listed models are constructed.
         foreach (var modelType in this.getModelTypes())
         {
-            var model = ApplicationBase.GetRequiredService(modelType); 
+            object model = ApplicationBase.GetRequiredService(modelType); 
             if (model  is not IModel)
             {
                 throw new ApplicationException("Failed to warmup model: " + model.ToString());

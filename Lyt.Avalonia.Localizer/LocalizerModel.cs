@@ -36,7 +36,7 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
         if (configuration.IsLikelyValid)
         {
             this.configuration = configuration;
-            this.DetectAvailableLanguages();
+            DetectAvailableLanguages();
         }
         else
         {
@@ -46,14 +46,14 @@ public sealed class LocalizerModel : ModelBase, ILocalizer
         return Task.CompletedTask;
     }
 
-    public bool DetectAvailableLanguages()
-    {
+    public static bool DetectAvailableLanguages() => false; 
+    // {
         // Returns nothing :(   Possible bug ? 
         // Stupid Avalonia AssetLoader is filtering out all axaml files... 
-        string uriString = this.configuration.ResourceFolderUriString();
-        var assets = AssetLoader.GetAssets(new Uri(uriString), null).ToList();
-        return false;
-    }
+        //string uriString = this.configuration.ResourceFolderUriString();
+        //var assets = AssetLoader.GetAssets(new Uri(uriString), null).ToList();
+    //    return false;
+    //}
 
     public bool SelectLanguage(string targetLanguage)
     {
