@@ -1,5 +1,5 @@
 ﻿<UserControl 
-	x:Class="Lyt.Avalonia.Mvvm.Toasting.ToastView"
+	x:Class="Lyt.Avalonia.Mvvm.Toasting.Thin_ToastView"
 	xmlns:vm="clr-namespace:Lyt.Avalonia.Mvvm.Toasting"
 	x:DataType="vm:ToastViewModel" 
 
@@ -9,82 +9,85 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	d:DesignHeight="450" d:DesignWidth="800"
 	mc:Ignorable="d"
-
 	xmlns:glyphs="clr-namespace:Lyt.Avalonia.Controls.Glyphs;assembly=Lyt.Avalonia.Controls"
 
 	Background="Transparent"
-	HorizontalAlignment="Center" VerticalAlignment="Center"
+	MaxWidth="820"
+	HorizontalAlignment="Right"
+	VerticalAlignment="Bottom"
+	Margin="12"
 	ZIndex="9999999"
-	Margin="60"
-	MaxWidth="800"
-	>	
+	>
 	<Grid
 		x:Name="OuterGrid"
 		Margin ="8"
 		HorizontalAlignment="Stretch"
+		Height="64"
+		Opacity="1"
 		>
+		<Grid.Transitions>
+			<Transitions>
+				<DoubleTransition Property="Opacity" Duration="0:0:1.5"/>
+			</Transitions>
+		</Grid.Transitions>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="100"/>
-			<ColumnDefinition Width="20"/>
+			<ColumnDefinition Width="64"/>
+			<ColumnDefinition Width="12"/>
 			<ColumnDefinition Width="*"/>
-			<ColumnDefinition Width="120"/>
+			<ColumnDefinition Width="72"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="20" />
-			<RowDefinition Height="42" />
-			<RowDefinition Height="8" />
 			<RowDefinition Height="Auto" />
-			<RowDefinition Height="20" />
+			<RowDefinition Height="*" />
 		</Grid.RowDefinitions>
 		<Border
 			x:Name="outerBorder"
 			Grid.ColumnSpan="999" Grid.RowSpan="999"
-			HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+			Height="64" MaxHeight="1024"
 			Background="Transparent"
-			BorderBrush="{StaticResource LightAqua_0_120}"
-			BorderThickness="2"
-			CornerRadius="8"
+			BorderBrush="{StaticResource LightAqua_1_040}"
+			BorderThickness="1"
+			CornerRadius="4"
 			/>
 		<Rectangle
-			Margin="2"
+			Margin="1"
 			Fill="#F0000020"
 			Grid.ColumnSpan="999" Grid.RowSpan="999"
-			RadiusX="8" RadiusY="8"
+			RadiusX="4" RadiusY="4"
 			/>
 		<PathIcon
 			x:Name="Icon"
-			Grid.Column="0" Grid.Row="1" Grid.RowSpan="3"
+			Grid.Column="0" Grid.Row="0" Grid.RowSpan="2"
 			Data="{Binding IconGeometry}"
 			Foreground="{Binding ColorLevel}"
-			Width="60" Height="60"
+			Width="48" Height="48"
 			Margin="0"
-			VerticalAlignment="Top"
 			>
 		</PathIcon>
 		<TextBlock
-			Grid.Column="2" Grid.Row="1"
+			Grid.Column="2"
 			Foreground ="{Binding ColorLevel}"
-			Margin="0 0 0 0"
+			Margin="0 8 0 0"
 			FontWeight="Bold"
-			FontSize ="26"
+			FontSize ="16"
 			Text="{Binding Title, FallbackValue=Toast Title}"
 			/>
 		<TextBlock
-			Grid.Column="2" Grid.Row="3"
+			Grid.Column="2" Grid.Row="1"
 			Foreground ="{Binding ColorLevel}"
 			Text="{Binding Message, FallbackValue=Toast message}"
-			FontSize ="22"
-			Margin="20 0 0 0"
+			FontSize ="14"
+			Margin="0 0 0 0"
 			TextWrapping="Wrap"
 			/>
 		<glyphs:GlyphButton
 			x:Name="dismissButton"
-			Grid.Column="3" Grid.Row="1" Grid.RowSpan="3"
+			Grid.Column="3" Grid.Row="0" Grid.RowSpan="2"
 			Style="{StaticResource ToolbarIconButton}"
 			Layout="IconTextBelow"
 			Behaviour="Tap"
-			HorizontalAlignment="Center" VerticalAlignment="Top"
-			Width="80" Height="60"
+			HorizontalAlignment="Center" VerticalAlignment="Center"
+			Width="64" Height="48"
 			Margin="4 0 4 0"
 			GlyphSource="dismiss"
 			Text="{DynamicResource Toast.Dismiss}"

@@ -26,4 +26,10 @@
     <ProjectReference Include="..\Lyt.Avalonia.Controls\Lyt.Avalonia.Controls.csproj" />
     <ProjectReference Include="..\Lyt.Avalonia.Interfaces\Lyt.Avalonia.Interfaces.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Toasting\Thin_ToastView.axaml.cs">
+      <DependentUpon>Thin_ToastView.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>
