@@ -2,7 +2,6 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Lyt.Mvvm; 
 
 public sealed partial class ShellViewModel : ViewModel<ShellView>
 {

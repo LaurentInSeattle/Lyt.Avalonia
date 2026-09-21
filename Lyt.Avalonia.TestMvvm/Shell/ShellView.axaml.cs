@@ -1,7 +1,5 @@
 ﻿namespace Lyt.Avalonia.TestMvvm.Shell;
 
-using Lyt.Mvvm;
-
 public partial class ShellView : UserControl, IView
 {
     public ShellView()

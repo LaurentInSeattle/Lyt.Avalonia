@@ -42,7 +42,6 @@ global using Lyt.Avalonia.Controls.BadgeControl;
 
 global using Lyt.Avalonia.Mvvm.Utilities;
 
-global using Lyt.Mvvm;
 global using Lyt.Model;
 global using Lyt.Persistence;
 global using Lyt.Utilities;

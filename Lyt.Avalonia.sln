@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36121.58
+# Visual Studio Version 18
+VisualStudioVersion = 18.10.12210.168 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lyt.Avalonia.Mvvm", "Lyt.Avalonia.Mvvm\Lyt.Avalonia.Mvvm.csproj", "{CBD52159-6769-F6D5-1C5F-577B932793AF}"
 EndProject
@@ -38,6 +38,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lyt.Mvvm", "..\Lyt.Framework\Lyt.Mvvm\Lyt.Mvvm.csproj", "{66333785-F79B-0142-0808-D9E0F442C5F6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lyt.Orchestrator", "..\Lyt.Framework\Lyt.Orchestrator\Lyt.Orchestrator.csproj", "{AB43F19F-5F7E-2719-CEA5-BDD39075CDEF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lyt.Collections", "..\Lyt.Framework\Lyt.Collections\Lyt.Collections.csproj", "{AF3C38E8-78FA-9191-A5B5-99B6F017E293}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -113,6 +115,10 @@ Global
 		{AB43F19F-5F7E-2719-CEA5-BDD39075CDEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB43F19F-5F7E-2719-CEA5-BDD39075CDEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB43F19F-5F7E-2719-CEA5-BDD39075CDEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF3C38E8-78FA-9191-A5B5-99B6F017E293}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{AF3C38E8-78FA-9191-A5B5-99B6F017E293}.Debug|Any CPU.Build.0 = Debug|x64
+		{AF3C38E8-78FA-9191-A5B5-99B6F017E293}.Release|Any CPU.ActiveCfg = Release|x64
+		{AF3C38E8-78FA-9191-A5B5-99B6F017E293}.Release|Any CPU.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -127,6 +133,7 @@ Global
 		{FD61E555-024F-CD26-CB18-ACB5A80FA696} = {3A0F4AC3-530E-0ADE-C731-DC36B35E9C97}
 		{66333785-F79B-0142-0808-D9E0F442C5F6} = {3A0F4AC3-530E-0ADE-C731-DC36B35E9C97}
 		{AB43F19F-5F7E-2719-CEA5-BDD39075CDEF} = {3A0F4AC3-530E-0ADE-C731-DC36B35E9C97}
+		{AF3C38E8-78FA-9191-A5B5-99B6F017E293} = {3A0F4AC3-530E-0ADE-C731-DC36B35E9C97}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {137CD12A-AB0D-43F0-A6F1-CF296F58014C}
