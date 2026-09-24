@@ -11,7 +11,7 @@ public interface IToaster
     object? View { get; }
 
     void Show(
-        string title, string message, int dismissDelay = 10, 
+        string title, string message, int dismissDelay = 1_000, 
         InformationLevel toastLevel = InformationLevel.Info);
 
     void Dismiss();
