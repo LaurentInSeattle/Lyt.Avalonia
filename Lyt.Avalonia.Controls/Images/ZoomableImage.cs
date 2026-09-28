@@ -315,44 +315,47 @@ public partial class ZoomableImage : TemplatedControl, IScrollable
 
             context.DrawImage(image, this.GetSourceImageRegion(), imageViewPort);
 
-            // Draw pixel grid
-            double zoomFactor = this.ZoomFactor;
-            if (this.SizeMode == SizeModes.Normal && zoomFactor > this.PixelGridZoomThreshold)
-            {
-                double offsetX = this.Offset.X % zoomFactor;
-                double offsetY = this.Offset.Y % zoomFactor;
-                double left = imageViewPort.X;
-                double top = imageViewPort.Y;
-                double right = imageViewPort.Right;
-                double bottom = imageViewPort.Bottom;
+            // NOT NEEDED in ANY of our APP for NOW 
+            //
+            //// Draw pixel grid
+            //// 
+            //double zoomFactor = this.ZoomFactor;
+            //if (this.SizeMode == SizeModes.Normal && zoomFactor > this.PixelGridZoomThreshold)
+            //{
+            //    double offsetX = this.Offset.X % zoomFactor;
+            //    double offsetY = this.Offset.Y % zoomFactor;
+            //    double left = imageViewPort.X;
+            //    double top = imageViewPort.Y;
+            //    double right = imageViewPort.Right;
+            //    double bottom = imageViewPort.Bottom;
 
-                var pixelGridPen = this.EnsurePixelGridPen();
+            //    var pixelGridPen = this.EnsurePixelGridPen();
 
-                // First vertical line position aligned to zoom steps
-                double startX = left + zoomFactor - offsetX;
-                for (double x = startX; x < right; x += zoomFactor)
-                {
-                    context.DrawLine(pixelGridPen, new Point(x, top), new Point(x, bottom));
-                }
+            //    // First vertical line position aligned to zoom steps
+            //    double startX = left + zoomFactor - offsetX;
+            //    for (double x = startX; x < right; x += zoomFactor)
+            //    {
+            //        context.DrawLine(pixelGridPen, new Point(x, top), new Point(x, bottom));
+            //    }
 
-                // First horizontal line position aligned to zoom steps
-                double startY = top + zoomFactor - offsetY;
-                for (double y = startY; y < bottom; y += zoomFactor)
-                {
-                    context.DrawLine(pixelGridPen, new Point(left, y), new Point(right, y));
-                }
+            //    // First horizontal line position aligned to zoom steps
+            //    double startY = top + zoomFactor - offsetY;
+            //    for (double y = startY; y < bottom; y += zoomFactor)
+            //    {
+            //        context.DrawLine(pixelGridPen, new Point(left, y), new Point(right, y));
+            //    }
 
-                context.DrawRectangle(pixelGridPen, imageViewPort);
-            }
+            //    context.DrawRectangle(pixelGridPen, imageViewPort);
+            //}
 
-            var selectionRegion = this.SelectionRegion;
-            if (selectionRegion != default)
-            {
-                var rect = this.GetOffsetRectangle(selectionRegion, imageViewPort);
-                var selectionColor = this.SelectionColor;
-                context.FillRectangle(selectionColor, rect);
-                context.DrawRectangle(this.EnsureSelectionBorderPen(), rect);
-            }
+            //var selectionRegion = this.SelectionRegion;
+            //if (selectionRegion != default)
+            //{
+            //    var rect = this.GetOffsetRectangle(selectionRegion, imageViewPort);
+            //    var selectionColor = this.SelectionColor;
+            //    context.FillRectangle(selectionColor, rect);
+            //    context.DrawRectangle(this.EnsureSelectionBorderPen(), rect);
+            //}
         }
         catch (Exception ex)
         {
