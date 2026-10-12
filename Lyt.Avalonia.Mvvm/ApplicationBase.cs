@@ -74,6 +74,8 @@ public class ApplicationBase : Application, IApplicationBase
     public static object? GetOptionalService(Type type)
         => ApplicationBase.AppHost.Services.GetService(type);
 
+    public static bool IsShuttingDown { get; private set; }
+
     public List<IModel> GetModels()
     {
         List<IModel> models = [];
@@ -110,7 +112,8 @@ public class ApplicationBase : Application, IApplicationBase
         this.Logger.Info("***   Shutdown   ***");
         await this.OnShutdownBegin();
 
-        //startupWindow.Closing += (_, _) => { this.logViewer?.Close(); };
+        ApplicationBase.IsShuttingDown = true; 
+
         IApplicationModel applicationModel = ApplicationBase.GetRequiredService<IApplicationModel>();
         await applicationModel.Shutdown();
         await ApplicationBase.AppHost.StopAsync();
