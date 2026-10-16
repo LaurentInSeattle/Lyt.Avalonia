@@ -457,11 +457,16 @@ public partial class GlyphButton : UserControl, ICommandSource, ICanSelect
 
         if (this.Behaviour == ButtonBehaviour.Continuous)
         {
-            if (!this.eventingRectangle.IsPointerInside(args))
-            {
-                this.Leave();
-                args.Handled = true;
-            }
+            this.Leave();
+            args.Handled = true;
+
+            // This was for another app ? 
+            //
+            //if (!this.eventingRectangle.IsPointerInside(args))
+            //{
+            //    this.Leave();
+            //    args.Handled = true;
+            //}
         }
         else
         {
