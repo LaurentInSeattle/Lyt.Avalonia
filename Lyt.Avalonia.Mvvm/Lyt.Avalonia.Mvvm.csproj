@@ -9,14 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="12.1.4" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.13" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.13" />
-    <PackageReference Include="Nullable.Extended.Analyzer" Version="1.17.1">
+    <PackageReference Include="Avalonia" Version="12.1.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.14" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.14" />
+    <PackageReference Include="Nullable.Extended.Analyzer" Version="1.19.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="10.0.13" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="10.0.14" />
   </ItemGroup>
 
   <ItemGroup>
