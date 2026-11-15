@@ -13,7 +13,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="11.0.0" />
     <!-- Direct SkiaSharp Reference -->
-    <PackageReference Include="SkiaSharp" Version="4.156.0" />
+    <PackageReference Include="SkiaSharp" Version="4.156.1" />
 
     <PackageReference Include="Nullable.Extended.Analyzer" Version="1.19.0">
       <PrivateAssets>all</PrivateAssets>
